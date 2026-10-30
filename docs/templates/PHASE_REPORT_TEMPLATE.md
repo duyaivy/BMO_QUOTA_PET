@@ -1,5 +1,7 @@
 # Phase XX — report
 
+> Optional historical template. The [current roadmap](../IMPLEMENTATION_PHASES.md) uses concise conversation results and existing-document updates; a standalone report is not required.
+
 ## Scope and status
 Phase, date, DONE / BLOCKED / PARTIAL.
 

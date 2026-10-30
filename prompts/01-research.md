@@ -1,5 +1,7 @@
 # Phase 0 prompt — 3 research subagents (no coding)
 
+> Historical Phase 0 prompt. Do not execute as setup or treat its architecture/report-generation instructions as current. Use [Architecture Decisions](../docs/ARCHITECTURE_DECISIONS.md) and [Implementation Phases](../docs/IMPLEMENTATION_PHASES.md); research is optional for a specific unresolved question.
+
 You are the Lead Architect for BMO Personal. Read `AGENTS.md` and `docs/PROJECT_SCOPE.md` before acting.
 
 Launch **exactly three parallel instances of the configured `researcher` subagent** (not 7 roles, not an extra coding agent). Explicitly assign the following independent tasks and unique files:

@@ -1,16 +1,17 @@
-# Implementation workflow — run one phase at a time
+# Implementation workflow — one selected subphase
 
-Lead: read `AGENTS.md`, `docs/PROJECT_SCOPE.md`, `docs/research/RESEARCH_SUMMARY.md`, `docs/ARCHITECTURE_DECISIONS.md`, and `docs/IMPLEMENTATION_PHASES.md`.
+Lead: read AGENTS.md, docs/PROJECT_SCOPE.md, docs/ARCHITECTURE_DECISIONS.md, and the selected section of docs/IMPLEMENTATION_PHASES.md. The architecture is the technical authority; historical research is evidence only. Read a retained provider report only when needed.
 
-The user will specify **one** phase (for example 'Phase 1'). Do NOT work on subsequent phases.
+The owner must select **one subphase**, for example “Phase 1A — Next.js Foundation & UI Layout.” Use the roadmap's smallest named subphase; do not execute a whole numbered phase or subsequent subphases automatically.
 
-Steps:
-1. Lead defines scope, acceptance criteria, file ownership, affected FE routes and BE endpoints. Resolve any blockers from research first.
-2. Spawn **one `coder` subagent** to implement the bounded phase. For independent non-overlapping tasks, a second coder may be spawned, but only when explicit file ownership avoids conflicts.
-3. Wait for coder results, inspect diff, and run or check focused tests, lint, typecheck, builds as appropriate.
-4. Spawn **one `reviewer` subagent** after code settles; reviewer reads diff and contract, does not edit files.
-5. Lead sorts findings by P0/P1/P2 and assigns necessary fixes to coder. Retest and ask reviewer for targeted re-review if needed.
-6. Update phase report in `docs/phase-reports/PHASE-XX.md`: status, implemented FE/BE, exact test results, security notes, remaining blockers and next step.
-7. STOP after current phase. No deploy or merge without explicit authorization.
+1. Lead identifies the subphase's objective, dependencies, exact scope, files/modules, tests, Definition of Done, and exclusions. Inspect existing Git changes and preserve unrelated work.
+2. Delegate bounded implementation to **one configured Coder** with explicit file ownership and current architecture. No provider OAuth/token storage, cloud provider polling, or implementation from superseded reports.
+3. Inspect the diff and run appropriate tests/typecheck/lint/build. Synthetic fixtures must be labeled and must not be presented as live provider evidence.
+4. Use **one configured Reviewer** after code settles. Reviewer inspects changes/contracts/tests without edits.
+5. Assign confirmed fixes to Coder, retest, and request focused re-review only when necessary.
+6. Lead performs final verification, marks this roadmap subphase complete only when its gate passes, and reports changes, exact validation, blockers, and next step in the conversation. Update essential setup docs as needed; do not generate a separate large phase report.
+7. **STOP after this subphase.** Do not deploy, commit, push, merge, or start another subphase without explicit authorization.
 
-Important: an integration unavailable or not permitted must remain explicit UNAVAILABLE. Never make fake quota screenshots look like live values. Use safe demo fixtures only in tests/development.
+Missing compatibility/permission or real quota evidence stays unverified/unsupported. A fixture parser, native login, callback repetition, or fast upload never proves fresh upstream quota. Phase 1 has no real provider integration or production deployment; Phase 2 contains those provider verification gates.
+
+Architecture-only sessions must not invoke Coder or start Phase 1A.

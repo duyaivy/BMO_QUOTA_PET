@@ -1,42 +1,47 @@
-# BMO Personal — Codex multi-agent starter
+# BMO Personal — Project and Codex Setup
 
-This kit provides **real Codex custom agent configuration** and reusable prompts. It does not include application implementation or actual provider tokens.
+BMO Personal is a single-owner subscription-quota dashboard with an event-driven Mac collector and a future ESP32-CAM desk pet. This repository currently contains architecture, planning, historical evidence, and agent setup only. No application, dependency manifest, test suite, or runnable dashboard exists yet.
 
-## File map
-- `AGENTS.md`: persistent repo-level rules and phase gates.
-- `.codex/config.toml`: default cheap subagent model + concurrency 3.
-- `.codex/agents/researcher.toml`: one specialized research role, spawn 3 instances for Codex/AGY/Claude.
-- `.codex/agents/coder.toml`: scoped fullstack developer.
-- `.codex/agents/reviewer.toml`: independent read-only reviewer (instructional restriction, NOT a distinct sandbox).
-- `docs/PROJECT_SCOPE.md`: final project scope and chosen stack.
-- `prompts/01-research.md`: Phase 0 with 3 parallel researchers and combined Markdown documents.
-- `prompts/02-build-phase.md`: coding then review, one phase at a time.
-- `prompts/03-review.md`: standalone review.
+## Read first
 
-## Install on macOS
-1. In a new or existing Git project, **copy these contents to the project root**, including hidden `.codex/`.
-2. If `AGENTS.md` or `.codex/config.toml` already exists, **merge it manually**; don't overwrite existing repo rules or MCP settings blindly.
-3. Install/update Codex CLI if needed: `npm install -g @openai/codex`.
-4. Run `python3 scripts/validate_codex_setup.py` from the project root to validate TOML and expected files.
-5. Open `codex` **from the project root**. Trust the project when prompted, otherwise its project-scoped `.codex/config.toml` may be ignored.
-6. In an interactive Codex session, send: `Read prompts/01-research.md and execute Phase 0 exactly, using three researcher subagents. Stop after documentation.`
-7. Use `/subagents` to inspect their threads. Review `docs/research/RESEARCH_SUMMARY.md` before Phase 1.
-8. When approved, ask: `Read prompts/02-build-phase.md and implement Phase 1 only. Use coder, then reviewer. Stop after the report.`
+- [Project scope](docs/PROJECT_SCOPE.md): product/hardware boundaries.
+- [Architecture decisions](docs/ARCHITECTURE_DECISIONS.md): **single authority for technical contracts**, replacing older cloud-polling/RPC/VPS plans.
+- [Implementation phases](docs/IMPLEMENTATION_PHASES.md): one focused conversation per subphase; all implementation is pending.
+- [AGENTS.md](AGENTS.md): repository rules. Its original “no Git metadata” statement predates the current Git repository; use actual repository inspection for tooling/status.
 
-## Model and budget decision
-- All 3 roles use `gpt-6-luna` with **medium** reasoning, a cheaper/faster current Codex model than Sol/Astra.
-- The main agent's model is NOT overridden. Choose it yourself in the Codex UI/CLI. For complex architecture judgments you can select a more capable model, but don't need to use it for the subagents.
-- `gpt-5.4-mini` retired for Codex ChatGPT sign-in in Aug 2026; if using API-key authentication and have access, you can explicitly swap the role model to `gpt-5.4-mini` after checking your model catalog.
-- Limit parallel threads to 3. Do not spawn coding/review subagents while the three researchers are active.
+Next coding task: **Phase 1A — Next.js Foundation & UI Layout**. Do not start it as part of architecture cleanup.
 
-## Security caveats
-- A custom agent with 'do not edit files' is constrained by instructions, **not a dedicated read-only permission sandbox**. Set sandbox and approvals in the parent session.
-- Never paste actual access/refresh tokens into research prompts, source files, or logs.
-- Add `.env`, `.env.local`, `.env.*.local`, `node_modules/`, `.next/` and build artifacts to `.gitignore` in your actual app.
-- Technical feasibility of accessing a subscription quota does not automatically authorize reuse of a provider's OAuth credentials.
+## Agent setup
 
-## Official documentation
-- https://developers.openai.com/codex/multi-agent
-- https://developers.openai.com/codex/config-reference
-- https://developers.openai.com/codex/agents-md
-- https://learn.chatgpt.com/docs/models
+Keep [.codex/config.toml](.codex/config.toml) and configured [Researcher](.codex/agents/researcher.toml), [Coder](.codex/agents/coder.toml), and [Reviewer](.codex/agents/reviewer.toml) intact. They remain the repository's existing role/model/concurrency configuration; architecture decisions here override obsolete project-specific provider-auth assumptions in role text.
+
+For an existing project, preserve/merge configuration rather than blindly overwriting it. Open Codex from this root and use the project's normal trust flow. Validate setup with Python 3.11+:
+
+~~~sh
+python3 scripts/validate_codex_setup.py
+~~~
+
+Future coding workflow: Lead → Coder → tests → Reviewer → fixes → final verification. Use [the build prompt](prompts/02-build-phase.md) and name exactly one subphase, e.g. “Implement Phase 1A only.” Stop after that subphase; no automatic deployment, commit, push, or merge. [Standalone review prompt](prompts/03-review.md) remains available.
+
+The [Phase 0 research prompt](prompts/01-research.md) and [research template](docs/templates/PROVIDER_RESEARCH_TEMPLATE.md) are historical reusable references, not setup prerequisites. Do not rerun research or create per-phase report files by default. Current validation evidence belongs in the conversation and brief updates to existing docs.
+
+## Retained evidence
+
+These are historical findings, **not current architecture or implementation instructions**:
+
+- [Codex local/VPS research](docs/feasibility/01-codex-local-vps.md): documentary RPC constraints; the current JSONL candidate is still unverified.
+- [Antigravity local research](docs/feasibility/02-antigravity-local-vps.md) and [Claude local research](docs/feasibility/03-claude-local-vps.md): native statusline field/lifecycle candidates and permission uncertainties.
+- [PoC results](docs/feasibility/POC_RESULTS.md): zero successful live quota observations.
+- [Earlier Antigravity report](docs/research/02-antigravity.md): preserved with pre-existing edits; “no structured output” was superseded by later statusline research, while credential-access restrictions remain relevant.
+
+Consolidated and removed seven project-generated redundant reports: research/01-codex.md, research/03-claude.md, research/RESEARCH_SUMMARY.md; feasibility/AUTH_SESSION_RESEARCH.md, feasibility/FINAL_RECOMMENDATION.md, feasibility/HOSTING_COMPARISON.md, feasibility/LOCAL_COLLECTOR_ARCHITECTURE.md (all paths relative to docs). Their necessary security, freshness, hosting, and transport decisions are incorporated in the architecture; provider-specific evidence remains above.
+
+## Configuration and security
+
+No real provider credentials are needed for Phase 1. Official clients manage provider authentication; BMO never extracts/transfers it. Never paste native tokens, session files, conversations, or prompts into source/logs/research.
+
+The existing .env.example is a historical starter, not the new architecture's runtime contract. Its SYNC_* provider-polling settings and CREDENTIAL_ENCRYPTION_KEY are obsolete. Phase 1B will align it with implemented app/auth/database settings; do not configure provider credential storage or cloud polling from this file. Actual production credentials are deferred to the appropriate Phase 5 subphase.
+
+Phase 1A will add .gitignore, a manifest/lockfile, and verified development/typecheck/lint/build commands. Phase 1B will add database/auth setup. Until then, no Next.js build/test command is configured.
+
+Custom reviewer “read-only” instructions are a role constraint, not a separate filesystem sandbox. Preserve the session's permission controls. No provider integration is verified or automatically enabled by these documents.
