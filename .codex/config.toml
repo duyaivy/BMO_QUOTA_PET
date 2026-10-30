@@ -1,0 +1,11 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+# Repo-local Codex settings: loaded only when this project is trusted.
+# No root model override: choose the main agent's model yourself in Codex.
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+default_subagent_model = "gpt-6-luna"
+default_subagent_reasoning_effort = "medium"
+
+[features]
+multi_agent = true
