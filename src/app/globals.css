@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f8f5;
+  --foreground: #213d33;
+  --card: #ffffff;
+  --card-foreground: #213d33;
+  --primary: #275e4d;
+  --primary-foreground: #ffffff;
+  --secondary: #dcefe5;
+  --secondary-foreground: #214a3c;
+  --muted: #edf1ec;
+  --muted-foreground: #53665d;
+  --accent: #e0efe6;
+  --accent-foreground: #214a3c;
+  --destructive: #b42318;
+  --border: #dce4dc;
+  --input: #c6d4c9;
+  --ring: #35755d;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    margin: 0;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+}

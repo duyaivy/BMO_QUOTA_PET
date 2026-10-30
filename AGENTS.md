@@ -2,15 +2,21 @@
 
 ## Project Status & Structure
 
-This directory is currently an empty project scaffold. No source code, tests, assets, dependency manifests, or Git metadata are present. Update this guide as the project takes shape so that instructions reflect actual tooling.
+Phase 1A implements a Next.js App Router UI foundation with strict TypeScript, Tailwind CSS, and shadcn/ui primitives. Source is under `src/`: routes in `src/app`, shared UI in `src/components`, browser-safe metadata in `src/contracts`, and a reserved `src/server` boundary. Static assets use framework-required `public/`; browser tests live under `tests/browser`.
 
-When adding the initial implementation, organize application code under `src/`, tests under `tests/`, and static resources under `assets/`, unless the chosen framework requires another layout. Keep configuration files at the repository root and document architectural decisions in `docs/` when needed.
+The six routes are placeholders. No authentication, database, ingestion, collector, provider integration, MQTT, firmware, or deployment is implemented. Follow the selected subphase in `docs/IMPLEMENTATION_PHASES.md` and technical contracts in `docs/ARCHITECTURE_DECISIONS.md`; never start a later subphase implicitly.
 
 ## Build, Test, and Development Commands
 
-No build, test, or local development commands are configured yet. Do not assume commands such as `npm test` or `make build` are available.
+Use Node.js 24.18.0 and pnpm 11.24.0. `README.md` documents local setup and browser prerequisites. No cloud credentials are needed for 1A.
 
-When introducing a toolchain, add a dependency manifest and its lockfile, document installation and execution commands in `README.md`, and update this section with verified commands. Include separate instructions for development, production builds, tests, and linting where applicable.
+- `pnpm install --frozen-lockfile`: install pinned dependencies.
+- `pnpm dev`: loopback-only development server.
+- `pnpm typecheck`: generate Next.js route types and check strict TypeScript.
+- `pnpm lint`: run ESLint with zero warnings.
+- `pnpm format:check` / `pnpm format`: check/apply Prettier to implementation and setup docs.
+- `pnpm build` / `pnpm start`: build/serve production locally.
+- `pnpm test:integration` (alias `pnpm test`): Playwright against a temporary local production server on port 3100; build first. Install Chromium with `pnpm exec playwright install chromium` or set `PLAYWRIGHT_CHANNEL=chrome` for installed Chrome.
 
 ## Coding Style & Naming Conventions
 
@@ -18,7 +24,7 @@ Follow the formatter and conventions of the language selected for the project. C
 
 ## Testing Guidelines
 
-No testing framework or coverage threshold is established. Add tests for meaningful behavior and bug fixes once executable code exists. Use descriptive test names that identify the behavior and expected result. Keep test placement consistent and document the test command before requiring it in review.
+Focused Playwright tests cover responsive navigation, keyboard and skip-link behavior, honest placeholders, and 404 recovery. No unit framework or coverage threshold is established. Add meaningful behavior and regression tests as executable business logic is introduced; avoid redundant assertions that merely mirror static markup. Keep synthetic, local integration, and live provider evidence distinct. Do not claim a check passed unless executed.
 
 ## Commit & Pull Request Guidelines
 

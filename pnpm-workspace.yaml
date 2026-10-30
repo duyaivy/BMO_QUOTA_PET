@@ -1,0 +1,5 @@
+# The optional platform binding is installed from the lockfile; no fallback build/download.
+allowBuilds:
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - eslint@10.14.0

@@ -26,11 +26,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Implementation scope:**
 
-- [ ] Initialize one Next.js App Router app; choose compatible supported Node/package versions and commit pnpm manifest/lockfile.
-- [ ] Enable TypeScript strict mode, Tailwind CSS, shadcn/ui, formatter/lint configuration.
-- [ ] Establish app/components/server/contracts organization, responsive shell, navigation, reusable layouts, loading/error/empty/unavailable/stale components.
-- [ ] Add placeholder routes for overview, provider settings, collectors, devices, operational status, and login; explicitly identify any synthetic previews.
-- [ ] Add .gitignore and essential local setup/verified command documentation. Keep secrets out of client imports.
+- [x] Initialize one Next.js App Router app; choose compatible supported Node/package versions and commit pnpm manifest/lockfile.
+- [x] Enable TypeScript strict mode, Tailwind CSS, shadcn/ui, formatter/lint configuration.
+- [x] Establish app/components/server/contracts organization, responsive shell, navigation, reusable layouts, loading/error/empty/unavailable/stale components.
+- [x] Add placeholder routes for overview, provider settings, collectors, devices, operational status, and login; explicitly identify any synthetic previews.
+- [x] Add .gitignore and essential local setup/verified command documentation. Keep secrets out of client imports.
 
 **Key files/modules:** package.json, pnpm-lock.yaml, tsconfig.json, framework/lint/style configuration, src/app, src/components, src/server, src/contracts, assets/public, .gitignore, README.md.
 
@@ -38,7 +38,7 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Definition of Done:**
 
-- [ ] Local app starts; documented typecheck/lint/production build pass; frontend/backend organization is ready.
+- [x] Local app starts; documented typecheck/lint/production build pass; frontend/backend organization is ready.
 
 **Exclusions:** Database, authentication logic, ingestion, collector, real providers, MQTT, firmware, production deployment.
 
