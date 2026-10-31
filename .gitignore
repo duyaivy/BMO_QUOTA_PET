@@ -10,3 +10,8 @@ test-results/
 !.env.example
 .DS_Store
 *.log
+
+.data/
+collector/.data/
+
+collector.local.json

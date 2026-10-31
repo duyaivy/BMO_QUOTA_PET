@@ -17,5 +17,9 @@ export const navigationItems = [
   },
   { href: "/devices", label: "Devices", description: "Your desk companion" },
   { href: "/status", label: "Status", description: "Application operations" },
-  { href: "/login", label: "Owner login", description: "Access placeholder" },
+  {
+    href: "/login",
+    label: "Owner login",
+    description: "Owner password access",
+  },
 ] as const;

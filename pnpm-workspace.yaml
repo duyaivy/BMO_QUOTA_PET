@@ -1,5 +1,11 @@
+packages:
+  - collector
 # The optional platform binding is installed from the lockfile; no fallback build/download.
 allowBuilds:
   unrs-resolver: false
+  argon2@0.45.1: true
+  esbuild@0.18.20: true
+  esbuild@0.25.12: true
+  esbuild@0.28.2: true
 minimumReleaseAgeExclude:
   - eslint@10.14.0

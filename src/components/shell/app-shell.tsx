@@ -1,15 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { ArrowUpRight, CircleGauge } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
+import { ArrowUpRight, CircleGauge, LogOut } from "lucide-react";
 
 import { navigationItems } from "@/contracts/navigation";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [logoutError, setLogoutError] = useState("");
+
+  async function signOut() {
+    try {
+      const csrfResponse = await fetch("/api/auth/csrf", { cache: "no-store" });
+      const { csrfToken } = (await csrfResponse.json()) as {
+        csrfToken: string;
+      };
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+      if (response.ok) {
+        router.replace("/login");
+        router.refresh();
+      } else setLogoutError("Sign out failed. Please retry.");
+    } catch {
+      setLogoutError("Sign out is temporarily unavailable. Please retry.");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -75,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             role="status"
             className="flex items-center justify-center gap-2 border-b border-border bg-primary/5 px-4 py-2 text-center text-xs font-medium text-foreground"
           >
-            Local preview · Authentication is not implemented
+            Private owner workspace · Provider sources remain unverified
             <ArrowUpRight
               aria-hidden="true"
               className="hidden size-3.5 sm:block"
@@ -88,9 +109,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <div className="mx-auto w-full max-w-6xl space-y-6">{children}</div>
           </main>
+          {logoutError ? (
+            <p role="alert" className="px-4 text-sm text-destructive">
+              {logoutError}
+            </p>
+          ) : null}
           <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground sm:px-7 lg:px-10">
-            Local preview · Values are shown only when supported by observed
-            data.
+            Values are shown only when supported by observed data.
+            <button
+              onClick={signOut}
+              className="ml-3 inline-flex items-center gap-1 underline underline-offset-2"
+              type="button"
+            >
+              <LogOut aria-hidden="true" className="size-3" /> Sign out
+            </button>
           </footer>
         </div>
       </div>

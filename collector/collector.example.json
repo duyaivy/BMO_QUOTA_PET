@@ -1,0 +1,22 @@
+{
+  "collectorId": "fixture-collector",
+  "keyId": "fixture-key",
+  "secretFile": ".data/collector/bmo.key",
+  "url": "http://127.0.0.1:3000/api/internal/usage/ingest",
+  "stateDirectory": ".data/collector/state",
+  "allowLocalHttp": true,
+  "providers": {
+    "codex": {
+      "enabled": false,
+      "generation": 2
+    },
+    "claude": {
+      "enabled": false,
+      "generation": 2
+    },
+    "antigravity": {
+      "enabled": false,
+      "generation": 2
+    }
+  }
+}

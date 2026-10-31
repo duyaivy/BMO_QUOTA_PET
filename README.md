@@ -1,60 +1,80 @@
 # BMO Personal
 
-Phase 1A: a local Next.js App Router foundation with a responsive UI shell and placeholder routes. There are no quota observations, synthetic readings, working authentication, database, collector, or MQTT services. All three provider integrations remain unverified. This preview contains no private owner data and is intended for local use.
+Next.js App Router application for one owner's quota companion. Phase 1A–1E is complete and verified locally: owner authentication, signed synthetic ingestion, a durable local fixture collector, persisted quota/collector views and PET-first display configuration. Provider sources remain unverified. No provider credentials, native CLI configuration, production infrastructure, MQTT, or firmware are used in Phase 1.
 
 ## Local setup
 
-Use Node.js **24.18.0** (`.nvmrc`) and pnpm **11.24.0** (`packageManager`). With those installed:
+Use Node.js **24.18.0** (`.nvmrc`) and pnpm **11.24.0** (`packageManager`). Dependencies and native build approvals are pinned in the manifest, lockfile, and workspace file.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev
+cp .env.example .env.local
 ```
 
-Open <http://127.0.0.1:3000>. No environment variables or external accounts are required. Do not copy the historical `.env.example` for this phase; obsolete polling/credential placeholders will be replaced by the configuration-owning phase (1B). Provider credentials are never requested by this app.
+Set `SESSION_SECRET` to an independent random secret of at least 32 characters (hex avoids dotenv interpolation). Generate the hash without putting a plaintext password in shell history:
 
-Direct dependencies are pinned in `package.json`; `pnpm-lock.yaml` pins transitive resolution. The app uses Next.js 16.4.3, React 19.3.1, strict TypeScript 5.9.3, Tailwind CSS 4.3.3, and manually installed shadcn/ui primitives configured by `components.json`. System fonts keep builds independent of external font services.
+```sh
+python3 -c 'import getpass,sys; sys.stdout.write(getpass.getpass("Owner password: "))' | pnpm exec tsx scripts/auth-hash.ts
+```
 
-ESLint 10 works with the pinned Next.js lint preset. Its older transitive plugins still declare ESLint 9 peer ranges, so pnpm can emit peer warnings; this is [documented upstream](https://nextjs.org/docs/app/api-reference/config/eslint#setup-eslint). Lint itself must pass with zero warnings. `pnpm-workspace.yaml` disables the resolver's fallback build script; its lockfile-installed native optional binding is used.
+Paste the emitted `ADMIN_PASSWORD_HASH=...` line into `.env.local`. Its dollar signs are escaped for Next's dotenv expansion; preserve those escapes. Explicit process configuration is preserved by the setup/server scripts. Then run `pnpm db:migrate` and `pnpm dev`. Keep the hash and secret in the ignored `.env.local`. Provider passwords/tokens are never requested. `TURSO_DATABASE_URL=file:./.data/bmo.db` uses local libSQL; no cloud account is needed. `BMO_APP_ORIGIN` must exactly match the browser origin. `BMO_ALLOW_LOCAL_DATABASE=true` explicitly permits local database use when serving a production build with `pnpm start`. Local disk is for development; deployment durability remains Turso's responsibility.
+
+The Phase 1 gate passed: frozen workspace install, typecheck, zero-warning lint, formatting, production build, **60 Node tests and 12 Chrome tests**, plus development-server smoke verification. The crash/restart test kills a disposable collector process after its durable commit and verifies event, checkpoint and sequence recovery. See [the roadmap](docs/IMPLEMENTATION_PHASES.md) for exact subphase evidence. All quota evidence is synthetic/local; real provider compatibility remains a Phase 2 gate.
 
 ## Commands
 
-| Command                                | Purpose                                                              |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| `pnpm dev`                             | Development server, bound to loopback on port 3000                   |
-| `pnpm typecheck`                       | Generate Next.js route types and run strict TypeScript checking      |
-| `pnpm lint`                            | Next.js/React/TypeScript lint, zero warnings allowed                 |
-| `pnpm format:check`                    | Check formatting of application, tests, configuration and setup docs |
-| `pnpm format`                          | Format those same files; excludes historical project docs            |
-| `pnpm build`                           | Production build without cloud configuration                         |
-| `pnpm start`                           | Serve the existing production build locally                          |
-| `pnpm test` or `pnpm test:integration` | Browser integration checks against a temporary production server     |
+| Command                             | Purpose                                                 |
+| ----------------------------------- | ------------------------------------------------------- |
+| `pnpm dev`                          | Loopback development server, port 3000                  |
+| `pnpm db:migrate`                   | Apply reviewed local database migrations                |
+| `pnpm typecheck`                    | Next.js route types and strict TypeScript               |
+| `pnpm lint`                         | ESLint, zero warnings                                   |
+| `pnpm format:check` / `pnpm format` | Check/apply formatting                                  |
+| `pnpm build` / `pnpm start`         | Build/serve production locally                          |
+| `pnpm test:unit`                    | Node Vitest behavior and persistence checks             |
+| `pnpm test:integration`             | Playwright against a disposable local production server |
 
-Build before running browser tests. Install the matching browser once:
+Build before browser tests. Install matching Chromium with `pnpm exec playwright install chromium` or use installed Chrome:
 
 ```sh
-pnpm exec playwright install chromium
 pnpm build
-pnpm test:integration
-```
-
-Alternatively, use an existing Google Chrome installation without downloading Chromium:
-
-```sh
 PLAYWRIGHT_CHANNEL=chrome pnpm test:integration
 ```
 
-The suite owns port 3100 and refuses to reuse another server. It verifies navigation/current-page state across all six routes at 375px and desktop widths, keyboard navigation and skip-link focus, honest unavailable/unknown states, and 404 recovery. It does not validate any provider, cloud service, device, or authentication flow. No unit suite or migration validation exists in 1A because no business logic or persistence is implemented.
+The browser suite owns port 3100, creates a temporary local database and synthetic owner identity, and removes it after the server exits. It never uses local owner secrets. Do not run another server on that port. This is local integration evidence, not provider or cloud evidence.
 
 ## Layout and boundaries
 
-- `src/app/`: overview (`/`), provider settings (`/settings/providers`), collectors, devices, status, login, and framework loading/error/not-found boundaries.
-- `src/components/shell/`: shared navigation and page layout.
-- `src/components/states/`: reusable loading, error, empty, unavailable, and stale presentations.
-- `src/components/ui/`: editable shadcn/ui primitives; `src/lib/utils.ts` merges classes.
-- `src/contracts/`: browser-safe shared metadata; versioned usage contracts belong to 1C.
-- `src/server/`: reserved server boundary; future implementation entry points must import `server-only` and never flow into browser or contract imports.
-- `tests/browser/`: focused Playwright interaction/integration tests.
-- `public/`: static assets. `docs/` contains the approved architecture and roadmap.
+- `src/app/`: public login, five protected pages and Node auth/ingestion/settings handlers.
+- `src/components/`: responsive shell, reusable states and shadcn/ui primitives.
+- `src/contracts/`: browser-safe contracts; never imports server secrets.
+- `src/server/`: server-only config, database/auth, ingestion, quota queries and device repositories.
+- `drizzle/`: three incremental, checksummed SQLite/libSQL migrations; Drizzle schema stays alongside the repositories.
+- `collector/`: private SQLite queue/checkpoints, synthetic adapters, HMAC uploader and explicit foreground CLI.
+- `api/README.md`: local ingestion and guarded configuration contracts.
+- `tests/`: focused browser and Node integration checks.
+- `public/`: static assets; `docs/`: approved architecture and roadmap.
 
-There are no API routes, protected operations, or secret reads in this phase. Login explicitly accepts no credentials. Missing quota is unknown, never zero. The stale-state component is ready for later real data without seeding fabricated readings. Authentication and Turso are Phase 1B; they have not been started.
+Authentication uses a sealed HTTP-only cookie carrying an opaque handle, checked against a hashed revocable database session on each protected request. Same-origin CSRF checks apply to cookie mutations. Database/configuration errors fail closed. Login uses durable source and account limits. The same Next app's local Node entrypoint (`scripts/serve.ts`) derives the TCP peer, overwrites private source metadata, and signs it with an ephemeral process secret; arbitrary forwarded headers are ignored. There is one loopback listener. Direct `next start` omits this trusted boundary, so use the documented pnpm scripts. Before Phase 5 hosting, validate proxy topology: a proxy socket address is a coarse source, not evidence of an individual end-user address. Official local clients retain provider authentication. Missing quota is unknown, never zero.
+
+Direct dependencies are pinned. The pinned Next lint preset's older plugins declare ESLint 9 peer ranges; installation can report peer warnings while project lint requires zero warnings. Builds use system fonts and require no external font service.
+
+## Synthetic ingestion
+
+See [the local API contract and enrollment](api/README.md) for Phase 1C quota-only signed ingestion. Real providers remain unverified. HTTP is allowed only for loopback fixtures; other collector destinations require HTTPS.
+
+Production builds use Next’s supported Webpack compiler. Turbopack’s internal CSS worker could not bind its port in the execution environment; the Webpack build and production HTTP/browser checks passed.
+
+## Collector and dashboard
+
+Follow [synthetic enrollment](api/README.md) and [the collector guide](collector/README.md). Copy `collector/collector.example.json` to ignored `collector.local.json`, supply a private BMO secret file, and enable only selected fixture sources with their assigned generations. From the repository root:
+
+```sh
+pnpm collector ./collector.local.json codex ./fixture.jsonl --upload
+```
+
+The foreground uploader retries immutable events and resumes durable file checkpoints; no service or native CLI configuration is installed. Provider settings toggle application acceptance, never provider login. Overview refresh reads persisted application data. Device saves persist local PET-first configuration and preview only; they do not publish MQTT or confirm hardware.
+
+The two-package pnpm workspace is pinned in the lockfile. Both development and production use Webpack through the single loopback Next server. Browser tests use a disposable DB/owner/collector mapping; Node tests use separate temporary stores. Expected anonymous-access probes can appear as sanitized UNAUTHORIZED entries in Next's test-server output; access/replay assertions pass.
+
+Next is Phase 2 provider verification, only when explicitly requested and opted in. No deployment, MQTT, firmware or live provider validation was performed in Phase 1.

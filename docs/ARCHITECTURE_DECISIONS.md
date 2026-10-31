@@ -1,6 +1,6 @@
 # BMO Personal — Architecture Decisions
 
-Owner-approved architecture reset · 2026-10-31 · Design contract; no application is implemented.
+Owner-approved architecture reset · 2026-10-31 · Design contract; Phase 1 is implemented and verified locally using synthetic fixtures.
 
 This is the single authority for architecture and technical contracts. [Scope](PROJECT_SCOPE.md) defines product requirements; [roadmap](IMPLEMENTATION_PHASES.md) defines implementation order. Latest owner instructions take precedence, followed by applicable agent rules, verified constraints, and compatible historical decisions. Historical research is evidence, not execution instructions.
 
@@ -205,7 +205,7 @@ Durable per-collector throttling plus bounded pre-auth limits; do not trust arbi
 
 ## 8. Database architecture
 
-Conceptual schema only; no migrations now. Enable foreign keys; short transactions; explicit revisions/timestamps.
+Conceptual target schema; actual migrations are introduced incrementally by the owning roadmap subphase. Phase 1 migrations are under drizzle/. Enable foreign keys; short transactions; explicit revisions/timestamps.
 
 | Table | Primary keys, relationships, critical constraints/indexes |
 |---|---|

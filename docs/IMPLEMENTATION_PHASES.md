@@ -1,6 +1,6 @@
 # BMO Personal — Implementation Phases
 
-Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
+Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E complete and verified locally; Phase 2 not started.**
 
 [Architecture Decisions](ARCHITECTURE_DECISIONS.md) is the technical authority; [Project Scope](PROJECT_SCOPE.md) defines the product. This roadmap replaces historical phases and Render-only quota-polling plans. Research completion and synthetic PoC checks do not complete any subphase below.
 
@@ -13,7 +13,7 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 - Test contracts/observable failure behavior, not implementation copies. Synthetic, local integration, and real-provider evidence are separate.
 - Phase 1 requires no provider credentials, native CLI configuration changes, external production accounts, MQTT service, or firmware. Use isolated local SQLite/libSQL and fixtures; optionally verify a disposable development Turso database.
 - Phases 3–4 use local test broker/simulators and development hardware; production Render/Turso/EMQX/scheduler credentials belong to Phase 5.
-- Document actual install/dev/build/typecheck/lint/test commands only after adding scripts; no commands exist yet. Never commit secrets, deploy, push, merge, or install services implicitly.
+- Document actual install/dev/build/typecheck/lint/test commands only after adding scripts; see README for current commands. Never commit secrets, deploy, push, merge, or install services implicitly.
 - Useful module paths below are expected locations, not instructions to pre-create later phases. Add schema/migrations incrementally in the owning subphase.
 
 ## Phase 1 — Fullstack Foundation + Collector MVP
@@ -42,6 +42,8 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Exclusions:** Database, authentication logic, ingestion, collector, real providers, MQTT, firmware, production deployment.
 
+**Validation (2026-10-31):** Node 24.18.0/pnpm 11.24.0; typecheck, lint, format check, production build, and all 5 Chrome browser tests passed. Full Phase 1 execution is owner-authorized in this conversation, overriding the older one-subphase execution rule.
+
 ### Phase 1B — Turso Database & Admin Authentication
 
 **Objective:** Add durable app configuration and single-owner access control.
@@ -50,11 +52,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Implementation scope:**
 
-- [ ] Configure Drizzle/Turso client with isolated local SQLite/libSQL test mode; create initial settings/provider metadata, admin-session and throttle schema/migrations.
-- [ ] Seed provider identities as unverified; add no provider credential tables.
-- [ ] Verify ENV Argon2id hash, implement iron-session cookie with opaque revocable DB handle, bounded login throttling, Origin/CSRF checks, logout.
-- [ ] Protect dashboard/settings and server operations; fail closed on DB/config errors.
-- [ ] Replace obsolete .env.example polling/credential placeholders with documented implemented app/auth/DB settings. Provide local setup with no production credential requirement.
+- [x] Configure Drizzle/Turso client with isolated local SQLite/libSQL test mode; create initial settings/provider metadata, admin-session and throttle schema/migrations.
+- [x] Seed provider identities as unverified; add no provider credential tables.
+- [x] Verify ENV Argon2id hash, implement iron-session cookie with opaque revocable DB handle, bounded login throttling, Origin/CSRF checks, logout.
+- [x] Protect dashboard/settings and server operations; fail closed on DB/config errors.
+- [x] Replace obsolete .env.example polling/credential placeholders with documented implemented app/auth/DB settings. Provide local setup with no production credential requirement.
 
 **Key files/modules:** drizzle.config.ts, drizzle migrations, src/server/db, src/server/auth, src/server/config, src/app/login, auth handlers/actions, protected route layout, .env.example, tests/auth and tests/db.
 
@@ -62,9 +64,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Definition of Done:**
 
-- [ ] Database operations/migrations pass; owner login/logout works; unauthenticated operations are rejected; relevant security tests pass.
+- [x] Database operations/migrations pass; owner login/logout works; unauthenticated operations are rejected; relevant security tests pass.
 
 **Exclusions:** Provider authentication/OAuth, production Turso provisioning, collector enrollment/ingestion, MQTT, real quota.
+
+**Validation (2026-10-31):** typecheck, zero-warning lint, format check, production build, 11 Node behavior/persistence tests and 7 Chrome browser tests passed. Native Argon2 hash/verify and production-route login succeeded. Independent review found a missing source throttle; fixed using attested local socket metadata plus durable source/account limits. Focused source/transaction review found no remaining confirmed defect. Local-only evidence; proxy topology remains a Phase 5 gate. No production DB/account was used.
 
 ### Phase 1C — Secure Backend Usage Ingestion
 
@@ -74,12 +78,12 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Implementation scope:**
 
-- [ ] Implement shared versioned Zod event/window/heartbeat schemas, canonical hash, timestamp and dynamic-window rules from architecture §§5–7.
-- [ ] Add collector/key metadata and explicit provider-source ownership/generation enrollment through a minimal protected admin operation or documented local development setup.
-- [ ] Implement POST /api/internal/usage/ingest: raw-body bound, HMAC, key association, request/source time checks, atomic nonce claim, strict schema, ownership, receipt idempotency, ordering.
-- [ ] Migrate collectors/keys, observations/windows, receipts/nonces, and required operational state. Persist partial windows/current projection without losing prior good data.
-- [ ] Define stable sanitized success/error envelopes, throttling, and fixture request helpers; publish the implemented API contract locally if needed for executable tests, without a separate research report.
-- [ ] Keep MQTT publication disabled; only design the transaction boundary for its later addition.
+- [x] Implement shared versioned Zod event/window/heartbeat schemas, canonical hash, timestamp and dynamic-window rules from architecture §§5–7.
+- [x] Add collector/key metadata and explicit provider-source ownership/generation enrollment through a minimal protected admin operation or documented local development setup.
+- [x] Implement POST /api/internal/usage/ingest: raw-body bound, HMAC, key association, request/source time checks, atomic nonce claim, strict schema, ownership, receipt idempotency, ordering.
+- [x] Migrate collectors/keys, observations/windows, receipts/nonces, and required operational state. Persist partial windows/current projection without losing prior good data.
+- [x] Define stable sanitized success/error envelopes, throttling, and fixture request helpers; publish the implemented API contract locally if needed for executable tests, without a separate research report.
+- [x] Keep MQTT publication disabled; only design the transaction boundary for its later addition.
 
 **Key files/modules:** src/contracts/usage, src/app/api/internal/usage/ingest/route.ts, src/server/ingestion, src/server/quota, collector enrollment/config module, DB schema/migrations, tests/ingestion, tests/fixtures.
 
@@ -87,9 +91,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Definition of Done:**
 
-- [ ] Synthetic quota persists; invalid signatures/replays/forbidden fields fail; duplicates are idempotent; stale/late events cannot roll current state back; applicable API/security checks pass.
+- [x] Synthetic quota persists; invalid signatures/replays/forbidden fields fail; duplicates are idempotent; stale/late events cannot roll current state back; applicable API/security checks pass.
 
 **Exclusions:** Provider credentials, real provider capture, collector implementation, MQTT broker/outbox publishing, production access.
+
+**Validation after resume (2026-10-31):** typecheck, lint, format check and 28 Node tests passed. Webpack production build and all 8 Chrome tests passed, including actual HTTP HMAC ingestion/replay/duplicate acknowledgement. Disposable browser setup exercised the enrollment CLI for all three synthetic providers. Prior independent review had no actionable finding; the only resumed behavior change allows old per-window evidence in a new candidate without freshening it, covered by a regression. Turbopack internal port binding failed even after escalation; supported Webpack succeeded and is now the build script. No live-provider/cloud evidence is claimed.
 
 ### Phase 1D — Local Collector MVP
 
@@ -99,11 +105,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Implementation scope:**
 
-- [ ] Create a lightweight local TypeScript package with adapter interfaces, bounded stdin/file-record parsing, and source availability diagnostics.
-- [ ] Add baseline Codex JSONL candidate parser, Claude statusline parser, and Antigravity statusline parser using **synthetic** schemas; label source assumptions unverified.
-- [ ] Implement normalization, semantic dedup, persistent sequences, atomic checkpoints/queue, bounded age/size/coalescing, safe logging.
-- [ ] Add HMAC transport, immutable event retries, response classification, jitter/backoff, graceful shutdown; no local HTTP server.
-- [ ] Document opt-in local BMO config and source-disabled defaults. Supply fixture replay without modifying any native CLI config.
+- [x] Create a lightweight local TypeScript package with adapter interfaces, bounded stdin/file-record parsing, and source availability diagnostics.
+- [x] Add baseline Codex JSONL candidate parser, Claude statusline parser, and Antigravity statusline parser using **synthetic** schemas; label source assumptions unverified.
+- [x] Implement normalization, semantic dedup, persistent sequences, atomic checkpoints/queue, bounded age/size/coalescing, safe logging.
+- [x] Add HMAC transport, immutable event retries, response classification, jitter/backoff, graceful shutdown; no local HTTP server.
+- [x] Document opt-in local BMO config and source-disabled defaults. Supply fixture replay without modifying any native CLI config.
 
 **Key files/modules:** collector/package.json, collector/src/{adapters,normalize,dedup,queue,transport,config,diagnostics}, shared contract import/package boundary, collector/tests, tests/fixtures, short collector README/setup section.
 
@@ -111,9 +117,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Definition of Done:**
 
-- [ ] Synthetic parsers work; collector signs valid requests; bounded queue retries safely; duplicates do not repeat observations; unsupported states remain explicit.
+- [x] Synthetic parsers work; collector signs valid requests; bounded queue retries safely; duplicates do not repeat observations; unsupported states remain explicit.
 
 **Exclusions:** Verified real integrations, live provider storage observation, native statusline installation/config changes, LaunchAgent installation, production uploads. Real observation is a Phase 2 gate.
+
+**Validation (2026-10-31):** typecheck, lint, format check, all 54 Node tests, Webpack production build and 9 Chrome tests passed. Actual fixture CLI → HTTP ingestion acknowledged persistence and resumed a file checkpoint. Independent review identified stale lock reclamation and provider-order bypass; fixed and covered. A PID-reuse recovery edge was fixed using process-start identity with a regression. Queue/error/body limits, lost-ack restart, key rotation, per-window timing and disabled mixed buckets were verified. Synthetic/local evidence only; no native provider sources or persistent services.
 
 ### Phase 1E — Dashboard Integration & Testing
 
@@ -123,10 +131,10 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Implementation scope:**
 
-- [ ] Connect protected overview/provider cards to DB projections; render nullable percentages/progress, dynamic windows, reset countdown, capture/source time, freshness/availability.
-- [ ] Separate collector reachability/upload health from quota freshness; refresh only persisted app data.
-- [ ] Add initial device settings and ordered PET/quota screen UI with 128×64 preview, using persisted local configuration; introduce minimal device/screen schema if needed.
-- [ ] Run fixture → collector → ingestion → DB → dashboard locally; identify fixtures visibly; review Phase 1 integration/security.
+- [x] Connect protected overview/provider cards to DB projections; render nullable percentages/progress, dynamic windows, reset countdown, capture/source time, freshness/availability.
+- [x] Separate collector reachability/upload health from quota freshness; refresh only persisted app data.
+- [x] Add initial device settings and ordered PET/quota screen UI with 128×64 preview, using persisted local configuration; introduce minimal device/screen schema if needed.
+- [x] Run fixture → collector → ingestion → DB → dashboard locally; identify fixtures visibly; review Phase 1 integration/security.
 
 **Key files/modules:** src/app overview/settings/collectors/devices/status pages, src/components/quota and OLED preview, src/server/quota queries, device configuration repository/schema, tests/integration and focused browser tests.
 
@@ -134,9 +142,11 @@ Owner-approved roadmap reset · 2026-10-31 · **All implementation is pending.**
 
 **Definition of Done:**
 
-- [ ] Dashboard reads persisted events, updates from application data, labels synthetic fixtures, handles stale/empty states, and passes local end-to-end integration/security checks.
+- [x] Dashboard reads persisted events, updates from application data, labels synthetic fixtures, handles stale/empty states, and passes local end-to-end integration/security checks.
 
 **Exclusions:** Live provider claims, MQTT behavior, hardware validation, deployment.
+
+**Validation (2026-10-31):** frozen two-package workspace install, typecheck, zero-warning lint, format check, 60 Node tests, Webpack production build and all 12 Chrome tests passed. A development-server smoke returned /login 200 on a disposable loopback port. Actual CLI fixture → signed HTTP ingestion → DB → dashboard rendered 27% with synthetic labels; empty/null/unknown/stale/unsupported/unavailable/reset states, heartbeat timing, persisted screen order, 128×64 preview and revision conflict recovery were exercised. Forced collector SIGKILL after commit preserved event/checkpoint/sequence on restart. Independent review found no actionable Phase 1E issue; prior collector findings are resolved. After visual review, the first quota screen’s ineffective move-up control was disabled; build and the 2 affected device browser tests passed again. No real provider, remote Turso, broker, hardware or production evidence is claimed. Stop here; Phase 2 requires a new owner request/opt-in.
 
 ## Phase 2 — Real Provider Integration & Local Automation
 

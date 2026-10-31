@@ -1,4 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type APIRequestContext } from "@playwright/test";
+
+async function login(request: APIRequestContext) {
+  const csrf = await request.get("/api/auth/csrf");
+  expect(csrf.ok()).toBe(true);
+  const { csrfToken } = await csrf.json();
+  const response = await request.post("/api/auth/login", {
+    headers: { Origin: "http://127.0.0.1:3100" },
+    data: { password: "local-browser-fixture-password", csrfToken },
+  });
+  expect(response.ok()).toBe(true);
+}
+
+test.beforeEach(async ({ page }) => {
+  await login(page.request);
+});
 
 const routes = [
   { label: "Overview", path: "/", heading: "Your quota at a glance" },
@@ -30,11 +45,6 @@ for (const width of [375, 1440]) {
       );
       await expect(link).toHaveAttribute("aria-current", "page");
       await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
-      await expect(
-        page.getByText("Local preview · Authentication is not implemented", {
-          exact: true,
-        }),
-      ).toBeVisible();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -72,26 +82,76 @@ test("keyboard skip link and mobile navigation reach every route", async ({
   await expect(page).toHaveURL("/login");
 });
 
-test("unconfigured placeholders accept no credentials and fabricate no usage", async ({
-  page,
-}) => {
+test("unverified sources remain explicit", async ({ page }) => {
   await page.goto("/");
   await expect(
     page.getByText("Integration unverified", { exact: true }),
   ).toHaveCount(3);
-  await expect(page.getByRole("progressbar")).toHaveCount(0);
-  await page.getByRole("link", { name: "Review provider setup" }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "Providers", exact: true })
+    .click();
   await expect(page).toHaveURL("/settings/providers");
-  await expect(page.getByText("Unverified", { exact: true })).toHaveCount(3);
-  await page.goto("/login");
   await expect(
-    page.getByRole("heading", { name: "Authentication is unavailable" }),
-  ).toBeVisible();
-  await expect(page.locator("input, form")).toHaveCount(0);
-  await page.goto("/status");
-  await expect(
-    page.getByRole("heading", { name: "Service checks are unavailable" }),
-  ).toBeVisible();
+    page.getByText("Integration unverified", { exact: true }),
+  ).toHaveCount(3);
+});
+
+test("protected pages reject anonymous and tampered sessions; logout revokes cookie replay", async ({
+  page,
+  browser,
+}) => {
+  const request = page.request;
+  const original = await page.context().cookies();
+  const csrf = await (await request.get("/api/auth/csrf")).json();
+  const logout = await request.post("/api/auth/logout", {
+    headers: {
+      Origin: "http://127.0.0.1:3100",
+      "X-CSRF-Token": csrf.csrfToken,
+    },
+  });
+  expect(logout.ok()).toBe(true);
+  await page.goto("/");
+  await expect(page).toHaveURL("/login");
+  const replay = await browser.newContext();
+  await replay.addCookies(original);
+  const replayPage = await replay.newPage();
+  await replayPage.goto("/settings/providers");
+  await expect(replayPage).toHaveURL("/login");
+  await replay.close();
+  const tampered = await browser.newContext();
+  await tampered.addCookies(
+    original.map((cookie) => ({ ...cookie, value: cookie.value + "tampered" })),
+  );
+  const tamperedPage = await tampered.newPage();
+  await tamperedPage.goto("/devices");
+  await expect(tamperedPage).toHaveURL("/login");
+  await tampered.close();
+});
+
+test("cookie mutations require same-origin CSRF and accept no collector identity", async ({
+  page,
+}) => {
+  const request = page.request;
+  const csrf = await (await request.get("/api/auth/csrf")).json();
+  const badOrigin = await request.post("/api/auth/logout", {
+    headers: {
+      Origin: "https://attacker.invalid",
+      "X-CSRF-Token": csrf.csrfToken,
+    },
+  });
+  expect(badOrigin.status()).toBe(403);
+  const noToken = await request.post("/api/auth/logout", {
+    headers: { Origin: "http://127.0.0.1:3100" },
+  });
+  expect(noToken.status()).toBe(403);
+  const noOrigin = await request.post("/api/auth/login", {
+    data: {
+      password: "local-browser-fixture-password",
+      csrfToken: csrf.csrfToken,
+    },
+  });
+  expect(noOrigin.status()).toBe(403);
 });
 
 test("unknown routes return 404 and offer a working path home", async ({
