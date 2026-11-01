@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { providerIds, safeId, type QuotaWindow } from "./usage";
+import {
+  providerIds,
+  safeId,
+  type QuotaWindow,
+  type CollectorHealth,
+} from "./usage";
 export type ProviderId = (typeof providerIds)[number];
 export type DataStatus = "ok" | "unavailable" | "unsupported" | "error";
 const petScreen = z
@@ -68,6 +73,13 @@ export type CollectorView = {
   lastSourceEventAt: number | null;
   lastObservationCaptureAt: number | null;
   lastQuotaCaptureAt: number | null;
+  healthReports: Array<{
+    providerId: ProviderId;
+    collectedAt: number;
+    sourceAvailability: string;
+    sourceVersion: string | null;
+    health: CollectorHealth;
+  }>;
 };
 export type DashboardSnapshot = {
   generatedAt: number;

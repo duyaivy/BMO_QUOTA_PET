@@ -238,3 +238,20 @@ export const deviceScreens = sqliteTable(
     ),
   ],
 );
+
+export const collectorHealth = sqliteTable(
+  "collector_health",
+  {
+    collectorId: text("collector_id")
+      .notNull()
+      .references(() => collectors.collectorId),
+    providerId: text("provider_id")
+      .notNull()
+      .references(() => providerConfig.providerId),
+    generation: integer("generation").notNull(),
+    sequence: integer("sequence").notNull(),
+    collectedAt: integer("collected_at").notNull(),
+    payload: text("payload").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.collectorId, table.providerId] })],
+);

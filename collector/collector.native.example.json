@@ -1,0 +1,22 @@
+{
+  "evidenceMode": "native",
+  "collectorId": "native-collector",
+  "keyId": "native-key",
+  "secretFile": "/absolute/private/path/bmo.key",
+  "url": "http://127.0.0.1:3000/api/internal/usage/ingest",
+  "stateDirectory": "/absolute/private/path/native-collector-state",
+  "allowLocalHttp": true,
+  "providers": {
+    "codex": { "enabled": false, "generation": 2 },
+    "claude": { "enabled": false, "generation": 2 },
+    "antigravity": { "enabled": false, "generation": 2 }
+  },
+  "nativeCodex": {
+    "sessionDirectory": "/absolute/owner-authorized/.codex/sessions",
+    "version": "0.163.0"
+  },
+  "nativeStatuslines": {
+    "claude": { "version": "2.1.299", "subscriptionQuotaConfirmed": false },
+    "antigravity": { "version": "1.4.9", "subscriptionQuotaConfirmed": false }
+  }
+}

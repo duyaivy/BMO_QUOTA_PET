@@ -1,6 +1,6 @@
 # BMO Personal
 
-Next.js App Router application for one owner's quota companion. Phase 1A–1E is complete and verified locally: owner authentication, signed synthetic ingestion, a durable local fixture collector, persisted quota/collector views and PET-first display configuration. Provider sources remain unverified. No provider credentials, native CLI configuration, production infrastructure, MQTT, or firmware are used in Phase 1.
+Next.js App Router application for one owner's quota companion. Phase 1A–1E is complete and verified locally: owner authentication, signed synthetic ingestion, a durable local fixture collector, persisted quota/collector views and PET-first display configuration. Codex 0.163.0 read-only session observation is verified locally; Claude/Antigravity live callbacks remain unverified. Phase 2 also supplies opt-in wrappers, bounded health reporting and a LaunchAgent template. No provider credentials, native CLI configuration, production infrastructure, MQTT, or firmware are used in Phase 1.
 
 ## Local setup
 
@@ -19,7 +19,7 @@ python3 -c 'import getpass,sys; sys.stdout.write(getpass.getpass("Owner password
 
 Paste the emitted `ADMIN_PASSWORD_HASH=...` line into `.env.local`. Its dollar signs are escaped for Next's dotenv expansion; preserve those escapes. Explicit process configuration is preserved by the setup/server scripts. Then run `pnpm db:migrate` and `pnpm dev`. Keep the hash and secret in the ignored `.env.local`. Provider passwords/tokens are never requested. `TURSO_DATABASE_URL=file:./.data/bmo.db` uses local libSQL; no cloud account is needed. `BMO_APP_ORIGIN` must exactly match the browser origin. `BMO_ALLOW_LOCAL_DATABASE=true` explicitly permits local database use when serving a production build with `pnpm start`. Local disk is for development; deployment durability remains Turso's responsibility.
 
-The Phase 1 gate passed: frozen workspace install, typecheck, zero-warning lint, formatting, production build, **60 Node tests and 12 Chrome tests**, plus development-server smoke verification. The crash/restart test kills a disposable collector process after its durable commit and verifies event, checkpoint and sequence recovery. See [the roadmap](docs/IMPLEMENTATION_PHASES.md) for exact subphase evidence. All quota evidence is synthetic/local; real provider compatibility remains a Phase 2 gate.
+The Phase 1 gate passed: frozen workspace install, typecheck, zero-warning lint, formatting, production build, **60 Node tests and 12 Chrome tests**, plus development-server smoke verification. The crash/restart test kills a disposable collector process after its durable commit and verifies event, checkpoint and sequence recovery. See [the roadmap](docs/IMPLEMENTATION_PHASES.md) for exact subphase evidence. That Phase 1 evidence is synthetic/local. Phase 2A additionally captured new ordinary-session Codex quota through signed local ingestion and Chrome dashboard rendering; upstream freshness remained unknown. See [native setup](collector/README.md) and the roadmap for current evidence and remaining callback gates.
 
 ## Commands
 
@@ -49,8 +49,8 @@ The browser suite owns port 3100, creates a temporary local database and synthet
 - `src/components/`: responsive shell, reusable states and shadcn/ui primitives.
 - `src/contracts/`: browser-safe contracts; never imports server secrets.
 - `src/server/`: server-only config, database/auth, ingestion, quota queries and device repositories.
-- `drizzle/`: three incremental, checksummed SQLite/libSQL migrations; Drizzle schema stays alongside the repositories.
-- `collector/`: private SQLite queue/checkpoints, synthetic adapters, HMAC uploader and explicit foreground CLI.
+- `drizzle/`: four incremental, checksummed SQLite/libSQL migrations; Drizzle schema stays alongside the repositories.
+- `collector/`: private SQLite queue/checkpoints, synthetic and opt-in native adapters, callback spool, HMAC uploader and foreground daemon.
 - `api/README.md`: local ingestion and guarded configuration contracts.
 - `tests/`: focused browser and Node integration checks.
 - `public/`: static assets; `docs/`: approved architecture and roadmap.
@@ -61,7 +61,7 @@ Direct dependencies are pinned. The pinned Next lint preset's older plugins decl
 
 ## Synthetic ingestion
 
-See [the local API contract and enrollment](api/README.md) for Phase 1C quota-only signed ingestion. Real providers remain unverified. HTTP is allowed only for loopback fixtures; other collector destinations require HTTPS.
+See [the local API contract and enrollment](api/README.md) for Phase 1C quota-only signed ingestion. Native collector setup uses a distinct local enrollment gate and evidence identity; provider verification remains server-owned. HTTP is allowed only for explicit loopback development; other collector destinations require HTTPS.
 
 Production builds use Next’s supported Webpack compiler. Turbopack’s internal CSS worker could not bind its port in the execution environment; the Webpack build and production HTTP/browser checks passed.
 
@@ -77,4 +77,4 @@ The foreground uploader retries immutable events and resumes durable file checkp
 
 The two-package pnpm workspace is pinned in the lockfile. Both development and production use Webpack through the single loopback Next server. Browser tests use a disposable DB/owner/collector mapping; Node tests use separate temporary stores. Expected anonymous-access probes can appear as sanitized UNAUTHORIZED entries in Next's test-server output; access/replay assertions pass.
 
-Next is Phase 2 provider verification, only when explicitly requested and opted in. No deployment, MQTT, firmware or live provider validation was performed in Phase 1.
+Phase 2 is **partial**: 2A and 2D are complete locally; 2B/2C need real Claude/Antigravity callback, quota-meter and lifecycle evidence. Final checks passed: **92 Node tests, 14 Chrome tests**, typecheck, zero-warning lint, formatting, production build and LaunchAgent syntax. Codex ordinary-session quota and health reached the final local dashboard with unknown upstream freshness. Use the disabled-by-default [native config example](collector/collector.native.example.json) and [reversible setup/automation instructions](collector/README.md). No LaunchAgent or native settings were installed automatically. Production deployment, MQTT and firmware remain later phases.

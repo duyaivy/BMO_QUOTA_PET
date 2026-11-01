@@ -12,9 +12,11 @@ const enrollment = z
   })
   .strict();
 // Local development operation only. No native provider configuration is touched.
-export async function enrollFixture(input: z.input<typeof enrollment>) {
+async function enroll(input: z.input<typeof enrollment>, native: boolean) {
   if (
-    process.env.BMO_ALLOW_FIXTURE_SETUP !== "true" ||
+    process.env[
+      native ? "BMO_ALLOW_NATIVE_SETUP" : "BMO_ALLOW_FIXTURE_SETUP"
+    ] !== "true" ||
     !process.env.TURSO_DATABASE_URL?.startsWith("file:")
   )
     throw new Error(
@@ -24,9 +26,15 @@ export async function enrollFixture(input: z.input<typeof enrollment>) {
   return writeTransaction(async (tx) => {
     const now = Date.now();
     await tx.execute({
-      sql: "INSERT INTO collectors(collector_id,name,fixture_mode,created_at) VALUES(?,?,1,?) ON CONFLICT(collector_id) DO UPDATE SET name=excluded.name",
-      args: [value.collectorId, value.name, now],
+      sql: "INSERT INTO collectors(collector_id,name,fixture_mode,created_at) VALUES(?,?,?,?) ON CONFLICT(collector_id) DO UPDATE SET name=excluded.name",
+      args: [value.collectorId, value.name, native ? 0 : 1, now],
     });
+    const collector = await tx.execute({
+      sql: "SELECT fixture_mode FROM collectors WHERE collector_id=?",
+      args: [value.collectorId],
+    });
+    if (Boolean(collector.rows[0]?.fixture_mode) === native)
+      throw new Error("Collector evidence mode conflict");
     const existing = await tx.execute({
       sql: "SELECT collector_id FROM collector_keys WHERE key_id=?",
       args: [value.keyId],
@@ -64,4 +72,14 @@ export async function enrollFixture(input: z.input<typeof enrollment>) {
     });
     return Number(result.rows[0].ownership_generation);
   });
+}
+
+export async function enrollFixture(input: z.input<typeof enrollment>) {
+  return enroll(input, false);
+}
+// Explicit local owner operation. A native collector does not promote verification.
+export async function enrollNative(
+  input: Omit<z.input<typeof enrollment>, "completeSetVerified">,
+) {
+  return enroll({ ...input, completeSetVerified: false }, true);
 }

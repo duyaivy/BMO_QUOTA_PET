@@ -1,10 +1,12 @@
 # BMO Personal — Implementation Phases
 
-Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E complete and verified locally; Phase 2 not started.**
+Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E and Phase 2A/2D complete locally; Phase 2 PARTIAL: 2B/2C await real callback evidence.**
 
 [Architecture Decisions](ARCHITECTURE_DECISIONS.md) is the technical authority; [Project Scope](PROJECT_SCOPE.md) defines the product. This roadmap replaces historical phases and Render-only quota-polling plans. Research completion and synthetic PoC checks do not complete any subphase below.
 
 ## Execution rules
+
+Current owner authorization: full Phase 2 execution with adaptive delegation and automatic progression after quality gates; this overrides the older single-subphase workflow below. Independent providers may proceed when another provider lacks live callback evidence. No native settings or services are installed automatically.
 
 - Execute **one named subphase per focused Codex conversation**, only when requested. Read AGENTS.md, the architecture, and that subphase first.
 - Future workflow: Lead → one configured Coder → appropriate tests → configured Reviewer → fixes → final verification. Preserve agent configurations; parallel coders are unnecessary by default.
@@ -160,9 +162,9 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Implementation scope:**
 
-- [ ] Verify installed JSONL event schema, token_count/rate_limits candidate, timestamps, units, bucket IDs, completeness, and allowed usage.
-- [ ] Implement incremental file observation, baseline/catch-up rules, multiple sessions, rotation/truncation, source-specific recency, and dedup.
-- [ ] Capture only sanitized real quota fields; record installed version and verification result briefly beside adapter tests/docs.
+- [x] Verify installed JSONL event schema, token_count/rate_limits candidate, timestamps, units, bucket IDs, completeness, and allowed usage.
+- [x] Implement incremental file observation, baseline/catch-up rules, multiple sessions, rotation/truncation, source-specific recency, and dedup.
+- [x] Capture only sanitized real quota fields; record installed version and verification result briefly beside adapter tests/docs.
 
 **Key files/modules:** collector/src/adapters/codex, local checkpoint/stream arbitration, sanitized adapter fixtures, focused tests, collector setup docs.
 
@@ -170,9 +172,11 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Definition of Done:**
 
-- [ ] Actual supported local quota observation and collector-to-dashboard flow is evidenced; limitations are explicit. Otherwise retain unverified/unsupported and report the exact blocker.
+- [x] Actual supported local quota observation and collector-to-dashboard flow is evidenced; limitations are explicit. Otherwise retain unverified/unsupported and report the exact blocker.
 
 **Exclusions:** App-server periodic reads, credential access, cloud polling, private endpoints, Claude/AGY work.
+
+**Validation (2026-10-31):** Installed codex-cli 0.163.0 and matching official release source verified percent/minute/Unix-second semantics. Bounded observation after an EOF baseline captured a new ordinary-session record; signed native collector → disposable local HTTP application → protected dashboard rendered two windows in Chrome, with native labels and unknown upstream freshness. No provider request or native setting change. All 73 Node tests, typecheck, lint and production build passed; independent read-only review found no actionable defect. Scanner limits are explicit; partial snapshots remain conservative and rollout emission time is used only for local ordering. Fixture/native identities and local state cannot be silently mixed.
 
 ### Phase 2B — Claude Code Statusline Integration
 
@@ -183,7 +187,7 @@ For each provider, preserve existing user configuration and use only supported a
 **Implementation scope:**
 
 - [ ] Verify installed native callback shape and quota availability, normalize actual fields, and validate permission/lifecycle boundaries.
-- [ ] Provide opt-in wrapper/config instructions preserving existing statusline output/settings with rollback/uninstall.
+- [x] Provide opt-in wrapper/config instructions preserving existing statusline output/settings with rollback/uninstall.
 - [ ] Capture sanitized real observations without logging raw stdin; distinguish session snapshot and upstream freshness.
 
 **Key files/modules:** collector/src/adapters/claude, statusline wrapper/setup, sanitized fixtures/tests, collector docs.
@@ -196,6 +200,12 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Exclusions:** Independent polling after session closure, subscription token reuse, private usage endpoints, AGY changes.
 
+**Partial checkpoint (2026-10-31):** Claude Code 2.1.299 installed; documented native shape has a bounded quota-only parser and reversible wrapper/setup. Separate private SQLite callback spool preserves first capture/dedup across acknowledgment/restart without HTTPS or uploader-lock waits. Explicit subscription-meter confirmation prevents spend-limit gateway substitution. The 83-test Node suite passed before the final timeout regression; after fixing the review-confirmed backpressure hang, all 10 focused wrapper tests passed, including oversized stdin to a non-reading command. Typecheck/lint passed; independent review found no other actionable issue. Synthetic callback → queue → signed ingestion preserves session_snapshot/unknown upstream age and prior good data on missing fields. **Blocker:** no actual Claude callback from an ordinary owner session; installed schema, account quota availability, and live callback/dashboard/lifecycle remain unverified. 2B remains incomplete; independent 2C/2D work is permitted by the Phase 2 provider rule.
+
+**Resume check (2026-11-01):** Claude live acceptance remains BLOCKED: no native BMO config or callback spool found at documented repository-local paths, and no real callback/meter confirmation supplied. Installed versions remain Claude 2.1.299 / AGY 1.4.9. Focused callback checks passed (14 parser/wrapper tests and 2 ingestion/generation/isolation tests; all synthetic). No application changes, native settings changes, full-suite repeat, or completion promotion. See [write-ahead resume checkpoint](PHASE2_RESUME_CHECKPOINT.md) for exact evidence, budget and next actions.
+
+**Account-independent audit (2026-11-01):** Implementation **DONE** for the pinned candidate parser, wrapper, private spool, absent/malformed handling, isolation and retry contracts already covered by local tests. Real-provider verification **BLOCKED_EXTERNAL_DEPENDENCY**: owner has no Claude account/subscription and has not configured or deployed a Claude integration; the preinstalled executable is not access. Full subphase completion remains unchecked. Three additional focused regressions passed across 2B/2C: disabled Claude stays inert while preserving its existing command, and context/token/cost/standalone-credit statistics cannot replace subscription quota. Targeted lint/format passed; prior successful integration/retry evidence was retained without a full-suite repeat. No account creation, installation, provider requests or global settings edits. See [checkpoint](PHASE2_RESUME_CHECKPOINT.md) and [optional activation steps](../collector/README.md#optional-live-activation-after-external-dependencies-are-resolved).
+
 ### Phase 2C — Antigravity Statusline Integration
 
 **Objective:** Verify installed AGY compatibility and native quota buckets.
@@ -205,7 +215,7 @@ For each provider, preserve existing user configuration and use only supported a
 **Implementation scope:**
 
 - [ ] Verify native statusline JSON, bucket identities/available fields, missing/disabled states, actual reset and fractional/amount semantics.
-- [ ] Provide reversible opt-in integration preserving existing settings/output.
+- [x] Provide reversible opt-in integration preserving existing settings/output.
 - [ ] Capture sanitized real events and document installed version, source timing, and permission/compatibility limitations.
 
 **Key files/modules:** collector/src/adapters/antigravity, statusline wrapper/setup, sanitized fixtures/tests, collector docs.
@@ -218,6 +228,12 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Exclusions:** Interactive /usage scraping, private language-server calls, OAuth extraction, headless prompt runs as quota probes.
 
+**Partial checkpoint (2026-10-31):** Antigravity CLI 1.4.9 installed; documented candidate quota parser and shared reversible native wrapper implemented. Fractions normalize; amount-only percentages and unanchored relative resets remain null; disabled buckets are unavailable. The meter-confirmation gate defaults off. Callback packets retain capture-time ownership generation; stale generations are counted/discarded and disabled providers cannot starve another source. All 89 Node tests, typecheck, zero-warning lint and formatting passed. Independent review found no actionable 2C issue; the prior wrapper backpressure defect is fixed with regression coverage. **Blocker:** no actual ordinary-session AGY callback, verified subscription-versus-credit semantics, or account-specific permission evidence. Installed compatibility and real callback/dashboard/lifecycle remain unverified; 2C is incomplete. 2D may proceed independently using verified Codex and labeled infrastructure fixtures.
+
+**Resume check (2026-11-01):** Antigravity live acceptance remains BLOCKED: no native BMO config or callback spool found at documented repository-local paths, and no real callback/meter confirmation supplied. Installed versions remain Claude 2.1.299 / AGY 1.4.9. Focused callback checks passed (14 parser/wrapper tests and 2 ingestion/generation/isolation tests; all synthetic). No application changes, native settings changes, full-suite repeat, or completion promotion. See [write-ahead resume checkpoint](PHASE2_RESUME_CHECKPOINT.md) for exact evidence, budget and next actions.
+
+**Account-independent audit (2026-11-01):** Implementation **DONE** for the pinned candidate parser, wrapper, private spool, absent/malformed handling, isolation and retry contracts already covered by local tests. Real-provider verification **BLOCKED_EXTERNAL_DEPENDENCY**: AGY 1.4.9 and its CLI settings exist, but statusLine.command is absent; no native BMO callback/config is active, and subscription-versus-credit/permission evidence is unverified. Full subphase completion remains unchecked. Three additional focused regressions passed across 2B/2C: disabled Claude stays inert while preserving its existing command, and context/token/cost/standalone-credit statistics cannot replace subscription quota. Targeted lint/format passed; prior successful integration/retry evidence was retained without a full-suite repeat. No account creation, installation, provider requests or global settings edits. See [checkpoint](PHASE2_RESUME_CHECKPOINT.md) and [optional activation steps](../collector/README.md#optional-live-activation-after-external-dependencies-are-resolved).
+
 ### Phase 2D — Local Automation & Reliability
 
 **Objective:** Make verified adapters recover safely across normal Mac/CLI lifecycles.
@@ -226,9 +242,9 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Implementation scope:**
 
-- [ ] Add optional per-user LaunchAgent template and explicit install/uninstall instructions, never install automatically.
-- [ ] Add graceful restarts, sleep/wake/reconnect catch-up, source lifecycle diagnostics, queue pressure reporting, and complete collector-health UI.
-- [ ] Validate the full local telemetry path with available verified adapters and honest inactive sources; use labeled fixtures for infrastructure checks when no provider is supported.
+- [x] Add optional per-user LaunchAgent template and explicit install/uninstall instructions, never install automatically.
+- [x] Add graceful restarts, sleep/wake/reconnect catch-up, source lifecycle diagnostics, queue pressure reporting, and complete collector-health UI.
+- [x] Validate the full local telemetry path with available verified adapters and honest inactive sources; use labeled fixtures for infrastructure checks when no provider is supported.
 
 **Key files/modules:** collector startup/diagnostics/health, optional collector launchd template, dashboard collector status, reliability tests, setup docs.
 
@@ -236,9 +252,15 @@ For each provider, preserve existing user configuration and use only supported a
 
 **Definition of Done:**
 
-- [ ] Recovery and bounded queue behavior pass; optional automation is reversible and opt-in; evidence identifies each verified/unavailable provider and distinguishes fixture-only checks. Zero supported providers does not block infrastructure completion or deployment, and never counts as live integration.
+- [x] Recovery and bounded queue behavior pass; optional automation is reversible and opt-in; evidence identifies each verified/unavailable provider and distinguishes fixture-only checks. Zero supported providers does not block infrastructure completion or deployment, and never counts as live integration.
 
 **Exclusions:** Root services, auto-login/keychain changes, forced CLI sessions, production deployment.
+
+**Validation (2026-11-01):** All 92 Node tests, 14 Chrome browser tests, production Webpack build, strict typecheck, zero-warning lint, formatting and diff checks passed. Fresh/repeated migration application passed for the additive health table. `plutil -lint` accepted the optional LaunchAgent template. Signed health uses generation/sequence/sample-time antirollback, remains separate from quota freshness, and displays stale/future/unknown diagnostics honestly. Native versions are probed independently; a simulated unsupported Codex version did not block the valid statusline fixture. Actual foreground processes exercised offline HTTP 503 retry, SIGSTOP/SIGCONT suspend/resume catch-up, graceful stop/restart, immutable attempted delivery and unchanged quota capture time; existing crash/lost-ack/expiry/clock-skew/source-switch tests also passed. These lifecycle faults are controlled local simulations, not a claim of physical Mac power-state testing. Independent API/migration review found no actionable defect; its missing provider-isolation regression was added and passed.
+
+**Live coverage and boundaries:** Repeated final-build read-only Codex 0.163.0 capture after baseline → signed local HTTP ingestion → Chrome dashboard **and health** passed with two native windows and unknown upstream freshness. Claude and AGY remain unverified; all their callback tests are labeled synthetic. No provider credentials, model probes, native setting edits, LaunchAgent installation, production account or deployment was used. Optional automation is reversible and documented; its actual launchd installation and physical Mac sleep/shutdown are owner-run checks.
+
+**Phase 2 result: PARTIAL.** Completed: 2A and 2D. Resume 2B with an ordinary owner session/native callback and confirmed subscription meter; then complete 2C with callback, meter and permission evidence. Their unchecked installed/live/lifecycle criteria remain open. Re-run affected native acceptance checks and local regressions when enabling/changing those adapters. Do not start Phase 3 automatically.
 
 ## Phase 3 — MQTT & Device Configuration
 
@@ -591,4 +613,4 @@ These are separate focused sessions, not prerequisites to pretend unverified pro
 
 ## Handoff
 
-Architecture/planning cleanup does not implement any checkbox. The exact next coding session is **Phase 1A — Next.js Foundation & UI Layout**. Read only relevant retained evidence when the selected subphase needs it; never reapply superseded RPC, VPS, provider-auth, or cloud-polling instructions.
+Phase 1 and Phase 2A/2D are implemented and locally verified. The next incomplete subphases are **2B/2C real-provider verification**, both BLOCKED_EXTERNAL_DEPENDENCY. Account-independent implementation is audited DONE. The owner has no Claude account; do not request one or treat the preinstalled CLI as configured. Independently activate/verify AGY only when the owner approves native configuration and its subscription-meter/permission evidence is available. Native wrapper/setup exists but documentary schemas and fixtures do not complete those gates. Read the relevant checkpoints above and collector setup before resuming. Preserve ownership generations and separate native/fixture identities; never reapply superseded RPC, VPS, provider-auth or cloud-polling instructions.

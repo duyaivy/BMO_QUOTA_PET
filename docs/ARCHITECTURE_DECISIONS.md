@@ -1,6 +1,6 @@
 # BMO Personal — Architecture Decisions
 
-Owner-approved architecture reset · 2026-10-31 · Design contract; Phase 1 is implemented and verified locally using synthetic fixtures.
+Owner-approved architecture reset · 2026-10-31 · Design contract; Phase 1 is verified with synthetic fixtures; Phase 2A Codex observation is verified locally, while Claude/Antigravity live callbacks remain unverified.
 
 This is the single authority for architecture and technical contracts. [Scope](PROJECT_SCOPE.md) defines product requirements; [roadmap](IMPLEMENTATION_PHASES.md) defines implementation order. Latest owner instructions take precedence, followed by applicable agent rules, verified constraints, and compatible historical decisions. Historical research is evidence, not execution instructions.
 
@@ -108,9 +108,9 @@ Optional per-user macOS LaunchAgent uses explicit paths and graceful shutdown/re
 | Windows | Dynamic stable bucket/window IDs, nullable durations/resets, partial sets |
 | Errors | Closed codes, including SOURCE_INACTIVE, SOURCE_UNAVAILABLE, SCHEMA_UNSUPPORTED, MALFORMED_QUOTA, AUTH_REQUIRED, POLICY_BLOCKED; no raw provider error |
 
-**All three live integrations remain unverified.** Phase 1D uses synthetic parser fixtures only; Phase 2 validates installed interfaces and permitted operation. A working parser/native login is not a successful quota integration. One provider's incompatibility must not block the others.
+**Codex 0.163.0 is verified locally with new ordinary-session quota records; Claude and Antigravity live callbacks remain unverified.** Phase 1D uses synthetic parser fixtures only; Phase 2 validates installed interfaces and permitted operation. A working parser/native login is not a successful quota integration. One provider's incompatibility must not block the others.
 
-- **Codex:** preferred candidate is incremental read-only observation of the owner's session JSONL. Possible token_count events containing rate_limits require installed-schema validation in Phase 2A: nesting, buckets, units, reset semantics, timing, and completeness are not verified. Historical app-server RPC fields are not a validated JSONL schema. No app-server polling or private endpoint fallback is selected.
+- **Codex:** preferred candidate is incremental read-only observation of the owner's session JSONL. Phase 2A validated installed 0.163.0 token_count events with rate_limits primary/secondary slots under limit_id namespaces, percent used, minute durations and Unix-second resets. Snapshots remain partial; the rollout timestamp is local emission time, never upstream evidence. The collector baselines existing files and rejects unsupported installed versions. Local collector-to-dashboard evidence is recorded in the roadmap. Historical app-server RPC fields are not a validated JSONL schema. No app-server polling or private endpoint fallback is selected.
 - **Claude Code:** use [native statusline JSON](https://code.claude.com/docs/en/statusline) where installed support exists. Candidate subscription fields: rate_limits.five_hour/seven_day with used_percentage and epoch-second resets_at. Fields can be absent. Repeated callbacks/timers do not establish a new provider fetch. Preserve existing statusline configuration; do not substitute spend, context, or session costs.
 - **Antigravity:** use [native statusline JSON](https://antigravity.google/docs/cli/statusline) where supported. Candidate quota buckets: remaining_fraction, remaining_amount, reset_time, reset_in_seconds, optional disabled. Fraction can yield percent; amount alone gives no denominator. Disabled is unavailable, not 100% used. Accept validated absolute resets; derive from relative resets only if a documented trusted reference instant exists, otherwise null. Time until reset is not window duration. Interactive /usage, prompt JSON, hooks, and private local endpoints are not polling APIs.
 

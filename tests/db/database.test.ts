@@ -49,7 +49,7 @@ it("applies clean and repeated actual migrations, seeds only unverified identiti
   });
   expect(
     (await db.$client.execute("SELECT * FROM bmo_migrations")).rows,
-  ).toHaveLength(3);
+  ).toHaveLength(4);
   await expect(
     updateSettings({
       expectedRevision: 1,

@@ -12,6 +12,7 @@ import {
   fixtureWindow,
   signedRequest,
   FIXTURE_KEY,
+  fixtureHealth,
 } from "../fixtures/usage";
 let directory: string;
 beforeEach(async () => {
@@ -506,4 +507,82 @@ it("updates partial window availability without freshening prior known upstream 
   const state = (await rows("current_windows"))[0];
   expect(state.data_status).toBe("unavailable");
   expect(JSON.parse(String(state.payload))).toEqual(original);
+});
+
+it("persists bounded health by generation/sequence/sample time without changing quota freshness", async () => {
+  const quota = observation();
+  await send(quota);
+  const original = await projected();
+  const capturedAt = new Date(Date.now() - 60000).toISOString();
+  const beat = heartbeat({
+    sequence: 4,
+    collectedAt: capturedAt,
+    health: fixtureHealth(),
+  });
+  expect((await send(beat)).status).toBe(200);
+  let health = (await rows("collector_health"))[0];
+  expect(health.sequence).toBe(4);
+  expect(health.collected_at).toBe(Date.parse(capturedAt));
+  expect((await projected()).collectedAt).toBe(original.collectedAt);
+  expect(await rows("quota_observations")).toHaveLength(1);
+  expect(
+    (
+      await send(
+        heartbeat({ sequence: 3, health: fixtureHealth({ dropped: 100 }) }),
+      )
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await send(
+        heartbeat({
+          sequence: 5,
+          collectedAt: new Date(Date.now() - 120000).toISOString(),
+          health: fixtureHealth({ dropped: 100 }),
+        }),
+      )
+    ).status,
+  ).toBe(200);
+  health = (await rows("collector_health"))[0];
+  expect(health.sequence).toBe(4);
+  expect(JSON.parse(String(health.payload)).health.dropped).toBe(2);
+  const duplicate = await (await send(beat)).json();
+  expect(duplicate.data.outcome).toBe("duplicate");
+  const generation = await enrollFixture({
+    collectorId: "fixture-collector",
+    keyId: "fixture-key",
+    name: "Synthetic",
+    providerId: "codex",
+  });
+  await code(
+    await send(heartbeat({ sequence: 6, health: fixtureHealth() })),
+    409,
+    "SOURCE_OWNERSHIP_CONFLICT",
+  );
+  expect(
+    (
+      await send(
+        heartbeat({
+          ownershipGeneration: generation,
+          sequence: 1,
+          health: fixtureHealth({ dropped: 7 }),
+        }),
+      )
+    ).status,
+  ).toBe(200);
+  expect((await rows("collector_health"))[0]).toMatchObject({
+    generation,
+    sequence: 1,
+  });
+});
+it("rejects unknown, secret-bearing and excessive health fields through the signed contract", async () => {
+  for (const health of [
+    { ...fixtureHealth(), raw: "private input" },
+    { ...fixtureHealth(), queueBytes: 1048577 },
+    { ...fixtureHealth(), sourceCode: "RAW_PROVIDER_ERROR" },
+    { ...fixtureHealth(), token: "secret" },
+  ]) {
+    expect((await send({ ...heartbeat(), health })).status).toBe(400);
+  }
+  expect(await rows("collector_health")).toHaveLength(0);
 });

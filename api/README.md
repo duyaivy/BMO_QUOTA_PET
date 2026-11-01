@@ -44,3 +44,17 @@ GET /api/dashboard and GET /api/devices/config require a nonexpired, nonrevoked 
 POST /api/settings/providers accepts strict JSON {providerId, enabled, expectedRevision}; the revision belongs to app settings. POST /api/devices/config accepts {name, screens, expectedRevision}; the device has its own revision. Both require matching Origin, the owner cookie and X-CSRF-Token from /api/auth/csrf, and bound raw JSON to 8 KiB. Device screens are at most 16; pet-home/PET is fixed first, remaining screens reference provider/window IDs. Unknown window references remain unavailable in the preview.
 
 Success is {data,requestId}; failures use {error:{code,message},requestId}. Stale revisions return 409 without partial changes. A device editor conflict preserves local edits and requires an explicit second save against the refreshed revision. Configuration success means local persistence, not MQTT delivery or hardware output.
+
+## Native local enrollment (Phase 2)
+
+`pnpm collector:enroll <collector-id> <key-id> <provider-id>` is an explicit owner-side setup operation requiring `BMO_ALLOW_NATIVE_SETUP=true` and a `file:` database. It never reads provider credentials or edits native CLI settings. Use a new collector/key and a separate `evidenceMode: native` local state directory; fixture/native collector identities cannot be mixed. It sets authoritative ownership/generation, clears the previous projection, and leaves verification **unverified**. Sender authentication does not establish provider-certified truth. Production enrollment/deployment is outside Phase 2.
+
+## Collector health heartbeats (Phase 2D)
+
+The existing signed `kind: heartbeat` event accepts an optional strict `health` object. Observation events do not accept it. Existing heartbeat senders remain compatible. Health carries only bounded counts and closed codes:
+
+- `queuePending` (0–1,000,000), `queueBytes` (0–1 MiB), `dropped` (0–1,000,000,000), and unique `pausedSources` (at most the three provider IDs).
+- `callbackPending` (0–128), `callbackBytes` (0–256 KiB), and `callbackDropped` (0–1,000,000,000), each nullable when the local spool is unknown/unavailable.
+- Nullable ISO `nextRetryAt`, closed `lastUploadCode` and `sourceCode` enums defined by [the shared contract](../src/contracts/usage/index.ts). No free-form native errors, paths, source IDs, or callback bodies.
+
+The same raw-body bound, HMAC, nonce, receipt, ownership, and source-time checks apply. Health persists separately by collector/provider. Only the current ownership generation, increasing sequence, and nondecreasing capture time can replace its report; duplicate/lost-ack retries preserve the original sample. Health never modifies quota observations, percentages, provider verification, or freshness. Dashboard health age uses original capture time, not upload receipt time, and old generations are excluded. Future samples show clock uncertainty. Stale health is not proof that a CLI exited.

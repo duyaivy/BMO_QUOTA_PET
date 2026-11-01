@@ -15,3 +15,4 @@ test-results/
 collector/.data/
 
 collector.local.json
+collector-native.local.json

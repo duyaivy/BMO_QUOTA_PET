@@ -12,12 +12,15 @@ import {
 import { join, resolve } from "node:path";
 import {
   eventSchema,
+  collectorHealthSchema,
+  type CollectorHealth,
   semanticInput,
   signingInput,
   type UsageEvent,
   type QuotaWindow,
 } from "../../src/contracts/usage/index.js";
-import { parseFixture } from "./adapters/parse.js";
+import { parseFixture, type ParsedQuota } from "./adapters/parse.js";
+import type { CodexCursor } from "./adapters/codex.js";
 import type {
   CaptureResult,
   CollectorConfig,
@@ -109,6 +112,14 @@ async function processIdentity(pid: number): Promise<string | null> {
     throw new Error("STATE_IDENTITY_UNAVAILABLE");
   }
 }
+type NativeCheckpoint = { streamId: string; cursor: CodexCursor };
+type CaptureOptions = {
+  freshnessBasis?: "unknown" | "session_snapshot";
+  sourceVersion?: string;
+  nativeCheckpoint?: NativeCheckpoint;
+  recordAt?: string;
+};
+
 export class FixtureCollector {
   private client: Client;
   private secret: Buffer;
@@ -129,6 +140,11 @@ export class FixtureCollector {
   }
   static async open(config: CollectorConfig) {
     config = structuredClone(config);
+    if (
+      config.evidenceMode !== undefined &&
+      !["fixture", "native"].includes(config.evidenceMode)
+    )
+      throw new Error("INVALID_CONFIG");
     const idPattern = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/;
     if (
       typeof config.secretFile !== "string" ||
@@ -255,6 +271,8 @@ export class FixtureCollector {
           "CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY,v TEXT NOT NULL)",
           "CREATE TABLE IF NOT EXISTS events (provider TEXT NOT NULL,seq INTEGER NOT NULL,id TEXT NOT NULL UNIQUE,body TEXT NOT NULL,semantic TEXT NOT NULL,created INTEGER NOT NULL,attempted INTEGER NOT NULL DEFAULT 0,attempts INTEGER NOT NULL DEFAULT 0,next_at INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(provider,seq))",
           "CREATE TABLE IF NOT EXISTS checkpoints (provider TEXT PRIMARY KEY,stream TEXT NOT NULL,offset INTEGER NOT NULL)",
+          "CREATE TABLE IF NOT EXISTS native_checkpoints (provider TEXT NOT NULL,generation INTEGER NOT NULL,stream TEXT NOT NULL,state TEXT NOT NULL,PRIMARY KEY(provider,generation,stream))",
+          "CREATE TABLE IF NOT EXISTS native_order (provider TEXT PRIMARY KEY,generation INTEGER NOT NULL,record_at TEXT NOT NULL)",
           "CREATE TABLE IF NOT EXISTS dedup (provider TEXT PRIMARY KEY,semantic TEXT NOT NULL,event TEXT NOT NULL)",
           "CREATE TABLE IF NOT EXISTS pauses (provider TEXT PRIMARY KEY,code TEXT NOT NULL)",
           "CREATE TABLE IF NOT EXISTS window_cache (provider TEXT NOT NULL,window_id TEXT NOT NULL,semantic TEXT NOT NULL,window_json TEXT NOT NULL,PRIMARY KEY(provider,window_id))",
@@ -306,6 +324,18 @@ export class FixtureCollector {
           )
             throw new Error("STATE_IDENTITY_MISMATCH");
         }
+        const evidenceMode = config.evidenceMode ?? "fixture";
+        const mode = await tx.execute(
+          "SELECT v FROM meta WHERE k='evidence_mode'",
+        );
+        if (mode.rows[0] && mode.rows[0].v !== evidenceMode)
+          throw new Error("STATE_EVIDENCE_MODE_MISMATCH");
+        if (!mode.rows[0] && prior.rows.length && evidenceMode !== "fixture")
+          throw new Error("STATE_EVIDENCE_MODE_MISMATCH");
+        await tx.execute({
+          sql: "INSERT OR IGNORE INTO meta(k,v) VALUES('evidence_mode',?)",
+          args: [evidenceMode],
+        });
         await tx.execute({
           sql: "INSERT OR IGNORE INTO meta(k,v) VALUES('identity',?)",
           args: [identity],
@@ -349,6 +379,74 @@ export class FixtureCollector {
     collectedAt = nowIso(Date.now()),
     checkpoint?: { streamId: string; offset: number },
   ): Promise<CaptureResult> {
+    if (this.config.evidenceMode === "native")
+      return { code: "FIXTURE_MODE_REQUIRED", queued: false };
+    return this.captureQuota(
+      providerId,
+      parseFixture(providerId, raw),
+      collectedAt,
+      checkpoint,
+    );
+  }
+  async nativeCheckpoint(
+    providerId: ProviderId,
+    streamId: string,
+  ): Promise<CodexCursor | null> {
+    return this.run(async () => {
+      const rows = await this.client.execute({
+        sql: "SELECT state FROM native_checkpoints WHERE provider=? AND generation=? AND stream=?",
+        args: [
+          providerId,
+          this.config.providers[providerId]?.generation ?? 0,
+          streamId,
+        ],
+      });
+      return rows.rows[0]
+        ? (JSON.parse(String(rows.rows[0].state)) as CodexCursor)
+        : null;
+    });
+  }
+  private async saveNativeCheckpoint(
+    client: Pick<Client, "execute">,
+    providerId: ProviderId,
+    checkpoint: NativeCheckpoint,
+  ) {
+    const generation = this.config.providers[providerId]?.generation ?? 0;
+    await client.execute({
+      sql: "DELETE FROM native_checkpoints WHERE provider=? AND generation<>?",
+      args: [providerId, generation],
+    });
+    const rows = await client.execute({
+      sql: "SELECT COUNT(*) n FROM native_checkpoints WHERE provider=? AND generation=? AND stream<>?",
+      args: [providerId, generation, checkpoint.streamId],
+    });
+    if (Number(rows.rows[0].n) >= 512) throw new Error("CHECKPOINT_LIMIT");
+    await client.execute({
+      sql: "INSERT OR REPLACE INTO native_checkpoints(provider,generation,stream,state) VALUES(?,?,?,?)",
+      args: [
+        providerId,
+        generation,
+        checkpoint.streamId,
+        JSON.stringify(checkpoint.cursor),
+      ],
+    });
+  }
+  async advanceNative(
+    providerId: ProviderId,
+    checkpoint: NativeCheckpoint,
+  ): Promise<CaptureResult> {
+    return this.run(async () => {
+      await this.saveNativeCheckpoint(this.client, providerId, checkpoint);
+      return { code: "CHECKPOINTED", queued: false };
+    });
+  }
+  async captureQuota(
+    providerId: ProviderId,
+    parsed: ParsedQuota,
+    collectedAt = nowIso(Date.now()),
+    checkpoint?: { streamId: string; offset: number },
+    options: CaptureOptions = {},
+  ): Promise<CaptureResult> {
     return this.run(async () => {
       const cfg = this.config.providers[providerId];
       if (!cfg?.enabled) return { code: "SOURCE_DISABLED", queued: false };
@@ -383,15 +481,46 @@ export class FixtureCollector {
           throw error;
         }
       }
-      let parsed;
-      try {
-        parsed = parseFixture(providerId, raw);
-      } catch {
-        return { code: "MALFORMED_QUOTA", queued: false };
-      }
       const captured = Date.parse(collectedAt);
       if (Number.isNaN(captured))
         return { code: "INVALID_CAPTURE_TIME", queued: false };
+      if (options.recordAt) {
+        const recordTime = Date.parse(options.recordAt);
+        const previous = await this.client.execute({
+          sql: "SELECT record_at FROM native_order WHERE provider=? AND generation=?",
+          args: [providerId, cfg.generation],
+        });
+        // Local emission order prevents older sessions rolling back a newer candidate.
+        // It is never used as proof of upstream freshness.
+        if (
+          !Number.isFinite(recordTime) ||
+          recordTime > captured + 300000 ||
+          captured - recordTime > (this.config.maxAgeMs ?? 86400000) ||
+          (previous.rows[0] &&
+            recordTime <= Date.parse(String(previous.rows[0].record_at)))
+        ) {
+          if (options.nativeCheckpoint)
+            await this.saveNativeCheckpoint(
+              this.client,
+              providerId,
+              options.nativeCheckpoint,
+            );
+          return { code: "OLDER_SOURCE_RECORD", queued: false };
+        }
+      }
+      const saveNative = async (client: Pick<Client, "execute">) => {
+        if (options.nativeCheckpoint)
+          await this.saveNativeCheckpoint(
+            client,
+            providerId,
+            options.nativeCheckpoint,
+          );
+        if (options.recordAt)
+          await client.execute({
+            sql: "INSERT OR REPLACE INTO native_order(provider,generation,record_at) VALUES(?,?,?)",
+            args: [providerId, cfg.generation, options.recordAt],
+          });
+      };
       const old = await this.client.execute({
         sql: "SELECT semantic,event FROM dedup WHERE provider=?",
         args: [providerId],
@@ -418,7 +547,8 @@ export class FixtureCollector {
             upstreamObservedAt: parsed.observedAt,
             freshnessBasis: (parsed.observedAt
               ? "upstream_timestamp"
-              : "unknown") as "upstream_timestamp" | "unknown",
+              : (options.freshnessBasis ?? "unknown")) as
+              "upstream_timestamp" | "unknown" | "session_snapshot",
             sourceFreshness: "unknown" as const,
             dataStatus: w.status ?? ("ok" as const),
           };
@@ -443,7 +573,7 @@ export class FixtureCollector {
         eventId: randomUUID(),
         providerId,
         sourceType: SRC[providerId],
-        sourceVersion: null,
+        sourceVersion: options.sourceVersion ?? null,
         ownershipGeneration: cfg.generation,
         sequence: seq,
         collectedAt: nowIso(captured),
@@ -451,7 +581,9 @@ export class FixtureCollector {
         sourceAvailability: availability,
         dataStatus: isOk ? "ok" : parsed.status,
         errorCode: parsed.errorCode as UsageEvent["errorCode"],
-        freshnessBasis: parsed.observedAt ? "upstream_timestamp" : "unknown",
+        freshnessBasis: parsed.observedAt
+          ? "upstream_timestamp"
+          : (options.freshnessBasis ?? "unknown"),
         sourceFreshness: "unknown",
         snapshotMode: "partial",
         windows,
@@ -460,13 +592,15 @@ export class FixtureCollector {
       if (!valid.success) return { code: "MALFORMED_QUOTA", queued: false };
       const semanticHash = semantic(event);
       if (old.rows[0]?.semantic === semanticHash) {
-        if (checkpoint) {
+        if (checkpoint || options.nativeCheckpoint || options.recordAt) {
           const tx = await this.client.transaction("write");
           try {
-            await tx.execute({
-              sql: "INSERT OR REPLACE INTO checkpoints(provider,stream,offset) VALUES(?,?,?)",
-              args: [providerId, checkpoint.streamId, checkpoint.offset],
-            });
+            if (checkpoint)
+              await tx.execute({
+                sql: "INSERT OR REPLACE INTO checkpoints(provider,stream,offset) VALUES(?,?,?)",
+                args: [providerId, checkpoint.streamId, checkpoint.offset],
+              });
+            await saveNative(tx);
             await tx.commit();
           } catch (e) {
             await tx.rollback();
@@ -602,6 +736,7 @@ export class FixtureCollector {
             sql: "INSERT OR REPLACE INTO checkpoints(provider,stream,offset) VALUES(?,?,?)",
             args: [providerId, checkpoint.streamId, checkpoint.offset],
           });
+        await saveNative(tx);
         await tx.commit();
       } catch (e) {
         await tx.rollback();
@@ -660,6 +795,111 @@ export class FixtureCollector {
         dropped: Number(dropped.rows[0]?.v ?? 0),
         pausedSources: paused.rows.map((r) => String(r.provider)),
       };
+    });
+  }
+  async healthHeartbeat(
+    providerId: ProviderId,
+    health: CollectorHealth,
+    sourceAvailability: UsageEvent["sourceAvailability"],
+    sourceVersion: string | null,
+    now = Date.now(),
+  ): Promise<CaptureResult> {
+    return this.run(async () => {
+      const cfg = this.config.providers[providerId];
+      if (!cfg?.enabled) return { code: "SOURCE_DISABLED", queued: false };
+      const validHealth = collectorHealthSchema.safeParse(health);
+      if (!validHealth.success)
+        return { code: "INVALID_HEALTH", queued: false };
+      const count = await this.client.execute({
+        sql: "SELECT v FROM meta WHERE k=?",
+        args: [`sequence:${providerId}`],
+      });
+      const source = await this.client.execute({
+        sql: "SELECT record_at FROM native_order WHERE provider=? AND generation=?",
+        args: [providerId, cfg.generation],
+      });
+      const lastSourceEventAt =
+        source.rows[0] && Date.parse(String(source.rows[0].record_at)) <= now
+          ? String(source.rows[0].record_at)
+          : null;
+      const event: UsageEvent = {
+        schemaVersion: 1,
+        kind: "heartbeat",
+        collectorId: this.config.collectorId,
+        eventId: randomUUID(),
+        providerId,
+        sourceType: SRC[providerId],
+        sourceVersion,
+        ownershipGeneration: cfg.generation,
+        sequence: Number(count.rows[0]?.v ?? 0) + 1,
+        collectedAt: nowIso(now),
+        upstreamObservedAt: null,
+        freshnessBasis: "unknown",
+        sourceFreshness: "unknown",
+        sourceAvailability,
+        dataStatus:
+          sourceAvailability === "unsupported" ? "unsupported" : "unavailable",
+        errorCode:
+          sourceAvailability === "unsupported" ? "SCHEMA_UNSUPPORTED" : null,
+        lastSourceEventAt,
+        health: validHealth.data,
+      };
+      if (!eventSchema.safeParse(event).success)
+        return { code: "INVALID_HEALTH", queued: false };
+      const body = JSON.stringify(event);
+      const tx = await this.client.transaction("write");
+      try {
+        const previous = await tx.execute({
+          sql: "SELECT id,body FROM events WHERE provider=? AND attempted=0",
+          args: [providerId],
+        });
+        for (const row of previous.rows)
+          if ((JSON.parse(String(row.body)) as UsageEvent).kind === "heartbeat")
+            await tx.execute({
+              sql: "DELETE FROM events WHERE id=?",
+              args: [row.id],
+            });
+        const capacity = await tx.execute(
+          "SELECT COALESCE(SUM(length(CAST(body AS BLOB))),0) n FROM events",
+        );
+        if (
+          Number(capacity.rows[0].n) + Buffer.byteLength(body) >
+          (this.config.maxQueueBytes ?? 1048576)
+        ) {
+          await tx.rollback();
+          await this.incrementDropped();
+          return { code: "QUEUE_FULL", queued: false };
+        }
+        await tx.execute({
+          sql: "INSERT INTO events(provider,seq,id,body,semantic,created) VALUES(?,?,?,?,?,?)",
+          args: [
+            providerId,
+            event.sequence,
+            event.eventId,
+            body,
+            semantic(event),
+            now,
+          ],
+        });
+        await tx.execute({
+          sql: "INSERT OR REPLACE INTO meta(k,v) VALUES(?,?)",
+          args: [`sequence:${providerId}`, String(event.sequence)],
+        });
+        await tx.commit();
+        return { code: "QUEUED", queued: true };
+      } catch (error) {
+        await tx.rollback();
+        throw error;
+      }
+    });
+  }
+  async nextRetryAt(): Promise<string | null> {
+    return this.run(async () => {
+      const rows = await this.client.execute(
+        "SELECT MIN(next_at) t FROM events WHERE attempted=1",
+      );
+      const at = Number(rows.rows[0]?.t ?? 0);
+      return at > 0 ? nowIso(at) : null;
     });
   }
   async resumeSource(providerId: ProviderId) {
@@ -870,7 +1110,7 @@ export class FixtureCollector {
     const n = await this.client.execute("SELECT v FROM meta WHERE k='dropped'");
     await this.client.execute({
       sql: "INSERT OR REPLACE INTO meta(k,v) VALUES('dropped',?)",
-      args: [String(Number(n.rows[0]?.v ?? 0) + 1)],
+      args: [String(Math.min(1000000000, Number(n.rows[0]?.v ?? 0) + 1))],
     });
   }
   async close(): Promise<void> {

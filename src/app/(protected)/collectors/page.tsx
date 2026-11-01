@@ -79,6 +79,101 @@ export default async function CollectorsPage() {
                     </dd>
                   </div>
                 </dl>
+                <div className="mt-5 space-y-4">
+                  {collector.healthReports.length ? (
+                    collector.healthReports.map((report) => (
+                      <section
+                        key={report.providerId}
+                        className="rounded-lg border p-3"
+                        aria-label={`${report.providerId} collector health`}
+                      >
+                        <div className="flex flex-wrap justify-between gap-2 text-sm font-medium">
+                          <span>
+                            {report.providerId} ·{" "}
+                            {report.sourceVersion ?? "Version unknown"}
+                          </span>
+                          <Badge variant="outline">
+                            {report.collectedAt > snapshot.generatedAt + 1000
+                              ? "Health sample clock uncertain"
+                              : snapshot.generatedAt - report.collectedAt >
+                                  180000
+                                ? "Health report stale"
+                                : "Recent health report"}
+                          </Badge>
+                        </div>
+                        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Health sampled
+                            </dt>
+                            <dd>{timestamp(report.collectedAt)}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Source input
+                            </dt>
+                            <dd>
+                              {report.sourceAvailability} ·{" "}
+                              {report.health.sourceCode}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Upload queue
+                            </dt>
+                            <dd>
+                              {report.health.queuePending} pending ·{" "}
+                              {report.health.queueBytes} bytes
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Dropped events
+                            </dt>
+                            <dd>{report.health.dropped}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Callback spool
+                            </dt>
+                            <dd>
+                              {report.health.callbackPending ?? "Unknown"}{" "}
+                              pending ·{" "}
+                              {report.health.callbackBytes ?? "Unknown"} bytes ·{" "}
+                              {report.health.callbackDropped ?? "Unknown"}{" "}
+                              dropped
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">Uploader</dt>
+                            <dd>{report.health.lastUploadCode}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Next queued retry
+                            </dt>
+                            <dd>
+                              {report.health.nextRetryAt ?? "None reported"}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-muted-foreground">
+                              Paused sources
+                            </dt>
+                            <dd>
+                              {report.health.pausedSources.join(", ") ||
+                                "None reported"}
+                            </dd>
+                          </div>
+                        </dl>
+                      </section>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No collector health report received.
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -99,7 +194,9 @@ export default async function CollectorsPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           The timestamps above show when BMO last heard from a collector and
           when an observation was captured. Delivery does not refresh quota
-          source age.
+          source age. Health reports are captured locally and can themselves be
+          stale after offline delivery. A readable session directory or silence
+          does not prove that a CLI is running or closed.
         </p>
       </section>
       <Link

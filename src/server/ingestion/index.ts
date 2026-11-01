@@ -325,6 +325,24 @@ async function persist(
         });
       }
     }
+    if (event.kind === "heartbeat" && event.health) {
+      await tx.execute({
+        sql: "INSERT INTO collector_health(collector_id,provider_id,generation,sequence,collected_at,payload) VALUES(?,?,?,?,?,?) ON CONFLICT(collector_id,provider_id) DO UPDATE SET generation=excluded.generation,sequence=excluded.sequence,collected_at=excluded.collected_at,payload=excluded.payload WHERE excluded.generation>collector_health.generation OR (excluded.generation=collector_health.generation AND excluded.sequence>collector_health.sequence AND excluded.collected_at>=collector_health.collected_at)",
+        args: [
+          event.collectorId,
+          event.providerId,
+          event.ownershipGeneration,
+          event.sequence,
+          Date.parse(event.collectedAt),
+          JSON.stringify({
+            health: event.health,
+            sourceAvailability: event.sourceAvailability,
+            sourceVersion: event.sourceVersion,
+            lastSourceEventAt: event.lastSourceEventAt,
+          }),
+        ],
+      });
+    }
     await tx.execute({
       sql: "UPDATE collectors SET last_seen_at=?,last_quota_capture_at=CASE WHEN ? IS NOT NULL THEN MAX(COALESCE(last_quota_capture_at,0),?) ELSE last_quota_capture_at END,last_source_event_at=CASE WHEN ? IS NOT NULL THEN MAX(COALESCE(last_source_event_at,0),?) ELSE last_source_event_at END WHERE collector_id=?",
       args: [

@@ -128,3 +128,21 @@ export function signedRequest(
     } as RequestInit,
   );
 }
+
+export function fixtureHealth(
+  extra: Partial<import("@/contracts/usage").CollectorHealth> = {},
+): import("@/contracts/usage").CollectorHealth {
+  return {
+    queuePending: 3,
+    queueBytes: 123,
+    dropped: 2,
+    pausedSources: [],
+    callbackPending: 1,
+    callbackBytes: 42,
+    callbackDropped: 1,
+    nextRetryAt: null,
+    lastUploadCode: "NETWORK_RETRY",
+    sourceCode: "NO_CALLBACK",
+    ...extra,
+  };
+}

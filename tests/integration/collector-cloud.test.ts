@@ -6,9 +6,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FixtureCollector, type CollectorConfig } from "../../collector/src";
 import { ingest } from "@/server/ingestion";
-import { enrollFixture } from "@/server/ingestion/enroll";
+import { enrollNative, enrollFixture } from "@/server/ingestion/enroll";
 import { closeDbForTests, getDb } from "@/server/db";
-import { FIXTURE_KEY } from "../fixtures/usage";
+import { fixtureHealth, FIXTURE_KEY } from "../fixtures/usage";
+import { StatuslineSpool } from "../../collector/src/statusline-spool";
+import { parseClaude } from "../../collector/src/adapters/claude";
+import { drainStatuslines } from "../../collector/src/native-statusline";
 import { eventSchema } from "@/contracts/usage";
 
 let directory: string;
@@ -270,4 +273,278 @@ it("recovers the committed event and checkpoint after an actual collector proces
     if (child.exitCode === null && child.signalCode === null)
       child.kill("SIGKILL");
   }
+});
+
+it("requires explicit local native enrollment and keeps fixture and real evidence identities separate", async () => {
+  await expect(
+    enrollNative({
+      collectorId: "native",
+      keyId: "native-key",
+      name: "Native",
+      providerId: "codex",
+    }),
+  ).rejects.toThrow();
+  vi.stubEnv("BMO_ALLOW_NATIVE_SETUP", "true");
+  await expect(
+    enrollNative({
+      collectorId: "fixture-collector",
+      keyId: "native-key",
+      name: "Native",
+      providerId: "codex",
+    }),
+  ).rejects.toThrow("evidence mode conflict");
+  const generation = await enrollNative({
+    collectorId: "native",
+    keyId: "native-key",
+    name: "Native",
+    providerId: "codex",
+  });
+  expect(generation).toBe(3);
+  const db = await getDb();
+  expect(
+    (
+      await db.$client.execute(
+        "SELECT fixture_mode FROM collectors WHERE collector_id='native'",
+      )
+    ).rows[0].fixture_mode,
+  ).toBe(0);
+  expect(
+    (
+      await db.$client.execute(
+        "SELECT verification FROM provider_config WHERE provider_id='codex'",
+      )
+    ).rows[0].verification,
+  ).toBe("unverified");
+  await expect(
+    enrollFixture({
+      collectorId: "native",
+      keyId: "native-key",
+      name: "Fixture",
+      providerId: "codex",
+    }),
+  ).rejects.toThrow("evidence mode conflict");
+});
+
+it("drains labeled synthetic native-shape callbacks without freshening cached or missing quota", async () => {
+  const spool = StatuslineSpool.open(config.stateDirectory);
+  try {
+    const runtime = {
+      ...config,
+      nativeStatuslines: {
+        claude: {
+          version: "2.1.299" as const,
+          subscriptionQuotaConfirmed: true,
+        },
+      },
+    };
+    const firstTime = new Date(Date.now() - 60000).toISOString();
+    const quota = parseClaude(
+      JSON.stringify({ rate_limits: { five_hour: { used_percentage: 27 } } }),
+    );
+    expect(
+      spool.enqueue(
+        "claude",
+        "claude-code/2.1.299",
+        quota,
+        firstTime,
+        config.providers.claude!.generation,
+      ).code,
+    ).toBe("QUEUED");
+    expect((await drainStatuslines(runtime, collector!, spool)).committed).toBe(
+      1,
+    );
+    await collector!.uploadOnce(cloud);
+    const first = JSON.parse(
+      String(
+        (
+          await (
+            await getDb()
+          ).$client.execute(
+            "SELECT payload FROM current_windows WHERE provider_id='claude'",
+          )
+        ).rows[0].payload,
+      ),
+    );
+    expect(first).toMatchObject({
+      collectedAt: firstTime,
+      freshnessBasis: "session_snapshot",
+      upstreamObservedAt: null,
+      sourceFreshness: "unknown",
+    });
+    expect(
+      spool.enqueue(
+        "claude",
+        "claude-code/2.1.299",
+        quota,
+        undefined,
+        config.providers.claude!.generation,
+      ).code,
+    ).toBe("DUPLICATE");
+    expect((await drainStatuslines(runtime, collector!, spool)).committed).toBe(
+      0,
+    );
+    expect(
+      spool.enqueue(
+        "claude",
+        "claude-code/2.1.299",
+        parseClaude("{}"),
+        undefined,
+        config.providers.claude!.generation,
+      ).code,
+    ).toBe("QUEUED");
+    await drainStatuslines(runtime, collector!, spool);
+    await collector!.uploadOnce(cloud);
+    const after = JSON.parse(
+      String(
+        (
+          await (
+            await getDb()
+          ).$client.execute(
+            "SELECT payload FROM current_windows WHERE provider_id='claude'",
+          )
+        ).rows[0].payload,
+      ),
+    );
+    expect(after.collectedAt).toBe(firstTime);
+    expect(after.usedPercent).toBe(27);
+  } finally {
+    spool.close();
+  }
+});
+
+it("discards callbacks from a former ownership generation and lets another provider bypass disabled callback entries", async () => {
+  const spool = StatuslineSpool.open(config.stateDirectory);
+  try {
+    const quota = parseClaude(
+      JSON.stringify({ rate_limits: { five_hour: { used_percentage: 25 } } }),
+    );
+    spool.enqueue("claude", "claude-code/2.1.299", quota, undefined, 1);
+    const runtime = {
+      ...config,
+      nativeStatuslines: {
+        claude: {
+          version: "2.1.299" as const,
+          subscriptionQuotaConfirmed: true,
+        },
+      },
+    };
+    expect((await drainStatuslines(runtime, collector!, spool)).dropped).toBe(
+      1,
+    );
+    expect(await collector!.pendingEvents()).toHaveLength(0);
+    for (let i = 0; i < 20; i++)
+      spool.enqueue(
+        "claude",
+        "claude-code/2.1.299",
+        parseClaude(
+          JSON.stringify({
+            rate_limits: { five_hour: { used_percentage: i } },
+          }),
+        ),
+        undefined,
+        config.providers.claude!.generation,
+      );
+    // Disabled Claude callbacks must not occupy the whole bounded drain batch.
+    const agy = (
+      await import("../../collector/src/adapters/antigravity")
+    ).parseAntigravity(
+      JSON.stringify({ quota: { model: { remaining_fraction: 0.75 } } }),
+    );
+    spool.enqueue(
+      "antigravity",
+      "antigravity/1.4.9",
+      agy,
+      undefined,
+      config.providers.antigravity!.generation,
+    );
+    const mixed = {
+      ...runtime,
+      providers: {
+        ...config.providers,
+        claude: { ...config.providers.claude!, enabled: false },
+      },
+      nativeStatuslines: {
+        ...runtime.nativeStatuslines,
+        antigravity: {
+          version: "1.4.9" as const,
+          subscriptionQuotaConfirmed: true,
+        },
+      },
+    };
+    expect((await drainStatuslines(mixed, collector!, spool)).committed).toBe(
+      1,
+    );
+    expect((await collector!.pendingEvents())[0].providerId).toBe(
+      "antigravity",
+    );
+    await collector!.uploadOnce(cloud);
+    expect(
+      (
+        await (
+          await getDb()
+        ).$client.execute("SELECT provider_id FROM quota_observations")
+      ).rows[0].provider_id,
+    ).toBe("antigravity");
+  } finally {
+    spool.close();
+  }
+});
+
+it("keeps heartbeat retries immutable across restart, wake and clock-skew recovery without changing quota", async () => {
+  await collector!.capture("codex", codex());
+  await collector!.uploadOnce(cloud);
+  const before = String(
+    (
+      await (
+        await getDb()
+      ).$client.execute(
+        "SELECT payload FROM current_windows WHERE provider_id='codex' ORDER BY window_id",
+      )
+    ).rows[0].payload,
+  );
+  await collector!.healthHeartbeat(
+    "codex",
+    fixtureHealth(),
+    "available",
+    "synthetic-v1",
+  );
+  const original = (await collector!.pendingEvents())[0];
+  await collector!.uploadOnce(async () => {
+    throw new TypeError("offline fixture");
+  });
+  expect(await collector!.nextRetryAt()).not.toBeNull();
+  await collector!.close();
+  collector = await FixtureCollector.open(config);
+  expect((await collector.pendingEvents())[0]).toEqual(original);
+  // A wake/reconnect is a later upload attempt, not a quota capture.
+  await collector.uploadOnce(cloud, Date.now() + 10000);
+  expect((await collector.inspect()).pending).toBe(0);
+  expect(
+    String(
+      (
+        await (
+          await getDb()
+        ).$client.execute(
+          "SELECT payload FROM current_windows WHERE provider_id='codex' ORDER BY window_id",
+        )
+      ).rows[0].payload,
+    ),
+  ).toBe(before);
+  const health = (
+    await (
+      await getDb()
+    ).$client.execute("SELECT payload FROM collector_health")
+  ).rows;
+  expect(health).toHaveLength(1);
+  await collector.healthHeartbeat(
+    "codex",
+    fixtureHealth(),
+    "available",
+    "synthetic-v1",
+  );
+  expect((await collector.uploadOnce(cloud, Date.now() + 600000)).code).toBe(
+    "REQUEST_TIME_INVALID",
+  );
+  expect((await collector.inspect()).pausedSources).toHaveLength(0);
+  expect((await collector.pendingEvents())[0].kind).toBe("heartbeat");
 });

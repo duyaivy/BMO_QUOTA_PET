@@ -7,10 +7,13 @@ import argon2 from "argon2";
 async function main() {
   // Disposable synthetic owner and database. Never uses the local .env credentials.
 
+  const port = Number(process.env.BMO_BROWSER_PORT ?? 3100);
+  if (!Number.isInteger(port) || port < 1024 || port > 65535)
+    throw new Error("INVALID_TEST_PORT");
   const directory = await mkdtemp(join(tmpdir(), "bmo-browser-"));
   const env = {
     ...process.env,
-    BMO_APP_ORIGIN: "http://127.0.0.1:3100",
+    BMO_APP_ORIGIN: `http://127.0.0.1:${port}`,
     TURSO_DATABASE_URL: `file:${join(directory, "test.db")}`,
     TURSO_AUTH_TOKEN: "",
     BMO_ALLOW_LOCAL_DATABASE: "true",
@@ -52,7 +55,7 @@ async function main() {
   env.BMO_ALLOW_FIXTURE_SETUP = "false";
   const child = spawn(
     process.execPath,
-    ["--import", "tsx", "scripts/serve.ts", "--port", "3100"],
+    ["--import", "tsx", "scripts/serve.ts", "--port", String(port)],
     { env, stdio: "inherit" },
   );
   for (const signal of ["SIGINT", "SIGTERM"] as const)

@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { CollectorConfig } from "./types.js";
 const schema = z
   .object({
+    evidenceMode: z.enum(["fixture", "native"]).default("fixture"),
     collectorId: z.string().min(1).max(128),
     keyId: z.string().min(1).max(128),
     secretFile: z.string().min(1),
@@ -34,6 +35,32 @@ const schema = z
     maxQueueBytes: z.number().int().positive().max(1048576).optional(),
     maxAgeMs: z.number().int().positive().max(86400000).optional(),
     timeoutMs: z.number().int().positive().max(60000).optional(),
+    nativeStatuslines: z
+      .object({
+        claude: z
+          .object({
+            version: z.literal("2.1.299"),
+            subscriptionQuotaConfirmed: z.boolean().default(false),
+          })
+          .strict()
+          .optional(),
+        antigravity: z
+          .object({
+            version: z.literal("1.4.9"),
+            subscriptionQuotaConfirmed: z.boolean().default(false),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    nativeCodex: z
+      .object({
+        sessionDirectory: z.string().min(1),
+        version: z.literal("0.163.0"),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 export async function loadConfig(path: string): Promise<CollectorConfig> {

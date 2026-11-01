@@ -66,6 +66,41 @@ export const windowSchema = z
       (window.usedPercent === null && window.remainingPercent === null),
     "Unavailable percentages must be null",
   );
+export const collectorHealthSchema = z
+  .object({
+    queuePending: z.number().int().min(0).max(1000000),
+    queueBytes: z.number().int().min(0).max(1048576),
+    dropped: z.number().int().min(0).max(1000000000),
+    pausedSources: z
+      .array(z.enum(providerIds))
+      .max(3)
+      .refine((v) => new Set(v).size === v.length),
+    callbackPending: z.number().int().min(0).max(128).nullable(),
+    callbackBytes: z.number().int().min(0).max(262144).nullable(),
+    callbackDropped: z.number().int().min(0).max(1000000000).nullable(),
+    nextRetryAt: timestamp.nullable(),
+    lastUploadCode: z.enum([
+      "UNKNOWN",
+      "ACKNOWLEDGED",
+      "NETWORK_RETRY",
+      "REQUEST_TIME_INVALID",
+      "RETRYING",
+      "PAUSED",
+      "EMPTY",
+    ]),
+    sourceCode: z.enum([
+      "OK",
+      "NO_CALLBACK",
+      "SOURCE_UNAVAILABLE",
+      "SCHEMA_UNSUPPORTED",
+      "SCAN_LIMIT_REACHED",
+      "POLICY_BLOCKED",
+      "STATE_BUSY",
+      "QUEUE_FULL",
+    ]),
+  })
+  .strict();
+export type CollectorHealth = z.infer<typeof collectorHealthSchema>;
 const common = {
   schemaVersion: z.literal(1),
   collectorId: safeId,
@@ -114,6 +149,7 @@ export const eventSchema = z
         ...common,
         kind: z.literal("heartbeat"),
         lastSourceEventAt: timestamp.nullable(),
+        health: collectorHealthSchema.optional(),
       })
       .strict(),
   ])

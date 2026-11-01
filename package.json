@@ -20,7 +20,9 @@
     "test:unit": "vitest run",
     "db:migrate": "node --conditions=react-server --import tsx scripts/db-migrate.ts",
     "fixture:enroll": "node --conditions=react-server --import tsx scripts/enroll-fixture.ts",
-    "collector": "tsx collector/src/cli.ts"
+    "collector": "tsx collector/src/cli.ts",
+    "collector:native": "tsx collector/src/native-cli.ts",
+    "collector:enroll": "node --conditions=react-server --import tsx scripts/enroll-native.ts"
   },
   "dependencies": {
     "@libsql/client": "0.18.0",

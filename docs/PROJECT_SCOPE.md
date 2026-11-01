@@ -6,7 +6,7 @@ Personal single-owner project. [Architecture Decisions](ARCHITECTURE_DECISIONS.m
 
 - Monitor available subscription-quota observations from the owner's OpenAI Codex CLI, Anthropic Claude Code CLI, and Google Antigravity CLI. API billing, credits, and context occupancy are separate meters and are not substitutes.
 - Use an event-driven Node.js/TypeScript Local Collector on the owner's MacBook: authorized local sources → quota-only extraction → normalization/validation/deduplication → bounded offline queue → authenticated HTTPS upload.
-- Codex session JSONL quota events are a candidate requiring installed-schema verification. Claude and AGY use supported native statusline JSON where available. **No live provider integration is currently verified.**
+- Codex session JSONL quota events are a candidate requiring installed-schema verification. Claude and AGY use supported native statusline JSON where available. **Codex 0.163.0 is verified locally; Claude and AGY real callbacks remain unverified.**
 - Official clients own all provider login/refresh. Neither collector nor cloud extracts, accepts, stores, or forwards provider credentials. No raw conversations, prompts, or session files are uploaded.
 - CLI activity can produce observations; a callback may repeat cached data. Closed clients, Mac sleep/shutdown, and offline operation can leave saved quota stale. Fast delivery after capture is the goal, not guaranteed fresh upstream reads.
 - Dynamic provider bucket/window IDs and durations; nullable used/remaining percentages, resets, and source times. Never hardcode a universal five-hour/weekly pair or fabricate missing values.
@@ -36,4 +36,4 @@ One Next.js App Router application hosts frontend and backend on Render. No SaaS
 
 Cloud: Next.js App Router, TypeScript strict, Tailwind CSS, shadcn/ui, Turso/libSQL SQLite, Drizzle ORM, Zod, Argon2id, iron-session, MQTT.js, Render. Collector: Node.js/TypeScript and optional owner-installed macOS LaunchAgent. Tooling: pnpm and focused Vitest/integration tests when introduced. No additional backend/infrastructure is needed.
 
-Phase 1A–1E is implemented and locally verified with synthetic fixtures. Phase 2 verifies real providers/automation; Phase 3 adds MQTT/device delivery; Phase 4 implements firmware/hardware; Phase 5 deploys/validates; Phase 6 maintains/polishes. Phase 1 does not verify any live provider. Next: Phase 2, only with owner opt-in to the selected local observation scope.
+Phase 1A–1E is implemented and locally verified with synthetic fixtures. Phase 2 verifies real providers/automation; Phase 3 adds MQTT/device delivery; Phase 4 implements firmware/hardware; Phase 5 deploys/validates; Phase 6 maintains/polishes. Phase 1 does not verify any live provider. Current execution: Phase 2 under owner opt-in; 2B/2C live callback gates remain open. No Phase 3 work begins automatically.

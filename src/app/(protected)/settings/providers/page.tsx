@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 const guidance: Record<string, string> = {
   codex:
-    "Codex session observation is a candidate. Installed formats and source behavior remain unverified.",
+    "Read-only session quota was verified locally with Codex 0.163.0. Your source verification is managed separately; session record times do not prove fresh provider readings.",
   claude:
     "Claude Code native statusline input is a candidate. Installed support and quota timing remain unverified.",
   antigravity:
@@ -83,8 +83,8 @@ export default async function ProviderSettingsPage() {
         ))}
       </div>
       <p className="text-sm text-muted-foreground">
-        Fixture-local setup is synthetic-only. Use the local collector setup
-        guide; never enter provider credentials here.
+        Use the local collector setup guide for separate native and synthetic
+        sources; never enter provider credentials here.
       </p>
       <Link
         className="text-sm font-medium underline underline-offset-4"

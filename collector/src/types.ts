@@ -2,6 +2,7 @@ import type { UsageEvent } from "../../src/contracts/usage/index.js";
 export type { UsageEvent };
 export type ProviderId = "codex" | "claude" | "antigravity";
 export type CollectorConfig = {
+  evidenceMode?: "fixture" | "native";
   collectorId: string;
   keyId: string;
   secretFile: string;
@@ -14,6 +15,11 @@ export type CollectorConfig = {
   maxQueueBytes?: number;
   maxAgeMs?: number;
   timeoutMs?: number;
+  nativeStatuslines?: {
+    claude?: { version: "2.1.299"; subscriptionQuotaConfirmed?: boolean };
+    antigravity?: { version: "1.4.9"; subscriptionQuotaConfirmed?: boolean };
+  };
+  nativeCodex?: { sessionDirectory: string; version: "0.163.0" };
 };
 export type CaptureResult = { code: string; queued: boolean };
 export type Diagnostics = {

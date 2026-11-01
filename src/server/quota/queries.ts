@@ -3,7 +3,11 @@ import { requireAdmin } from "@/server/auth";
 import { getDb } from "@/server/db";
 import { readSettings } from "@/server/db/settings";
 import { readDevice } from "@/server/devices/repository";
-import { windowSchema, type UsageEvent } from "@/contracts/usage";
+import {
+  collectorHealthSchema,
+  windowSchema,
+  type UsageEvent,
+} from "@/contracts/usage";
 import type {
   DashboardSnapshot,
   DataStatus,
@@ -32,6 +36,11 @@ export async function readDashboard(): Promise<DashboardSnapshot> {
   ).rows;
   const collectorRows = (
     await db.$client.execute("SELECT * FROM collectors ORDER BY collector_id")
+  ).rows;
+  const healthRows = (
+    await db.$client.execute(
+      "SELECT h.* FROM collector_health h JOIN provider_config p ON p.provider_id=h.provider_id AND p.authoritative_collector_id=h.collector_id AND p.ownership_generation=h.generation ORDER BY h.provider_id",
+    )
   ).rows;
   const current = (
     await db.$client.execute(
@@ -104,6 +113,21 @@ export async function readDashboard(): Promise<DashboardSnapshot> {
       lastSourceEventAt: nullableNumber(row.last_source_event_at),
       lastObservationCaptureAt: nullableNumber(row.last_quota_capture_at),
       lastQuotaCaptureAt: captures.length ? Math.max(...captures) : null,
+      healthReports: healthRows
+        .filter((h) => h.collector_id === row.collector_id)
+        .map((h) => {
+          const payload = JSON.parse(String(h.payload));
+          return {
+            providerId: String(h.provider_id) as keyof typeof names,
+            collectedAt: Number(h.collected_at),
+            sourceAvailability: String(payload.sourceAvailability),
+            sourceVersion:
+              payload.sourceVersion === null
+                ? null
+                : String(payload.sourceVersion),
+            health: collectorHealthSchema.parse(payload.health),
+          };
+        }),
     };
   });
   return {
