@@ -10,6 +10,13 @@ async function main() {
   loadEnvConfig(process.cwd(), true, { info() {}, error() {} });
   Object.assign(process.env, explicit);
   const [collectorId, keyId, providerId] = process.argv.slice(2);
+  if (!collectorId || !keyId || !providerId) {
+    console.error(
+      "Usage: BMO_ALLOW_NATIVE_SETUP=true pnpm collector:enroll <collectorId> <keyId> <providerId>",
+    );
+    process.exitCode = 1;
+    return;
+  }
   const generation = await enrollNative({
     collectorId,
     keyId,
@@ -28,9 +35,10 @@ async function main() {
   );
 }
 void main()
-  .catch(() => {
+  .catch((error: unknown) => {
     console.error(
-      "Native enrollment failed; requires explicit local setup and separate collector identity",
+      "Native enrollment failed:",
+      error instanceof Error ? error.message : "Unknown error",
     );
     process.exitCode = 1;
   })

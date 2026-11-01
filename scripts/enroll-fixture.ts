@@ -10,6 +10,13 @@ async function main() {
   loadEnvConfig(process.cwd(), true, { info() {}, error() {} });
   Object.assign(process.env, explicit);
   const [collectorId, keyId, providerId] = process.argv.slice(2);
+  if (!collectorId || !keyId || !providerId) {
+    console.error(
+      "Usage: BMO_ALLOW_FIXTURE_SETUP=true pnpm fixture:enroll <collectorId> <keyId> <providerId>",
+    );
+    process.exitCode = 1;
+    return;
+  }
   const generation = await enrollFixture({
     collectorId,
     name: "Synthetic fixture collector",
@@ -27,9 +34,10 @@ async function main() {
   );
 }
 void main()
-  .catch(() => {
+  .catch((error: unknown) => {
     console.error(
-      "Fixture enrollment failed; verify explicit local setup and IDs",
+      "Fixture enrollment failed:",
+      error instanceof Error ? error.message : "Unknown error",
     );
     process.exitCode = 1;
   })

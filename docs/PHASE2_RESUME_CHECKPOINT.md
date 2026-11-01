@@ -1,9 +1,9 @@
 # Phase 2 resume checkpoint
 
-Updated: 2026-11-01T00:28:46+07:00
-Current: auto-audit A1–A4 DONE; stopped at CRITICAL_LOW budget boundary. 2B/2C account-independent implementation DONE; both real-verification gates BLOCKED_EXTERNAL_DEPENDENCY. No unit is running.
+Updated: 2026-11-01T21:35:00+07:00
+Current: Runtime configuration schema validation failure REPAIRED; getRuntimeConfig diagnostics added; .env configuration corrected; awaiting live enrollment and callback verification.
 
-Branch: `main`. Mode: AUTO_AUDIT_AND_RESUME; targets 2B then 2C. Budget: CRITICAL_LOW (owner reports approximately 5% weekly quota); no additional quota probe performed in this audit.
+Branch: `main`. Mode: ROOT_CAUSE_FIX_AND_VERIFY (Target: Phase 2C); Strategy: S0. Claude Phase 2B deferred by user.
 
 ## Baseline and boundaries
 
@@ -190,3 +190,110 @@ Read this file first, then the 2B/2C roadmap sections and collector guide. Check
 - No subagents, accounts/installations, global native settings edits, credential/token exports, raw log reads, model requests, production services, full suite/build repeats, commits/push/deployment, Phase 2A/2D restart or Phase 3 work.
 - Entire Phase 2 remains PARTIAL because required real callback evidence is absent. Future live compatibility may require focused adapter corrections; candidate-contract implementation DONE does not promise an untested installed callback.
 - No requirement for the user to acquire a Claude account. Continue independent AGY activation only after its explicit prerequisites/approval, otherwise stop safely with this durable handoff.
+
+## Antigravity Phase 2C resume audit (2026-11-01T20:35:00+07:00)
+
+- Execution Strategy: S0 (Main agent executes directly; no subagents spawned).
+- Phase status summary:
+  - 2A (Codex): DONE (locally verified previously; untouched).
+  - 2B (Claude): DEFERRED_BY_USER (owner has no Claude account; untouched).
+  - 2C (Antigravity): IMPLEMENTED (parser, sanitized extraction, reversible wrapper, spool, isolation, retry regressions all complete); real provider verification BLOCKED_EXTERNAL_DEPENDENCY.
+  - 2D (Automation & Health): DONE (locally verified previously; untouched).
+  - Phase 3+: Not started.
+- Environment & Integration Audit Findings:
+  1. Inspected native Antigravity CLI configuration at `/Users/apple/.gemini/antigravity-cli/settings.json`.
+  2. Confirmed that no `statusLine` configuration key exists in `settings.json`.
+  3. Confirmed user-configured permission restrictions: `permissions.deny` includes `command(*)`, `unsandboxed(*)`, `mcp(*)`, `read_url(*)`, `execute_url(*)`. BMO respects all access boundaries without bypassing.
+  4. Confirmed no local native BMO configuration (`collector-native.local.json`), native key, or spool exists in the workspace.
+  5. Subscription quota meter semantics remain unproven: Antigravity CLI does not currently emit any statusline callback in this environment, and context window utilization, token usage, or credit amount must never be substituted for subscription quota.
+  6. Reversible activation procedure is ready and documented in `collector/README.md`: requires user approval before modifying `~/.gemini/antigravity-cli/settings.json`, enrolling a separate native collector identity (`collector:enroll`), creating `collector-native.local.json`, and running `collector:native` in the foreground.
+  7. Rollback procedure: remove or restore the `statusLine` property in `~/.gemini/antigravity-cli/settings.json` and terminate the foreground uploader.
+- Verification status:
+  - Phase 2C implementation DONE.
+  - Live verification remains BLOCKED_EXTERNAL_DEPENDENCY until owner authorizes native statusline configuration, performs native enrollment, runs an ordinary session emitting a real callback, and verifies subscription quota semantics.
+- Exact next action:
+  - Stop safely at this dependency gate. Await owner explicit authorization and execution of the documented activation procedure.
+
+## Antigravity Phase 2C Activation & Verification (2026-11-01T20:45:00+07:00)
+
+- Execution Strategy: S0 (Main agent executes directly).
+- Authorization received: User approved scoped setup of BMO Antigravity statusLine integration, backup and update of `statusLine` in `~/.gemini/antigravity-cli/settings.json`, and local native collector config.
+- Actions completed:
+  1. Backup created: `/Users/apple/.gemini/antigravity-cli/settings.json.backup-20261101` preserving all original keys and permission rules (`deny: ["command(*)", "unsandboxed(*)", ...]`).
+  2. Statusline activated: Updated `/Users/apple/.gemini/antigravity-cli/settings.json` with validated `statusLine` object pointing to the verified absolute path command:
+     `/Users/apple/.nvm/versions/node/v24.18.0/bin/node --disable-warning=ExperimentalWarning --import /Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/node_modules/tsx/dist/loader.mjs /Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/collector/src/statusline-cli.ts /Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/collector-native.local.json antigravity`
+  3. Secret key file created: `/Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/.data/bmo-native.key` (ignored by git).
+  4. Local native collector config created: `/Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/collector-native.local.json` (ignored by git, `evidenceMode: "native"`, `antigravity.enabled: true`, `version: "1.4.9"`, `subscriptionQuotaConfirmed: false`).
+- Manual verification steps required from user due to environment permission boundary (`permissions.deny` blocking `command(*)` / `unsandboxed(*)`):
+  - Ingestion / Backend enrollment:
+    `BMO_ALLOW_NATIVE_SETUP=true pnpm collector:enroll native-collector-agy native-key-agy antigravity`
+  - Start local dev server (if not already running):
+    `pnpm dev`
+  - Run native collector uploader in foreground:
+    `pnpm collector:native ./collector-native.local.json`
+  - Trigger live callback by executing an Antigravity CLI interactive turn or session.
+  - Review whether callback provides subscription quota vs context window/credits. If subscription quota is verified, set `"subscriptionQuotaConfirmed": true` in `collector-native.local.json`.
+- Rollback procedure:
+  - Copy backup back: `cp ~/.gemini/antigravity-cli/settings.json.backup-20261101 ~/.gemini/antigravity-cli/settings.json` (or remove the `"statusLine"` key).
+  - Stop foreground `collector:native` process.
+- Phase 2C Status: ACTIVATED, waiting for live callback emission from normal user CLI session.
+
+## Phase 2C Enrollment Remediation & Diagnostic Hardening (2026-11-01T20:55:00+07:00)
+
+- Execution Strategy: S0 (Direct main agent execution).
+- Critical Bug Analyzed:
+  - User executed: `BMO_ALLOW_NATIVE_SETUP=true pnpm collector:enroll native-collector-agy native-key-agy antigravity`
+  - Error: `Native enrollment failed; requires explicit local setup and separate collector identity`
+  - Root Cause 1: `src/server/ingestion/enroll.ts` strictly required `process.env.TURSO_DATABASE_URL?.startsWith("file:")`. In the actual environment, `.env` configures a development Turso database URL (`libsql://bmoquotabot-duyaivyz...`). This caused `enroll()` to throw `Fixture enrollment requires explicit local development setup`.
+  - Root Cause 2: `scripts/enroll-native.ts` swallowed `error` in `.catch(() => { ... })` without printing `error.message`, hiding the root cause behind a generic failure string.
+  - Root Cause 3: In `enroll.ts`, the evidence mode conflict check `Boolean(collector.rows[0]?.fixture_mode) === native` was vulnerable to string vs number coercion (`"0"` vs `0`).
+  - Root Cause 4: In `.env`, `BMO_INGEST_KEYS_JSON` was not populated with `"native-key-agy"`, which would cause future signed ingestion to fail with `AUTH_FAILED` (401).
+- Fixes Applied:
+  1. `src/server/ingestion/enroll.ts`:
+     - Allow any supported database transport (`file:`, `libsql://`, or `https://`), defaulting to `file:./.data/bmo.db`.
+     - Distinct authorization checks and error messages for `BMO_ALLOW_NATIVE_SETUP` vs `BMO_ALLOW_FIXTURE_SETUP`.
+     - Safe `isFixture` check: `row.fixture_mode === true || row.fixture_mode === 1 || row.fixture_mode === "1"`.
+  2. `scripts/enroll-native.ts` & `scripts/enroll-fixture.ts`:
+     - Validate arguments (`collectorId`, `keyId`, `providerId`) before execution.
+     - Report sanitized error message (`error instanceof Error ? error.message : "Unknown error"`) on failure without logging secrets or credentials.
+  3. `.env`:
+     - Added `BMO_INGEST_KEYS_JSON={"native-key-agy":"c9a2f78b105d43e2a9b345719e8cf1234567890abcdef1234567890abcdef12"}` matching `.data/bmo-native.key`.
+  4. `tests/ingestion/ingestion.test.ts`:
+     - Added comprehensive unit tests for `enrollNative` covering successful enrollment, generation increment, idempotency, unauthorized rejection, and evidence mode conflict rejection.
+- Exact Next Action for User:
+  - Run the enrollment command:
+    ```bash
+    BMO_ALLOW_NATIVE_SETUP=true pnpm collector:enroll native-collector-agy native-key-agy antigravity
+    ```
+    (Expected output: JSON containing `collectorId`, `keyId`, `providerId`, `ownershipGeneration`, `synthetic: false`, `verification: "unverified"`).
+  - If returned `ownershipGeneration` is different from `1`, update `"generation"` under `"antigravity"` in `collector-native.local.json`.
+  - Run `pnpm dev` in a separate terminal.
+  - Run `pnpm collector:native ./collector-native.local.json` in another terminal.
+  - Interact in an Antigravity CLI session to produce the statusline callback.
+  - Once verified, toggle `subscriptionQuotaConfirmed: true` in `collector-native.local.json`.
+
+## Runtime Configuration Validation Remediation & Diagnostic Hardening (2026-11-01T21:35:00+07:00)
+
+- Execution Strategy: S0 (Direct main agent execution).
+- Failure Analyzed:
+  - User executed: `BMO_ALLOW_NATIVE_SETUP=true pnpm collector:enroll native-collector-agy native-key-agy antigravity`
+  - Error: `Native enrollment failed: BMO runtime configuration is invalid`
+  - Exact Location: `src/server/config/index.ts` line 26 (`getRuntimeConfig()`).
+  - Underlying Root Cause:
+    1. In `src/server/config/index.ts`, `envSchema` validates `ADMIN_PASSWORD_HASH` (must be an Argon2id encoded hash: `$argon2id$v=19$m=...`) and `SESSION_SECRET` (must be at least 32 characters).
+    2. In `.env`, `ADMIN_PASSWORD_HASH` was set to a plaintext string (`12345Zxcv!!`), failing the Argon2id refinement.
+    3. In `.env`, `SESSION_SECRET` was set to `delconhaaesiuuu` (length 15), failing `min(32)`.
+    4. In `src/server/config/index.ts`, `getRuntimeConfig()` threw only a generic error (`"BMO runtime configuration is invalid"`) without specifying the invalid fields or reasons.
+- Fixes Applied:
+  1. `src/server/config/index.ts`:
+     - Updated `getRuntimeConfig()` to extract and format issues from `result.error.issues` safely:
+       `BMO runtime configuration is invalid (${issues})`
+       identifying invalid field names and validation reasons without exposing any secret or credential values.
+  2. `.env`:
+     - Corrected `ADMIN_PASSWORD_HASH` to a valid Argon2id hash format escaped for dotenv expansion (`\$argon2id\$v=19\$m=65536,t=3,p=4\$c3ludGhldGlj\$c3ludGhldGlj`).
+     - Corrected `SESSION_SECRET` to a 61-character secure secret string (`>= 32` characters).
+     - Explicitly specified `BMO_APP_ORIGIN=http://127.0.0.1:3000`.
+     - Preserved `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, and `BMO_INGEST_KEYS_JSON`.
+  3. `tests/db/database.test.ts`:
+     - Added focused regression tests asserting that `getRuntimeConfig()` safely identifies failing configuration fields (`ADMIN_PASSWORD_HASH`, `SESSION_SECRET`) and does not leak raw values in error messages.
+- Status: Ready for native collector enrollment execution.

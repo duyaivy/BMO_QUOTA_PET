@@ -5,50 +5,50 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
-  title: "Operations status | BMO Personal",
-  description: "Availability of BMO operational services.",
+  title: "Trạng thái vận hành | BMO Personal",
+  description: "Độ khả dụng của các dịch vụ vận hành BMO.",
 };
 export default async function StatusPage() {
   const snapshot = await readDashboard();
   const items = [
     {
-      name: "Application database",
-      status: "Available",
-      detail: "Persisted dashboard data was read successfully for this page.",
+      name: "Cơ sở dữ liệu ứng dụng",
+      status: "Khả dụng",
+      detail: "Dữ liệu bảng điều khiển đã lưu được đọc thành công cho trang này.",
     },
     {
-      name: "Usage ingestion",
-      status: "Available",
+      name: "Thu nạp dữ liệu sử dụng",
+      status: "Khả dụng",
       detail:
-        "The application ingestion route is configured. This does not verify external delivery.",
+        "Đường dẫn thu nạp của ứng dụng đã được cấu hình. Điều này không xác minh việc truyền tải từ bên ngoài.",
     },
     {
-      name: "Provider integrations",
-      status: "Unverified",
+      name: "Tích hợp nhà cung cấp",
+      status: "Chưa xác minh",
       detail:
-        "Provider quota formats and native source behavior remain unverified.",
+        "Định dạng hạn mức và hành vi nguồn gốc của nhà cung cấp vẫn chưa được xác minh.",
     },
     {
       name: "MQTT broker",
-      status: "Pending",
-      detail: "Broker configuration and connectivity are not implemented.",
+      status: "Đang chờ",
+      detail: "Cấu hình và khả năng kết nối tới broker chưa được triển khai.",
     },
     {
-      name: "Hardware and deployment",
-      status: "Pending",
-      detail: "No hardware connection or production deployment check has run.",
+      name: "Phần cứng và triển khai",
+      status: "Đang chờ",
+      detail: "Chưa thực hiện kiểm tra kết nối phần cứng hoặc triển khai thực tế.",
     },
   ];
   return (
     <>
       <PageHeader
-        eyebrow="Operations"
-        title="Service status"
-        description={`Local application state read at ${new Date(snapshot.generatedAt).toISOString()}. No provider polling or broker health check was performed.`}
+        eyebrow="Vận hành"
+        title="Trạng thái dịch vụ"
+        description={`Trạng thái ứng dụng cục bộ được đọc lúc ${new Date(snapshot.generatedAt).toISOString()}. Không thực hiện truy vấn nhà cung cấp hay kiểm tra tình trạng broker.`}
       />
       <section
         className="grid gap-4 md:grid-cols-2"
-        aria-label="Application service status"
+        aria-label="Trạng thái dịch vụ ứng dụng"
       >
         {items.map((item) => (
           <Card key={item.name}>
@@ -57,7 +57,7 @@ export default async function StatusPage() {
                 <CardTitle>{item.name}</CardTitle>
                 <Badge
                   variant={
-                    item.status === "Available" ? "secondary" : "outline"
+                    item.status === "Khả dụng" ? "secondary" : "outline"
                   }
                 >
                   {item.status}

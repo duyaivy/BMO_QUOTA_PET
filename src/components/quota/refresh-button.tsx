@@ -12,7 +12,7 @@ export function RefreshButton() {
   }, [router]);
   return (
     <Button variant="outline" onClick={() => router.refresh()}>
-      Refresh app data
+      Làm mới dữ liệu ứng dụng
     </Button>
   );
 }

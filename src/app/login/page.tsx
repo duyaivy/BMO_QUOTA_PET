@@ -3,17 +3,17 @@ import { PageHeader } from "@/components/shell/page-header";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
-  title: "Sign in | BMO Personal",
-  description: "Sign in to the private BMO Personal workspace.",
+  title: "Đăng nhập | BMO Personal",
+  description: "Đăng nhập vào không gian làm việc BMO Personal.",
 };
 
 export default function LoginPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Access"
-        title="Sign in"
-        description="Sign in with the owner password configured for this BMO instance."
+        eyebrow="Truy cập"
+        title="Đăng nhập"
+        description="Đăng nhập bằng mật khẩu chủ sở hữu được định cấu hình cho phiên bản BMO này."
       />
       <LoginForm />
     </>

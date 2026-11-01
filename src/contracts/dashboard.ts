@@ -34,13 +34,13 @@ export const deviceChangeSchema = z
     (value) =>
       value.screens[0]?.kind === "pet" &&
       value.screens.slice(1).every((screen) => screen.kind === "quota"),
-    "PET must be fixed first",
+    "Màn hình PET phải được cố định đầu tiên",
   )
   .refine(
     (value) =>
       new Set(value.screens.map((screen) => screen.screenId)).size ===
       value.screens.length,
-    "Screen IDs must be unique",
+    "ID màn hình phải là duy nhất",
   );
 export type DeviceConfig = {
   deviceId: string;

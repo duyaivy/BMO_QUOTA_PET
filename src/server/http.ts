@@ -37,10 +37,10 @@ function errorResponse(error: unknown, requestId: string) {
         code,
         message:
           status === 409
-            ? "Configuration changed; refresh before saving"
+            ? "Cấu hình đã thay đổi; hãy làm mới trước khi lưu"
             : status === 503
-              ? "Temporarily unavailable"
-              : "Request rejected",
+              ? "Tạm thời không khả dụng"
+              : "Yêu cầu bị từ chối",
       },
       requestId,
     },

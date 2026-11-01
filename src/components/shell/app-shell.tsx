@@ -26,9 +26,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       if (response.ok) {
         router.replace("/login");
         router.refresh();
-      } else setLogoutError("Sign out failed. Please retry.");
+      } else setLogoutError("Đăng xuất thất bại. Vui lòng thử lại.");
     } catch {
-      setLogoutError("Sign out is temporarily unavailable. Please retry.");
+      setLogoutError("Tính năng đăng xuất tạm thời không khả dụng. Vui lòng thử lại.");
     }
   }
 
@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         href="#main-content"
         className="sr-only z-50 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
-        Skip to content
+        Chuyển đến nội dung
       </a>
       <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col lg:flex-row">
         <aside className="border-b border-border bg-card lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
@@ -49,16 +49,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div>
               <p className="font-semibold tracking-tight">BMO Quota</p>
               <p className="text-xs text-muted-foreground">
-                Personal workspace
+                Không gian làm việc cá nhân
               </p>
             </div>
           </div>
           <nav
-            aria-label="Main navigation"
+            aria-label="Điều hướng chính"
             className="px-3 pb-3 lg:px-4 lg:py-2"
           >
             <p className="hidden px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground lg:block">
-              Workspace
+              Không gian làm việc
             </p>
             <ul className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
               {navigationItems.map((item) => {
@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="hidden px-6 lg:absolute lg:inset-x-0 lg:bottom-5 lg:block">
             <p className="text-xs leading-5 text-muted-foreground">
-              Quota freshness depends on the last observed source data.
+              Độ mới của hạn mức phụ thuộc vào dữ liệu nguồn được quan sát gần nhất.
             </p>
           </div>
         </aside>
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             role="status"
             className="flex items-center justify-center gap-2 border-b border-border bg-primary/5 px-4 py-2 text-center text-xs font-medium text-foreground"
           >
-            Private owner workspace · Provider sources remain unverified
+            Không gian làm việc riêng của chủ sở hữu · Nguồn nhà cung cấp chưa xác minh
             <ArrowUpRight
               aria-hidden="true"
               className="hidden size-3.5 sm:block"
@@ -115,13 +115,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           ) : null}
           <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground sm:px-7 lg:px-10">
-            Values are shown only when supported by observed data.
+            Các giá trị chỉ hiển thị khi có dữ liệu quan sát được.
             <button
               onClick={signOut}
               className="ml-3 inline-flex items-center gap-1 underline underline-offset-2"
               type="button"
             >
-              <LogOut aria-hidden="true" className="size-3" /> Sign out
+              <LogOut aria-hidden="true" className="size-3" /> Đăng xuất
             </button>
           </footer>
         </div>

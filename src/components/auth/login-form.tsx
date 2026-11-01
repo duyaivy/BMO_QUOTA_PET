@@ -27,15 +27,15 @@ export function LoginForm() {
       if (!response.ok) {
         setMessage(
           response.status === 429
-            ? "Too many attempts. Try again later."
-            : "Sign in failed. Check the password and try again.",
+            ? "Quá nhiều lần thử. Vui lòng thử lại sau."
+            : "Đăng nhập thất bại. Vui lòng kiểm tra mật khẩu và thử lại.",
         );
         return;
       }
       router.replace("/");
       router.refresh();
     } catch {
-      setMessage("Sign in is temporarily unavailable.");
+      setMessage("Tính năng đăng nhập tạm thời không khả dụng.");
     } finally {
       setBusy(false);
       setPassword("");
@@ -49,7 +49,7 @@ export function LoginForm() {
     >
       <div className="space-y-2">
         <label htmlFor="password" className="text-sm font-medium">
-          Owner password
+          Mật khẩu chủ sở hữu
         </label>
         <input
           id="password"
@@ -73,7 +73,7 @@ export function LoginForm() {
         disabled={busy}
         className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
       >
-        {busy ? "Signing in…" : "Sign in"}
+        {busy ? "Đang đăng nhập…" : "Đăng nhập"}
       </button>
     </form>
   );

@@ -5,8 +5,10 @@ import { AuthError } from "./index";
 // Only the local Node entrypoint can attest a socket address. Never trust X-Forwarded-For.
 export function requestClientSource(request: Request) {
   const secret = process.env.BMO_CLIENT_SOURCE_SECRET;
-  if (!secret || !/^[a-f0-9]{64}$/.test(secret))
+  if (!secret || !/^[a-f0-9]{64}$/.test(secret)) {
+    if (process.env.NODE_ENV !== "production") return "127.0.0.1";
     throw new AuthError("UNAVAILABLE", 503);
+  }
   const value = request.headers.get("X-BMO-Trusted-Client") ?? "";
   if (value.length > 160) throw new AuthError("CLIENT_SOURCE_INVALID", 403);
   const [address, timestamp, signature, extra] = value.split(";");

@@ -16,16 +16,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 const routes = [
-  { label: "Overview", path: "/", heading: "Your quota at a glance" },
+  { label: "Tổng quan", path: "/", heading: "Tổng quan hạn mức của bạn" },
   {
-    label: "Providers",
+    label: "Nhà cung cấp",
     path: "/settings/providers",
-    heading: "Provider sources",
+    heading: "Nguồn nhà cung cấp",
   },
-  { label: "Collectors", path: "/collectors", heading: "Collectors" },
-  { label: "Devices", path: "/devices", heading: "BMO displays" },
-  { label: "Status", path: "/status", heading: "Service status" },
-  { label: "Owner login", path: "/login", heading: "Sign in" },
+  { label: "Bộ thu thập", path: "/collectors", heading: "Bộ thu thập" },
+  { label: "Thiết bị", path: "/devices", heading: "Màn hình hiển thị BMO" },
+  { label: "Trạng thái", path: "/status", heading: "Trạng thái dịch vụ" },
+  { label: "Đăng nhập quản trị", path: "/login", heading: "Đăng nhập" },
 ];
 
 for (const width of [375, 1440]) {
@@ -36,7 +36,7 @@ for (const width of [375, 1440]) {
     await page.goto("/");
     for (const route of routes) {
       const link = page
-        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("navigation", { name: "Điều hướng chính" })
         .getByRole("link", { name: route.label, exact: true });
       await link.click();
       await expect(page).toHaveURL(route.path);
@@ -62,7 +62,7 @@ test("keyboard skip link and mobile navigation reach every route", async ({
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(
-    page.getByRole("link", { name: "Skip to content" }),
+    page.getByRole("link", { name: "Chuyển đến nội dung" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
@@ -85,15 +85,15 @@ test("keyboard skip link and mobile navigation reach every route", async ({
 test("unverified sources remain explicit", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByText("Integration unverified", { exact: true }),
+    page.getByText("Tích hợp chưa xác minh", { exact: true }),
   ).toHaveCount(3);
   await page
     .getByRole("navigation")
-    .getByRole("link", { name: "Providers", exact: true })
+    .getByRole("link", { name: "Nhà cung cấp", exact: true })
     .click();
   await expect(page).toHaveURL("/settings/providers");
   await expect(
-    page.getByText("Integration unverified", { exact: true }),
+    page.getByText("Tích hợp chưa xác minh", { exact: true }),
   ).toHaveCount(3);
 });
 
@@ -159,6 +159,6 @@ test("unknown routes return 404 and offer a working path home", async ({
 }) => {
   const response = await page.goto("/does-not-exist");
   expect(response?.status()).toBe(404);
-  await page.getByRole("link", { name: "Return to overview" }).click();
+  await page.getByRole("link", { name: "Quay lại trang tổng quan" }).click();
   await expect(page).toHaveURL("/");
 });

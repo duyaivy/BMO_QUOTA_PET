@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function LoadingState({
-  label = "Loading content",
+  label = "Đang tải nội dung",
 }: {
   label?: string;
 }) {

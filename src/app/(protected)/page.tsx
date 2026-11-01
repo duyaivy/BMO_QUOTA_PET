@@ -6,8 +6,8 @@ import { RefreshButton } from "@/components/quota/refresh-button";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
-  title: "Overview | BMO Personal",
-  description: "Persisted quota observations and source status.",
+  title: "Tổng quan | BMO Personal",
+  description: "Các quan sát hạn mức đã lưu và trạng thái nguồn.",
 };
 
 export default async function OverviewPage() {
@@ -18,13 +18,13 @@ export default async function OverviewPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Overview"
-        title="Your quota at a glance"
-        description="Quota values come from persisted local observations. Refreshing this page reads application data only; it does not contact provider services."
+        eyebrow="Tổng quan"
+        title="Tổng quan hạn mức của bạn"
+        description="Các giá trị hạn mức được lấy từ các quan sát cục bộ đã lưu. Làm mới trang này chỉ đọc dữ liệu ứng dụng; không kết nối tới dịch vụ nhà cung cấp."
       >
         <RefreshButton />
       </PageHeader>
-      <section aria-label="Provider quota observations" className="grid gap-4">
+      <section aria-label="Quan sát hạn mức nhà cung cấp" className="grid gap-4">
         {snapshot.providers.map((provider) => (
           <ProviderQuotaCard
             key={provider.providerId}
@@ -36,8 +36,8 @@ export default async function OverviewPage() {
       </section>
       {!hasObservations ? (
         <EmptyState
-          title="No quota observations yet"
-          description="No persisted quota windows are available. Missing data is unknown; it does not mean zero usage."
+          title="Chưa có quan sát hạn mức nào"
+          description="Chưa có khung hạn mức nào được lưu. Thiếu dữ liệu nghĩa là chưa xác định; không có nghĩa là mức sử dụng bằng 0."
         />
       ) : null}
     </>

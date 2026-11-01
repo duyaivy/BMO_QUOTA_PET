@@ -127,7 +127,7 @@ export function DeviceEditor({
         } | null;
         if (latestResponse.ok && latest?.data) setSaved(latest.data);
         setMessage(
-          "Display settings changed elsewhere. Your edits are still here; save again to apply them against the latest revision.",
+          "Cài đặt hiển thị đã thay đổi ở nơi khác. Các chỉnh sửa của bạn vẫn còn ở đây; hãy nhấn lưu lại để áp dụng trên phiên bản mới nhất.",
         );
         router.refresh();
         return;
@@ -137,11 +137,11 @@ export function DeviceEditor({
       setName(body.data.name);
       setScreens(body.data.screens);
       setPreviewId(body.data.screens[0]?.screenId ?? "pet-home");
-      setMessage("Display settings saved");
+      setMessage("Đã lưu cài đặt hiển thị");
       router.refresh();
     } catch {
       setMessage(
-        "Display settings could not be saved. Check your connection and try again.",
+        "Không thể lưu cài đặt hiển thị. Vui lòng kiểm tra kết nối và thử lại.",
       );
     } finally {
       setBusy(false);
@@ -152,12 +152,12 @@ export function DeviceEditor({
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.7fr)]">
       <Card>
         <CardHeader>
-          <CardTitle>Display settings</CardTitle>
+          <CardTitle>Cài đặt hiển thị</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-2">
             <label htmlFor="device-name" className="text-sm font-medium">
-              Display name
+              Tên màn hình
             </label>
             <input
               id="device-name"
@@ -169,12 +169,12 @@ export function DeviceEditor({
           </div>
           <div className="grid gap-2">
             <label htmlFor="add-quota-screen" className="text-sm font-medium">
-              Add quota screen
+              Thêm màn hình hạn mức
             </label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <select
                 id="add-quota-screen"
-                aria-label="Add quota screen"
+                aria-label="Thêm màn hình hạn mức"
                 value={selectedValue}
                 disabled={!choices.length || screens.length >= 16}
                 onChange={(event) => setSelection(event.target.value)}
@@ -182,8 +182,8 @@ export function DeviceEditor({
               >
                 <option value="">
                   {choices.length
-                    ? "Choose a quota window"
-                    : "No new quota windows available"}
+                    ? "Chọn một khung hạn mức"
+                    : "Không còn khung hạn mức mới nào"}
                 </option>
                 {choices.map((choice) => (
                   <option key={choice.value} value={choice.value}>
@@ -197,15 +197,15 @@ export function DeviceEditor({
                 disabled={!choices.length || screens.length >= 16}
                 onClick={addScreen}
               >
-                Add screen
+                Thêm màn hình
               </Button>
             </div>
           </div>
-          <ol aria-label="Ordered display screens" className="space-y-2">
+          <ol aria-label="Danh sách màn hình hiển thị" className="space-y-2">
             {screens.map((screen, index) => {
               const title =
                 screen.kind === "pet"
-                  ? "BMO home"
+                  ? "Màn hình chính BMO"
                   : `${providers.find((provider) => provider.providerId === screen.providerId)?.name ?? screen.providerId} · ${providers.find((provider) => provider.providerId === screen.providerId)?.windows.find(({ window }) => window.windowId === screen.windowId)?.window.label ?? screen.windowId}`;
               return (
                 <li key={screen.screenId} className="rounded-lg border p-3">
@@ -217,34 +217,34 @@ export function DeviceEditor({
                       className="min-h-10 text-left text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {index + 1}. {title}
-                      {screen.kind === "pet" ? " (fixed first)" : ""}
+                      {screen.kind === "pet" ? " (cố định đầu tiên)" : ""}
                     </button>
                     <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
-                        aria-label="Move up"
+                        aria-label="Lên trên"
                         disabled={index < 2}
                         onClick={() => move(index, -1)}
                       >
-                        Move up
+                        Lên trên
                       </Button>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
-                        aria-label="Move down"
+                        aria-label="Xuống dưới"
                         disabled={index === 0 || index === screens.length - 1}
                         onClick={() => move(index, 1)}
                       >
-                        Move down
+                        Xuống dưới
                       </Button>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
-                        aria-label="Remove screen"
+                        aria-label="Xóa màn hình"
                         disabled={index === 0}
                         onClick={() => {
                           setScreens((current) =>
@@ -256,7 +256,7 @@ export function DeviceEditor({
                             setPreviewId(screens[0]?.screenId ?? "pet-home");
                         }}
                       >
-                        Remove screen
+                        Xóa màn hình
                       </Button>
                     </div>
                   </div>
@@ -270,10 +270,10 @@ export function DeviceEditor({
               disabled={busy || !name.trim() || name.trim().length > 80}
               onClick={() => void save()}
             >
-              {busy ? "Saving…" : "Save display settings"}
+              {busy ? "Đang lưu…" : "Lưu cài đặt hiển thị"}
             </Button>
             <span className="text-xs text-muted-foreground">
-              Revision {saved.revision}
+              Phiên bản {saved.revision}
             </span>
           </div>
           {message ? (
@@ -285,12 +285,12 @@ export function DeviceEditor({
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>OLED preview</CardTitle>
+          <CardTitle>Xem trước màn hình OLED</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-2">
             <label htmlFor="preview-screen" className="text-sm font-medium">
-              Preview screen
+              Màn hình xem trước
             </label>
             <select
               id="preview-screen"
@@ -301,7 +301,7 @@ export function DeviceEditor({
               {screens.map((screen, index) => (
                 <option key={screen.screenId} value={screen.screenId}>
                   {index + 1}.{" "}
-                  {screen.kind === "pet" ? "BMO home" : screen.windowId}
+                  {screen.kind === "pet" ? "Màn hình chính BMO" : screen.windowId}
                 </option>
               ))}
             </select>

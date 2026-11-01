@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createClient } from "@libsql/client";
 import { applyMigrations, closeDbForTests, getDb } from "@/server/db";
+import { getRuntimeConfig } from "@/server/config";
 import { readSettings, updateSettings } from "@/server/db/settings";
 let directory: string;
 beforeEach(async () => {
@@ -81,6 +82,7 @@ it("detects changed migrations and does not silently reseed or reset settings", 
   await expect(applyMigrations(client)).rejects.toThrow("checksum mismatch");
   expect((await readSettings()).revision).toBe(1);
 });
+
 it("rolls failed migration transactions back and recovers from initialization failure", async () => {
   const client = createClient({ url: `file:${join(directory, "broken.db")}` });
   await client.execute("CREATE TABLE app_settings (unrelated TEXT)");
@@ -98,3 +100,21 @@ it("rolls failed migration transactions back and recovers from initialization fa
   );
   expect((await readSettings()).revision).toBe(1);
 });
+
+it("provides safe diagnostics when runtime configuration validation fails without exposing values", () => {
+  vi.stubEnv("ADMIN_PASSWORD_HASH", "plaintext-password");
+  vi.stubEnv("SESSION_SECRET", "short");
+  expect(() => getRuntimeConfig()).toThrowError(
+    /BMO runtime configuration is invalid.*ADMIN_PASSWORD_HASH.*SESSION_SECRET/,
+  );
+  expect(() => getRuntimeConfig()).toThrowError(
+    /Expected an Argon2id encoded hash/,
+  );
+  try {
+    getRuntimeConfig();
+  } catch (error) {
+    expect((error as Error).message).not.toContain("plaintext-password");
+    expect((error as Error).message).not.toContain("short");
+  }
+});
+

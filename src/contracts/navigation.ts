@@ -2,24 +2,24 @@
 export const navigationItems = [
   {
     href: "/",
-    label: "Overview",
-    description: "Your personal quota workspace",
+    label: "Tổng quan",
+    description: "Không gian làm việc hạn mức cá nhân",
   },
   {
     href: "/settings/providers",
-    label: "Providers",
-    description: "Local source compatibility",
+    label: "Nhà cung cấp",
+    description: "Khả năng tương thích nguồn cục bộ",
   },
   {
     href: "/collectors",
-    label: "Collectors",
-    description: "Observation and delivery",
+    label: "Bộ thu thập",
+    description: "Quan sát và truyền dữ liệu",
   },
-  { href: "/devices", label: "Devices", description: "Your desk companion" },
-  { href: "/status", label: "Status", description: "Application operations" },
+  { href: "/devices", label: "Thiết bị", description: "Thú cưng bàn làm việc của bạn" },
+  { href: "/status", label: "Trạng thái", description: "Vận hành ứng dụng" },
   {
     href: "/login",
-    label: "Owner login",
-    description: "Owner password access",
+    label: "Đăng nhập quản trị",
+    description: "Truy cập bằng mật khẩu chủ sở hữu",
   },
 ] as const;

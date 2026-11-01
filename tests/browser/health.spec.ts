@@ -145,28 +145,28 @@ echo 'codex-cli 0.999.0'
     await page.goto("/");
     await expect(
       page
-        .getByRole("region", { name: "Claude Code quota" })
+        .getByRole("region", { name: "Hạn mức Claude Code" })
         .getByText("17%", { exact: true }),
     ).toBeVisible();
     await page.goto("/collectors");
     const health = page.getByRole("region", {
-      name: "claude collector health",
+      name: "Tình trạng sức khỏe bộ thu thập claude",
     });
     await expect(
-      health.getByText("Recent health report", { exact: true }),
+      health.getByText("Báo cáo sức khỏe gần đây", { exact: true }),
     ).toBeVisible();
     await expect(
-      health.getByText("Upload queue", { exact: true }),
+      health.getByText("Hàng đợi tải lên", { exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText("Synthetic fixtures", { exact: true }),
+      page.getByText("Dữ liệu mẫu mô phỏng", { exact: true }),
     ).toBeVisible();
     await expect(
       health.getByText("available · OK", { exact: true }),
     ).toBeVisible();
     await expect(
       page
-        .getByRole("region", { name: "codex collector health" })
+        .getByRole("region", { name: "Tình trạng sức khỏe bộ thu thập codex" })
         .getByText("unsupported · SCHEMA_UNSUPPORTED", { exact: true }),
     ).toBeVisible();
     const old = signedRequest(
@@ -189,8 +189,8 @@ echo 'codex-cli 0.999.0'
     await page.reload();
     await expect(
       page
-        .getByRole("region", { name: "antigravity collector health" })
-        .getByText("Health report stale", { exact: true }),
+        .getByRole("region", { name: "Tình trạng sức khỏe bộ thu thập antigravity" })
+        .getByText("Báo cáo sức khỏe đã cũ", { exact: true }),
     ).toBeVisible();
     const future = signedRequest(
       heartbeat({
@@ -212,8 +212,8 @@ echo 'codex-cli 0.999.0'
     await page.reload();
     await expect(
       page
-        .getByRole("region", { name: "antigravity collector health" })
-        .getByText("Health sample clock uncertain", { exact: true }),
+        .getByRole("region", { name: "Tình trạng sức khỏe bộ thu thập antigravity" })
+        .getByText("Đồng hồ mẫu sức khỏe không chắc chắn", { exact: true }),
     ).toBeVisible();
     await page.screenshot({
       path: test.info().outputPath("collector-health.png"),

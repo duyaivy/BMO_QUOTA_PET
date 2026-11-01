@@ -279,20 +279,20 @@ test("native Codex collector recovers quota across offline retry, suspend, resum
     expect(daemonError).toBe("");
 
     await page.goto("/");
-    const card = page.getByRole("region", { name: "Codex quota" });
-    const window = page.getByRole("group", { name: "Primary quota window" });
+    const card = page.getByRole("region", { name: "Hạn mức Codex" });
+    const window = page.getByRole("group", { name: "Khung hạn mức Primary" });
     await expect(window.getByText("33%", { exact: true })).toBeVisible();
     await expect(
-      window.getByText("Source age unknown", { exact: true }),
+      window.getByText("Tuổi dữ liệu nguồn chưa xác định", { exact: true }),
     ).toBeVisible();
     await expect(
-      window.getByText("Source observation", { exact: true }),
+      window.getByText("Thời điểm nguồn quan sát", { exact: true }),
     ).toBeVisible();
     await expect(
-      window.locator("dl").getByText("Unknown", { exact: true }),
+      window.locator("dl").getByText("Chưa xác định", { exact: true }),
     ).toBeVisible();
     await expect(
-      card.getByText("Synthetic fixtures", { exact: true }),
+      card.getByText("Dữ liệu mẫu mô phỏng", { exact: true }),
     ).toBeVisible();
     await expect(
       page.getByText("lifecycle-private-sentinel", { exact: true }),

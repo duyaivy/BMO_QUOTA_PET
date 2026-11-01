@@ -16,11 +16,21 @@ async function enroll(input: z.input<typeof enrollment>, native: boolean) {
   if (
     process.env[
       native ? "BMO_ALLOW_NATIVE_SETUP" : "BMO_ALLOW_FIXTURE_SETUP"
-    ] !== "true" ||
-    !process.env.TURSO_DATABASE_URL?.startsWith("file:")
+    ] !== "true"
   )
     throw new Error(
-      "Fixture enrollment requires explicit local development setup",
+      native
+        ? "Native enrollment requires explicit authorization (BMO_ALLOW_NATIVE_SETUP=true)"
+        : "Fixture enrollment requires explicit authorization (BMO_ALLOW_FIXTURE_SETUP=true)",
+    );
+  const dbUrl = process.env.TURSO_DATABASE_URL ?? "file:./.data/bmo.db";
+  if (
+    !dbUrl.startsWith("file:") &&
+    !dbUrl.startsWith("libsql://") &&
+    !dbUrl.startsWith("https://")
+  )
+    throw new Error(
+      "Enrollment requires a supported database transport (file:, libsql://, or https://)",
     );
   const value = enrollment.parse(input);
   return writeTransaction(async (tx) => {
@@ -33,7 +43,11 @@ async function enroll(input: z.input<typeof enrollment>, native: boolean) {
       sql: "SELECT fixture_mode FROM collectors WHERE collector_id=?",
       args: [value.collectorId],
     });
-    if (Boolean(collector.rows[0]?.fixture_mode) === native)
+    const isFixture =
+      collector.rows[0]?.fixture_mode === true ||
+      collector.rows[0]?.fixture_mode === 1 ||
+      collector.rows[0]?.fixture_mode === "1";
+    if (isFixture === native)
       throw new Error("Collector evidence mode conflict");
     const existing = await tx.execute({
       sql: "SELECT collector_id FROM collector_keys WHERE key_id=?",

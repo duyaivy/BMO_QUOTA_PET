@@ -56,7 +56,7 @@ test("fixture CLI uploads to the real application and resumes its persisted file
     ).toBe(200);
     await page.goto("/");
     await expect(
-      page.getByText("No quota observations yet", { exact: true }),
+      page.getByText("Chưa có quan sát hạn mức nào", { exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("progressbar")).toHaveCount(0);
     const first = await execute(process.execPath, args, {
@@ -68,10 +68,10 @@ test("fixture CLI uploads to the real application and resumes its persisted file
     expect(first.stdout).toContain("ACKNOWLEDGED");
     expect(first.stderr).toBe("");
     await page.goto("/");
-    const card = page.getByRole("region", { name: "Claude Code quota" });
+    const card = page.getByRole("region", { name: "Hạn mức Claude Code" });
     await expect(card.getByText("27%", { exact: true })).toBeVisible();
     await expect(
-      card.getByText("Synthetic fixtures", { exact: true }),
+      card.getByText("Dữ liệu mẫu mô phỏng", { exact: true }),
     ).toBeVisible();
 
     const resumed = await execute(process.execPath, args, {

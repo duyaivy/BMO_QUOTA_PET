@@ -1,5 +1,5 @@
 import { LoadingState } from "@/components/states/loading-state";
 
 export default function Loading() {
-  return <LoadingState label="Loading workspace" />;
+  return <LoadingState label="Đang tải không gian làm việc" />;
 }

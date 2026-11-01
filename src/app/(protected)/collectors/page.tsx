@@ -8,12 +8,12 @@ import { RefreshButton } from "@/components/quota/refresh-button";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
-  title: "Collectors | BMO Personal",
-  description: "Local collector enrollment and observation status.",
+  title: "Bộ thu thập | BMO Personal",
+  description: "Trạng thái đăng ký và quan sát của bộ thu thập cục bộ.",
 };
 function timestamp(value: number | null) {
   return value === null
-    ? "Unknown"
+    ? "Chưa xác định"
     : new Date(value).toISOString().replace("T", " ").replace(".000Z", " UTC");
 }
 
@@ -22,16 +22,16 @@ export default async function CollectorsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Collection"
-        title="Collectors"
-        description="Upload delivery and quota observation are separate signals. Neither implies a new provider reading."
+        eyebrow="Thu thập dữ liệu"
+        title="Bộ thu thập"
+        description="Việc truyền tải dữ liệu tải lên và quan sát hạn mức là hai tín hiệu tách biệt. Cả hai đều không khẳng định có số liệu mới từ nhà cung cấp."
       >
         <RefreshButton />
       </PageHeader>
       {snapshot.collectors.length ? (
         <section
           className="grid gap-4 lg:grid-cols-2"
-          aria-label="Enrolled collectors"
+          aria-label="Các bộ thu thập đã đăng ký"
         >
           {snapshot.collectors.map((collector) => (
             <Card key={collector.collectorId}>
@@ -40,10 +40,10 @@ export default async function CollectorsPage() {
                   <CardTitle>{collector.name}</CardTitle>
                   <div className="flex gap-2">
                     <Badge variant={collector.active ? "default" : "outline"}>
-                      {collector.active ? "Enrolled" : "Revoked"}
+                      {collector.active ? "Đã đăng ký" : "Đã thu hồi"}
                     </Badge>
                     {collector.synthetic ? (
-                      <Badge variant="secondary">Synthetic fixtures</Badge>
+                      <Badge variant="secondary">Dữ liệu mẫu mô phỏng</Badge>
                     ) : null}
                   </div>
                 </div>
@@ -52,19 +52,19 @@ export default async function CollectorsPage() {
                 <dl className="grid gap-3 text-sm sm:grid-cols-2">
                   <div>
                     <dt className="text-muted-foreground">
-                      Last successful upload
+                      Lần tải lên thành công gần nhất
                     </dt>
                     <dd className="mt-1">{timestamp(collector.lastSeenAt)}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground">Last source event</dt>
+                    <dt className="text-muted-foreground">Sự kiện nguồn gần nhất</dt>
                     <dd className="mt-1">
                       {timestamp(collector.lastSourceEventAt)}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-muted-foreground">
-                      Last observation captured
+                      Quan sát gần nhất được ghi nhận
                     </dt>
                     <dd className="mt-1">
                       {timestamp(collector.lastObservationCaptureAt)}
@@ -72,7 +72,7 @@ export default async function CollectorsPage() {
                   </div>
                   <div>
                     <dt className="text-muted-foreground">
-                      Last quota window captured
+                      Khung hạn mức gần nhất được ghi nhận
                     </dt>
                     <dd className="mt-1">
                       {timestamp(collector.lastQuotaCaptureAt)}
@@ -85,32 +85,32 @@ export default async function CollectorsPage() {
                       <section
                         key={report.providerId}
                         className="rounded-lg border p-3"
-                        aria-label={`${report.providerId} collector health`}
+                        aria-label={`Tình trạng sức khỏe bộ thu thập ${report.providerId}`}
                       >
                         <div className="flex flex-wrap justify-between gap-2 text-sm font-medium">
                           <span>
                             {report.providerId} ·{" "}
-                            {report.sourceVersion ?? "Version unknown"}
+                            {report.sourceVersion ?? "Chưa rõ phiên bản"}
                           </span>
                           <Badge variant="outline">
                             {report.collectedAt > snapshot.generatedAt + 1000
-                              ? "Health sample clock uncertain"
+                              ? "Đồng hồ mẫu sức khỏe không chắc chắn"
                               : snapshot.generatedAt - report.collectedAt >
                                   180000
-                                ? "Health report stale"
-                                : "Recent health report"}
+                                ? "Báo cáo sức khỏe đã cũ"
+                                : "Báo cáo sức khỏe gần đây"}
                           </Badge>
                         </div>
                         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
                           <div>
                             <dt className="text-muted-foreground">
-                              Health sampled
+                              Thời điểm lấy mẫu sức khỏe
                             </dt>
                             <dd>{timestamp(report.collectedAt)}</dd>
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Source input
+                              Dữ liệu đầu vào nguồn
                             </dt>
                             <dd>
                               {report.sourceAvailability} ·{" "}
@@ -119,50 +119,50 @@ export default async function CollectorsPage() {
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Upload queue
+                              Hàng đợi tải lên
                             </dt>
                             <dd>
-                              {report.health.queuePending} pending ·{" "}
-                              {report.health.queueBytes} bytes
+                              {report.health.queuePending} đang chờ ·{" "}
+                              {report.health.queueBytes} byte
                             </dd>
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Dropped events
+                              Sự kiện bị loại bỏ
                             </dt>
                             <dd>{report.health.dropped}</dd>
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Callback spool
+                              Vùng đệm callback
                             </dt>
                             <dd>
-                              {report.health.callbackPending ?? "Unknown"}{" "}
-                              pending ·{" "}
-                              {report.health.callbackBytes ?? "Unknown"} bytes ·{" "}
-                              {report.health.callbackDropped ?? "Unknown"}{" "}
-                              dropped
+                              {report.health.callbackPending ?? "Chưa rõ"}{" "}
+                              đang chờ ·{" "}
+                              {report.health.callbackBytes ?? "Chưa rõ"} byte ·{" "}
+                              {report.health.callbackDropped ?? "Chưa rõ"}{" "}
+                              bị loại bỏ
                             </dd>
                           </div>
                           <div>
-                            <dt className="text-muted-foreground">Uploader</dt>
+                            <dt className="text-muted-foreground">Bộ tải lên</dt>
                             <dd>{report.health.lastUploadCode}</dd>
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Next queued retry
+                              Lần thử lại tiếp theo
                             </dt>
                             <dd>
-                              {report.health.nextRetryAt ?? "None reported"}
+                              {report.health.nextRetryAt ?? "Không có báo cáo"}
                             </dd>
                           </div>
                           <div>
                             <dt className="text-muted-foreground">
-                              Paused sources
+                              Nguồn đang tạm dừng
                             </dt>
                             <dd>
                               {report.health.pausedSources.join(", ") ||
-                                "None reported"}
+                                "Không có báo cáo"}
                             </dd>
                           </div>
                         </dl>
@@ -170,7 +170,7 @@ export default async function CollectorsPage() {
                     ))
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      No collector health report received.
+                      Chưa nhận được báo cáo sức khỏe nào từ bộ thu thập.
                     </p>
                   )}
                 </div>
@@ -180,8 +180,8 @@ export default async function CollectorsPage() {
         </section>
       ) : (
         <EmptyState
-          title="No collectors enrolled"
-          description="No local collector is connected. Upload reachability and quota capture are unknown."
+          title="Chưa có bộ thu thập nào được đăng ký"
+          description="Chưa có bộ thu thập cục bộ nào được kết nối. Khả năng kết nối tải lên và việc ghi nhận hạn mức chưa xác định."
         />
       )}
       <section
@@ -189,21 +189,21 @@ export default async function CollectorsPage() {
         aria-labelledby="collector-boundary-title"
       >
         <h2 id="collector-boundary-title" className="font-semibold">
-          Upload is not a quota refresh
+          Tải lên không đồng nghĩa với làm mới hạn mức
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The timestamps above show when BMO last heard from a collector and
-          when an observation was captured. Delivery does not refresh quota
-          source age. Health reports are captured locally and can themselves be
-          stale after offline delivery. A readable session directory or silence
-          does not prove that a CLI is running or closed.
+          Các mốc thời gian trên hiển thị thời điểm BMO nhận phản hồi gần nhất từ
+          bộ thu thập và thời điểm quan sát được ghi nhận. Việc truyền dữ liệu không
+          làm mới tuổi nguồn hạn mức. Báo cáo tình trạng được ghi nhận cục bộ và bản thân
+          chúng có thể bị cũ sau khi truyền tải ngoại tuyến. Thư mục phiên có thể đọc được
+          hoặc sự im lặng không chứng minh được rằng CLI đang chạy hay đã đóng.
         </p>
       </section>
       <Link
         className="text-sm font-medium underline underline-offset-4"
         href="/settings/providers"
       >
-        Review provider sources
+        Xem lại các nguồn nhà cung cấp
       </Link>
     </>
   );

@@ -20,8 +20,8 @@ export function OledPreview({
     return () => clearInterval(timer);
   }, []);
   let title = "BMO";
-  let value = "READY";
-  let detail = "HOME";
+  let value = "SẴN SÀNG";
+  let detail = "TRANG CHỦ";
   if (screen.kind === "quota") {
     const provider = providers.find(
       (item) => item.providerId === screen.providerId,
@@ -29,10 +29,10 @@ export function OledPreview({
     const item = provider?.windows.find(
       ({ window }) => window.windowId === screen.windowId,
     );
-    title = provider?.name ?? "Quota";
+    title = provider?.name ?? "Hạn mức";
     if (!item) {
       value = "—";
-      detail = "Unavailable";
+      detail = "Không khả dụng";
     } else {
       const effective = effectiveWindow(
         item.window,
@@ -46,14 +46,14 @@ export function OledPreview({
           : 100 - item.window.remainingPercent);
       value = percent === null ? "—" : `${percent}%`;
       detail = effective.resetExpired
-        ? "Expired · last known"
+        ? "Hết hạn · gần nhất"
         : item.availability !== "ok"
-          ? "Source unavailable"
+          ? "Nguồn không khả dụng"
           : effective.effectiveFreshness === "stale"
-            ? "Stale · last known"
+            ? "Dữ liệu cũ · gần nhất"
             : effective.effectiveFreshness === "unknown"
-              ? "Age unknown"
-              : "Observed";
+              ? "Chưa rõ tuổi"
+              : "Đã quan sát";
     }
   }
   return (
@@ -63,7 +63,7 @@ export function OledPreview({
         height="64"
         viewBox="0 0 128 64"
         role="img"
-        aria-label="OLED 128 by 64 configuration preview"
+        aria-label="Xem trước cấu hình OLED 128x64"
         className="mx-auto h-auto w-full max-w-64 rounded border border-foreground/70 bg-background p-1 font-mono text-foreground"
       >
         <rect
@@ -115,10 +115,10 @@ export function OledPreview({
       {screen.kind === "quota" &&
       providers.find((provider) => provider.providerId === screen.providerId)
         ?.synthetic ? (
-        <p className="text-xs">Synthetic fixture data</p>
+        <p className="text-xs">Dữ liệu mẫu mô phỏng</p>
       ) : null}
       <p className="mt-2 text-xs text-muted-foreground">
-        Configuration aid only. MQTT and hardware output are not verified.
+        Chỉ dùng hỗ trợ cấu hình. Chưa xác minh MQTT và hiển thị phần cứng.
       </p>
     </div>
   );

@@ -72,35 +72,35 @@ test("persisted unknown, stale and reset values stay honest after heartbeat and 
     }),
   );
   await page.goto("/");
-  const amount = page.getByRole("group", { name: "Amount only quota window" });
+  const amount = page.getByRole("group", { name: "Khung hạn mức Amount only" });
   await expect(amount.getByRole("progressbar")).not.toHaveAttribute(
     "aria-valuenow",
   );
   await expect(amount.getByText("0%", { exact: true })).toHaveCount(0);
   const unknown = page.getByRole("group", {
-    name: "Unknown source age quota window",
+    name: "Khung hạn mức Unknown source age",
   });
   await expect(
-    unknown.getByText("Source age unknown", { exact: true }),
+    unknown.getByText("Tuổi dữ liệu nguồn chưa xác định", { exact: true }),
   ).toBeVisible();
   await expect(unknown.getByRole("progressbar")).toHaveAttribute(
     "aria-valuenow",
     "45",
   );
-  const stale = page.getByRole("group", { name: "Old quota quota window" });
+  const stale = page.getByRole("group", { name: "Khung hạn mức Old quota" });
   await expect(stale.getByText("70%", { exact: true })).toBeVisible();
   await expect(
-    stale.getByText("Stale · last known value", { exact: true }),
+    stale.getByText("Dữ liệu cũ · giá trị gần nhất", { exact: true }),
   ).toBeVisible();
   const captureBefore = await stale
     .locator("time")
     .first()
     .getAttribute("datetime");
   const expiry = page.getByRole("group", {
-    name: "Reset boundary quota window",
+    name: "Khung hạn mức Reset boundary",
   });
   await expect(
-    expiry.getByText("Reset time passed", { exact: true }),
+    expiry.getByText("Đã quá thời gian đặt lại", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
   await expect(expiry.getByText("63%", { exact: true })).toBeVisible();
   await expect(expiry.getByRole("progressbar")).not.toHaveAttribute(
@@ -115,7 +115,7 @@ test("persisted unknown, stale and reset values stay honest after heartbeat and 
       lastSourceEventAt: captured,
     }),
   );
-  await page.getByRole("button", { name: "Refresh app data" }).click();
+  await page.getByRole("button", { name: "Làm mới dữ liệu ứng dụng" }).click();
   await expect(stale.locator("time").first()).toHaveAttribute(
     "datetime",
     captureBefore!,
@@ -132,10 +132,10 @@ test("persisted unknown, stale and reset values stay honest after heartbeat and 
       windows: [],
     }),
   );
-  await page.getByRole("button", { name: "Refresh app data" }).click();
-  const provider = page.getByRole("region", { name: "Antigravity quota" });
+  await page.getByRole("button", { name: "Làm mới dữ liệu ứng dụng" }).click();
+  const provider = page.getByRole("region", { name: "Hạn mức Antigravity" });
   await expect(
-    provider.getByText("Unsupported", { exact: true }).first(),
+    provider.getByText("Không hỗ trợ", { exact: true }).first(),
   ).toBeVisible();
   await expect(stale.getByText("70%", { exact: true })).toBeVisible();
   await send(
@@ -150,9 +150,9 @@ test("persisted unknown, stale and reset values stay honest after heartbeat and 
       windows: [],
     }),
   );
-  await page.getByRole("button", { name: "Refresh app data" }).click();
+  await page.getByRole("button", { name: "Làm mới dữ liệu ứng dụng" }).click();
   await expect(
-    provider.getByText("Quota unavailable", { exact: true }),
+    provider.getByText("Hạn mức không khả dụng", { exact: true }),
   ).toBeVisible();
   await expect(stale.locator("time").first()).toHaveAttribute(
     "datetime",
@@ -195,28 +195,28 @@ test("device screen order persists and the 128 by 64 preview handles null and mi
   await page.setViewportSize({ width: 375, height: 900 });
   await page.goto("/devices");
   await page
-    .getByLabel("Add quota screen")
+    .getByLabel("Thêm màn hình hạn mức")
     .selectOption(JSON.stringify(["claude", "device.fixture"]));
-  await page.getByRole("button", { name: "Add screen", exact: true }).click();
+  await page.getByRole("button", { name: "Thêm màn hình", exact: true }).click();
   await page
-    .getByLabel("Add quota screen")
+    .getByLabel("Thêm màn hình hạn mức")
     .selectOption(JSON.stringify(["antigravity", "device.amount"]));
-  await page.getByRole("button", { name: "Add screen", exact: true }).click();
-  const list = page.getByRole("list", { name: "Ordered display screens" }),
+  await page.getByRole("button", { name: "Thêm màn hình", exact: true }).click();
+  const list = page.getByRole("list", { name: "Danh sách màn hình hiển thị" }),
     items = list.getByRole("listitem");
   await expect(items).toHaveCount(3);
   await expect(
-    items.first().getByRole("button", { name: "Remove screen", exact: true }),
+    items.first().getByRole("button", { name: "Xóa màn hình", exact: true }),
   ).toBeDisabled();
   await items
     .nth(2)
-    .getByRole("button", { name: "Move up", exact: true })
+    .getByRole("button", { name: "Lên trên", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Save display settings", exact: true })
+    .getByRole("button", { name: "Lưu cài đặt hiển thị", exact: true })
     .click();
   await expect(
-    page.getByText("Display settings saved", { exact: true }),
+    page.getByText("Đã lưu cài đặt hiển thị", { exact: true }),
   ).toBeVisible();
   await page.reload();
   const device = (await (await page.request.get("/api/devices/config")).json())
@@ -227,10 +227,10 @@ test("device screen order persists and the 128 by 64 preview handles null and mi
     ),
   ).toEqual(["pet", "antigravity", "claude"]);
   await page
-    .getByLabel("Preview screen", { exact: true })
+    .getByLabel("Màn hình xem trước", { exact: true })
     .selectOption(device.screens[1].screenId);
   const preview = page.getByRole("img", {
-    name: "OLED 128 by 64 configuration preview",
+    name: "Xem trước cấu hình OLED 128x64",
   });
   await expect(preview).toHaveAttribute("width", "128");
   await expect(preview).toHaveAttribute("height", "64");
@@ -258,9 +258,9 @@ test("device screen order persists and the 128 by 64 preview handles null and mi
   ).toBe(200);
   await page.reload();
   await page
-    .getByLabel("Preview screen", { exact: true })
+    .getByLabel("Màn hình xem trước", { exact: true })
     .selectOption("missing-screen");
-  await expect(preview).toContainText("Unavailable");
+  await expect(preview).toContainText("Không khả dụng");
   await page.screenshot({
     path: "test-results/phase1-devices.png",
     fullPage: true,
@@ -270,7 +270,7 @@ test("device revision conflict preserves edits and requires an explicit second s
   page,
 }) => {
   await page.goto("/devices");
-  await page.getByLabel("Display name", { exact: true }).fill("My local edits");
+  await page.getByLabel("Tên màn hình", { exact: true }).fill("My local edits");
   const device = (await (await page.request.get("/api/devices/config")).json())
     .data;
   expect(
@@ -283,19 +283,19 @@ test("device revision conflict preserves edits and requires an explicit second s
     ).status(),
   ).toBe(200);
   await page
-    .getByRole("button", { name: "Save display settings", exact: true })
+    .getByRole("button", { name: "Lưu cài đặt hiển thị", exact: true })
     .click();
   await expect(
-    page.getByText(/Display settings changed elsewhere/),
+    page.getByText(/Cài đặt hiển thị đã thay đổi ở nơi khác/),
   ).toBeVisible();
-  await expect(page.getByLabel("Display name", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Tên màn hình", { exact: true })).toHaveValue(
     "My local edits",
   );
   await page
-    .getByRole("button", { name: "Save display settings", exact: true })
+    .getByRole("button", { name: "Lưu cài đặt hiển thị", exact: true })
     .click();
   await expect(
-    page.getByText("Display settings saved", { exact: true }),
+    page.getByText("Đã lưu cài đặt hiển thị", { exact: true }),
   ).toBeVisible();
   expect(
     (await (await page.request.get("/api/devices/config")).json()).data.name,

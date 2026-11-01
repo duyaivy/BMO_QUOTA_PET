@@ -5,11 +5,11 @@ export default function NotFound() {
   return (
     <>
       <PageHeader
-        title="Page not found"
-        description="This page is not part of your workspace."
+        title="Không tìm thấy trang"
+        description="Trang này không thuộc không gian làm việc của bạn."
       />
       <Link href="/" className="font-medium underline underline-offset-4">
-        Return to overview
+        Quay lại trang tổng quan
       </Link>
     </>
   );

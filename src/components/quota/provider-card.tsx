@@ -14,23 +14,28 @@ export function ProviderQuotaCard({
   freshnessThresholdSeconds: number;
 }) {
   return (
-    <Card role="region" aria-label={provider.name + " quota"}>
+    <Card role="region" aria-label={"Hạn mức " + provider.name}>
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
             <CardTitle>{provider.name}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {provider.enabled ? "Source enabled" : "Source disabled"}
+              {provider.enabled ? "Nguồn đang bật" : "Nguồn đang tắt"}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">
               {provider.verification === "unverified"
-                ? "Integration unverified"
-                : "Integration " + provider.verification}
+                ? "Tích hợp chưa xác minh"
+                : "Tích hợp " +
+                  (provider.verification === "verified"
+                    ? "đã xác minh"
+                    : provider.verification === "unsupported"
+                      ? "không hỗ trợ"
+                      : provider.verification)}
             </Badge>
             {provider.synthetic ? (
-              <Badge variant="secondary">Synthetic fixtures</Badge>
+              <Badge variant="secondary">Dữ liệu mẫu mô phỏng</Badge>
             ) : null}
           </div>
         </div>
@@ -39,10 +44,10 @@ export function ProviderQuotaCard({
         {provider.dataStatus !== "ok" ? (
           <p className="text-sm">
             {provider.dataStatus === "unsupported"
-              ? "Unsupported"
+              ? "Không hỗ trợ"
               : provider.dataStatus === "error"
-                ? "Source error"
-                : "Quota unavailable"}
+                ? "Lỗi nguồn"
+                : "Hạn mức không khả dụng"}
           </p>
         ) : null}
         {provider.windows.length ? (
@@ -60,16 +65,16 @@ export function ProviderQuotaCard({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No quota observation available. Missing data is unknown, not zero.
+            Không có quan sát hạn mức nào khả dụng. Thiếu dữ liệu nghĩa là chưa xác định, không phải bằng 0.
           </p>
         )}
         <p className="text-xs text-muted-foreground">
-          Provider sign-in remains in the official client.{" "}
+          Đăng nhập nhà cung cấp vẫn được duy trì trong ứng dụng chính thức.{" "}
           <Link
             className="underline underline-offset-4"
             href="/settings/providers"
           >
-            Review source settings
+            Xem lại cài đặt nguồn
           </Link>
         </p>
       </CardContent>

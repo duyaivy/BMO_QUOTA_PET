@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ErrorState({
-  title = "Something went wrong",
-  description = "This information could not be loaded. Try again in a moment.",
+  title = "Đã xảy ra sự cố",
+  description = "Không thể tải thông tin này. Vui lòng thử lại sau giây lát.",
   onRetry,
 }: {
   title?: string;
@@ -33,7 +33,7 @@ export function ErrorState({
               onClick={onRetry}
               className="mt-4"
             >
-              Try again
+              Thử lại
             </Button>
           ) : null}
         </div>

@@ -23,7 +23,12 @@ const envSchema = z.object({
 export type RuntimeConfig = z.infer<typeof envSchema>;
 export function getRuntimeConfig(): RuntimeConfig {
   const result = envSchema.safeParse(process.env);
-  if (!result.success) throw new Error("BMO runtime configuration is invalid");
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((issue) => `${issue.path.join(".") || "config"}: ${issue.message}`)
+      .join("; ");
+    throw new Error(`BMO runtime configuration is invalid (${issues})`);
+  }
   const origin = new URL(result.data.BMO_APP_ORIGIN);
   if (
     origin.origin !== result.data.BMO_APP_ORIGIN ||

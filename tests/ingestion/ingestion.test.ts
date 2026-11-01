@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ingest } from "@/server/ingestion";
-import { enrollFixture } from "@/server/ingestion/enroll";
+import { enrollFixture, enrollNative } from "@/server/ingestion/enroll";
 import { getDb, closeDbForTests } from "@/server/db";
 import { effectiveWindow, semanticInput, eventSchema } from "@/contracts/usage";
 import {
@@ -586,3 +586,46 @@ it("rejects unknown, secret-bearing and excessive health fields through the sign
   }
   expect(await rows("collector_health")).toHaveLength(0);
 });
+
+it("enrolls native collectors with distinct identity, explicit authorization and generation increment", async () => {
+  vi.stubEnv("BMO_ALLOW_NATIVE_SETUP", "true");
+  const gen1 = await enrollNative({
+    collectorId: "native-collector-test",
+    keyId: "native-key-test",
+    providerId: "antigravity",
+    name: "Native Test Collector",
+  });
+  expect(gen1).toBeGreaterThanOrEqual(1);
+
+  // Repeat enrollment with same collector and key is idempotent and advances generation
+  const gen2 = await enrollNative({
+    collectorId: "native-collector-test",
+    keyId: "native-key-test",
+    providerId: "antigravity",
+    name: "Native Test Collector Renamed",
+  });
+  expect(gen2).toBe(gen1 + 1);
+
+  // Fails without authorization
+  vi.stubEnv("BMO_ALLOW_NATIVE_SETUP", "false");
+  await expect(
+    enrollNative({
+      collectorId: "native-collector-test",
+      keyId: "native-key-test",
+      providerId: "antigravity",
+      name: "Native Test Collector",
+    }),
+  ).rejects.toThrow("Native enrollment requires explicit authorization");
+
+  // Fails on conflicting evidence mode (reusing fixture-collector for native)
+  vi.stubEnv("BMO_ALLOW_NATIVE_SETUP", "true");
+  await expect(
+    enrollNative({
+      collectorId: "fixture-collector",
+      keyId: "new-key",
+      providerId: "antigravity",
+      name: "Conflicting Mode",
+    }),
+  ).rejects.toThrow("Collector evidence mode conflict");
+});
+

@@ -6,8 +6,8 @@ import { DeviceEditor } from "@/components/device/device-editor";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
-  title: "Devices | BMO Personal",
-  description: "Configure ordered BMO display screens.",
+  title: "Thiết bị | BMO Personal",
+  description: "Cấu hình thứ tự màn hình hiển thị BMO.",
 };
 
 export default async function DevicesPage() {
@@ -15,18 +15,18 @@ export default async function DevicesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Devices"
-        title="BMO displays"
-        description="Arrange the local display configuration and preview it at OLED dimensions. Saving settings does not confirm broker delivery or hardware connectivity."
+        eyebrow="Thiết bị"
+        title="Màn hình hiển thị BMO"
+        description="Sắp xếp cấu hình hiển thị cục bộ và xem trước theo kích thước màn hình OLED. Việc lưu cài đặt không xác nhận việc truyền tải qua broker hay khả năng kết nối phần cứng."
       />
       <Card className="mb-5 border-dashed shadow-none">
         <CardHeader>
-          <CardTitle className="text-base">Display connection status</CardTitle>
+          <CardTitle className="text-base">Trạng thái kết nối màn hình</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            MQTT broker delivery, device reachability, and physical display
-            output are not implemented or verified.
+            Việc truyền dữ liệu qua MQTT broker, khả năng tiếp cận thiết bị và đầu ra màn hình
+            vật lý chưa được triển khai hoặc xác minh.
           </p>
         </CardContent>
       </Card>
@@ -40,7 +40,7 @@ export default async function DevicesPage() {
         className="mt-5 inline-block text-sm font-medium underline underline-offset-4"
         href="/status"
       >
-        View operations status
+        Xem trạng thái vận hành
       </Link>
     </>
   );
