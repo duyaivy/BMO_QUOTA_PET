@@ -1,0 +1,111 @@
+#include "navigation.h"
+#include "mqtt_client.h"
+#include "wifi_manager.h"
+
+BMONavigationController navigation;
+
+BMONavigationController::BMONavigationController()
+    : _mode(UIMode::PET_FACE),
+      _quotaIndex(0),
+      _endOfListEnteredAt(0) {}
+
+void BMONavigationController::begin() {
+    _mode = UIMode::PET_FACE;
+    _quotaIndex = 0;
+    Serial.println("[NAV] Navigation initialized. Default mode: BMO Face (Pet Home)");
+}
+
+void BMONavigationController::update() {
+    buttonManager.update();
+
+    if (buttonManager.wasClicked(ButtonId::BUTTON_A)) {
+        handleButtonA();
+    }
+
+    if (buttonManager.wasClicked(ButtonId::BUTTON_B)) {
+        handleButtonB();
+    }
+
+    // Optional: Auto-wrap or auto-return from END_OF_LIST after timeout if configured
+    if (_mode == UIMode::END_OF_LIST) {
+        if (END_OF_LIST_AUTO_WRAP_MS > 0 && millis() - _endOfListEnteredAt > END_OF_LIST_AUTO_WRAP_MS) {
+            Serial.println("[NAV] End of list timeout reached. Returning to first quota screen.");
+            _mode = UIMode::QUOTA_VIEW;
+            _quotaIndex = 0;
+        }
+    }
+}
+
+void BMONavigationController::handleButtonA() {
+    if (_mode == UIMode::PET_FACE) {
+        // Already on Face screen: cycle to next face expression (1 to 6)
+        faceRenderer.nextFace();
+        Serial.printf("[NAV] Button A pressed: Cycled face to '%s' (%d/%d)\n",
+                      faceRenderer.getFaceName(faceRenderer.getCurrentFace()),
+                      (int)faceRenderer.getCurrentFace() + 1,
+                      FACE_COUNT);
+    } else {
+        // In Quota view or End-of-List: switch back to BMO Face mode
+        _mode = UIMode::PET_FACE;
+        Serial.println("[NAV] Button A pressed: Switched to BMO Face mode.");
+    }
+}
+
+void BMONavigationController::handleButtonB() {
+    uint8_t totalQuotaScreens = mqttClient.getQuotaScreenCount();
+
+    if (_mode == UIMode::PET_FACE) {
+        // Switched from Face mode to Quota mode
+        if (totalQuotaScreens == 0) {
+            _mode = UIMode::QUOTA_VIEW;
+            _quotaIndex = 0;
+            Serial.println("[NAV] Button B pressed: Entering Quota mode (no quota configured).");
+        } else {
+            _mode = UIMode::QUOTA_VIEW;
+            _quotaIndex = 0;
+            Serial.printf("[NAV] Button B pressed: Showing Quota screen [1/%d]\n", totalQuotaScreens);
+        }
+    } else if (_mode == UIMode::QUOTA_VIEW) {
+        if (totalQuotaScreens <= 1) {
+            // Only 1 or 0 screens: immediate transition to End of List
+            _mode = UIMode::END_OF_LIST;
+            _endOfListEnteredAt = millis();
+            _quotaIndex = 0;
+            Serial.println("[NAV] Button B pressed: Reached end of quota screens. Showing END_OF_LIST screen.");
+        } else {
+            _quotaIndex++;
+            if (_quotaIndex >= totalQuotaScreens) {
+                // Reached the end of quota list!
+                _mode = UIMode::END_OF_LIST;
+                _endOfListEnteredAt = millis();
+                _quotaIndex = 0;
+                Serial.println("[NAV] Button B pressed: Reached end of quota screens. Showing END_OF_LIST screen.");
+            } else {
+                Serial.printf("[NAV] Button B pressed: Showing Quota screen [%d/%d]\n",
+                              _quotaIndex + 1, totalQuotaScreens);
+            }
+        }
+    } else if (_mode == UIMode::END_OF_LIST) {
+        // Button B pressed again on End of List: loop back to first quota screen
+        _mode = UIMode::QUOTA_VIEW;
+        _quotaIndex = 0;
+        Serial.println("[NAV] Button B pressed on End of List: Restarting from Quota screen [1].");
+    }
+}
+
+void BMONavigationController::render() {
+    switch (_mode) {
+        case UIMode::PET_FACE:
+            faceRenderer.render(display.getDriver());
+            display.update();
+            break;
+
+        case UIMode::QUOTA_VIEW:
+            quotaRenderer.renderQuotaScreen(_quotaIndex, connManager.isWifiConnected(), mqttClient.isConnected());
+            break;
+
+        case UIMode::END_OF_LIST:
+            display.showEndOfListScreen();
+            break;
+    }
+}

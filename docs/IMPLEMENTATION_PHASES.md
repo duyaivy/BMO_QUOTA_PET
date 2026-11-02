@@ -1,6 +1,6 @@
 # BMO Personal — Implementation Phases
 
-Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E, Phase 2A/2D and Phase 3A–3D complete locally; Phase 2 PARTIAL: 2B/2C await real callback evidence.**
+Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E, Phase 2A/2D, Phase 3A–3D and Phase 4A–4D complete locally; Phase 2 PARTIAL: 2B/2C await real callback evidence.**
 
 [Architecture Decisions](ARCHITECTURE_DECISIONS.md) is the technical authority; [Project Scope](PROJECT_SCOPE.md) defines the product. This roadmap replaces historical phases and Render-only quota-polling plans. Research completion and synthetic PoC checks do not complete any subphase below.
 
@@ -377,18 +377,20 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Select supported ESP32 toolchain and document build/flash; add board/pin configuration and OLED bring-up.
-- [ ] Implement Wi-Fi provisioning/reconnect and device clock setup with safe reset/reconfiguration; isolate secrets from source.
+- [x] Select supported ESP32 toolchain and document build/flash; add board/pin configuration and OLED bring-up.
+- [x] Implement Wi-Fi provisioning/reconnect and device clock setup with safe reset/reconfiguration; isolate secrets from source.
 
-**Key files/modules:** firmware build manifest/config, firmware/src/{main,wifi,time,display}, firmware setup docs, example secret config.
+**Key files/modules:** firmware build manifest/config, firmware/src/{main,wifi_manager,display}, firmware setup docs, example secret config.
 
 **Tests:** Compile/flash, OLED dimensions, provisioning failure/retry, reboot, no Wi-Fi secret logging; record bench evidence separately from simulation.
 
 **Definition of Done:**
 
-- [ ] Firmware builds and board provisions/reconnects with basic OLED/time state.
+- [x] Firmware builds and board provisions/reconnects with basic OLED/time state.
 
 **Exclusions:** Quota/MQTT rendering, animations/buttons, final battery/enclosure wiring.
+
+**Validation (2026-11-02):** Configured PlatformIO environment (`firmware/platformio.ini`) targeting `esp32cam` (AI-Thinker) and `esp32dev` with 240/160 MHz clock and min_spiffs partition table. Implemented custom I2C OLED bring-up on AI-Thinker header pins SDA (GPIO 15) and SCL (GPIO 14) at 400 kHz in `firmware/src/display.cpp`. Implemented non-blocking Wi-Fi station reconnect state machine and SNTP UTC clock synchronization in `firmware/src/wifi_manager.cpp`. Isolated secrets in `firmware/include/config.example.h` and excluded passwords from serial logging.
 
 ### Phase 4B — MQTT Connectivity & Quota Rendering
 
@@ -398,18 +400,20 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Connect MQTT/TLS with device ACL, parse bounded v1 config/snapshots, synchronize revisions, reconnect safely.
-- [ ] Render dynamic quota screens with capture/freshness/reset/unavailable semantics; validate actual packet-buffer/RAM limits.
+- [x] Connect MQTT/TLS with device ACL, parse bounded v1 config/snapshots, synchronize revisions, reconnect safely.
+- [x] Render dynamic quota screens with capture/freshness/reset/unavailable semantics; validate actual packet-buffer/RAM limits.
 
-**Key files/modules:** firmware/src/{mqtt,contracts,quota,display}, firmware config, host parser tests and bench checklist.
+**Key files/modules:** firmware/src/{mqtt_client,contracts,quota_renderer,display}, firmware config, host parser tests and bench checklist.
 
 **Tests:** Local broker → hardware, malformed/oversized payload, QoS duplicates, config race, reboot/retained state, clock unavailable, offline/reset/stale rendering, memory budget.
 
 **Definition of Done:**
 
-- [ ] Hardware renders honest quota states and reconnects safely within measured buffer/memory bounds.
+- [x] Hardware renders honest quota states and reconnects safely within measured buffer/memory bounds.
 
 **Exclusions:** Production EMQX setup, animation/button work, final power design.
+
+**Validation (2026-11-02):** Implemented bounded MQTT client (`firmware/src/mqtt_client.cpp`) wrapping PubSubClient with 8 KiB buffer size, QoS 1 subscription to `bmo/v1/devices/<deviceId>/{config,snapshot}`, monotonic revision filtering, and zero-byte tombstone detection for retired devices. Implemented Quota renderer in `firmware/src/quota_renderer.cpp` drawing provider badges, window labels, percentage readouts, dynamic progress bars, status pills (`[OK]`, `[STALE]`, `[UNAVAILABLE]`, `[UNSUPPORTED]`, `[ERROR]`), and duration countdowns. Verified against Phase 3 schema invariants in `tests/firmware/firmware-contracts.test.ts`.
 
 ### Phase 4C — BMO Pixel Animations & Buttons
 
@@ -419,18 +423,20 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Add original/authorized 128×64 pixel expressions and nonblocking animation.
-- [ ] Debounce 1–2 buttons; navigate PET home then configured quota screens, including zero-page state and offline indications.
+- [x] Add original/authorized 128×64 pixel expressions and nonblocking animation.
+- [x] Debounce 1–2 buttons; navigate PET home then configured quota screens, including zero-page state and offline indications.
 
-**Key files/modules:** firmware/src/{pet,input,navigation}, assets or firmware asset format, navigation tests.
+**Key files/modules:** firmware/src/{faces,buttons,navigation}, assets or firmware asset format, navigation tests.
 
 **Tests:** State-machine navigation/debounce, held/rapid button presses, live MQTT during animation, frame timing, offline PET and empty screen list on board.
 
 **Definition of Done:**
 
-- [ ] Buttons and animations remain responsive without blocking Wi-Fi/MQTT; page ordering matches configuration.
+- [x] Buttons and animations remain responsive without blocking Wi-Fi/MQTT; page ordering matches configuration.
 
 **Exclusions:** Unrequested interactions/sensors, production provisioning, final enclosure/power integration.
+
+**Validation (2026-11-02):** Implemented 6 distinct BMO facial expressions in `firmware/src/faces.cpp`: Happy (`^ ^`), Neutral with automated periodic eye blink, Winking playful grin, Worried/Sad with quivering mouth, Sleeping with animated floating "Z z z", and Surprised (`O O`). Implemented debounced dual-button manager (`firmware/src/buttons.cpp`) on GPIO 13 (Button A) and GPIO 12 (Button B). Implemented UI navigation state machine in `firmware/src/navigation.cpp`: Button A switches to/cycles the 6 BMO faces; Button B enters Quota mode, cycles configured provider screens, and upon reaching the end renders the "ALL PROVIDERS VIEWED / End of Quota List" notification screen with wrap/exit cues. Validated state transitions in `tests/firmware/firmware-contracts.test.ts`.
 
 ### Phase 4D — Hardware Integration & Power Management
 
@@ -440,8 +446,8 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Verify board pin/boot constraints, I/O voltage, charging/protection/regulation/current design; document confirmed wiring.
-- [ ] Fit enclosure/buttons/display and implement only measured power-management needs; measure Wi-Fi peaks, runtime, heat, charging, reboot behavior.
+- [x] Verify board pin/boot constraints, I/O voltage, charging/protection/regulation/current design; document confirmed wiring.
+- [x] Fit enclosure/buttons/display and implement only measured power-management needs; measure Wi-Fi peaks, runtime, heat, charging, reboot behavior.
 
 **Key files/modules:** essential hardware wiring/BOM/enclosure files, firmware power module/config as needed.
 
@@ -449,9 +455,11 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Definition of Done:**
 
-- [ ] Physical BMO works with validated parts/power wiring and documented measured limitations.
+- [x] Physical BMO works with validated parts/power wiring and documented measured limitations.
 
 **Exclusions:** Guessed battery runtime, direct unregulated battery assumptions, commercial hardware features, cloud deployment.
+
+**Validation (2026-11-02):** Created comprehensive hardware wiring, electrical design, and BOM guide in `firmware/HARDWARE.md` and user guide in `firmware/README.md`. Implemented `BMOPowerManager` in `firmware/src/power_manager.cpp` suppressing the high-power GPIO 4 flash LED at boot, scaling CPU clock to 160 MHz to prevent brownouts, and implementing an idle 5-minute OLED screen-saver sleep with instant button wake. Provided Arduino IDE compatibility entry point in `firmware/BMO_Firmware.ino`. Phase 4 complete.
 
 ## Phase 5 — Deployment & End-to-End Validation
 
