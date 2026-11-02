@@ -1,6 +1,6 @@
 # BMO Personal — Implementation Phases
 
-Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E and Phase 2A/2D complete locally; Phase 2 PARTIAL: 2B/2C await real callback evidence.**
+Owner-approved roadmap reset · 2026-10-31 · **Phase 1A–1E, Phase 2A/2D and Phase 3A–3D complete locally; Phase 2 PARTIAL: 2B/2C await real callback evidence.**
 
 [Architecture Decisions](ARCHITECTURE_DECISIONS.md) is the technical authority; [Project Scope](PROJECT_SCOPE.md) defines the product. This roadmap replaces historical phases and Render-only quota-polling plans. Research completion and synthetic PoC checks do not complete any subphase below.
 
@@ -282,8 +282,8 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Implement config/snapshot contracts, device-specific topics, revisions, freshness fields, encoded-byte bounds, TLS/QoS 1/retained publish adapter.
-- [ ] Verify EMQX-compatible MQTT behavior against a local broker; publisher remains a tested primitive until transactional outbox integration in 3B.
+- [x] Implement config/snapshot contracts, device-specific topics, revisions, freshness fields, encoded-byte bounds, TLS/QoS 1/retained publish adapter.
+- [x] Verify EMQX-compatible MQTT behavior against a local broker; publisher remains a tested primitive until transactional outbox integration in 3B.
 
 **Key files/modules:** src/contracts/mqtt, src/server/mqtt/{config,publisher,projection}, tests/mqtt and local broker fixture.
 
@@ -291,9 +291,11 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Definition of Done:**
 
-- [ ] Versioned payloads and bounded publisher pass broker/transport tests without production credentials.
+- [x] Versioned payloads and bounded publisher pass broker/transport tests without production credentials.
 
 **Exclusions:** Production EMQX provisioning, durable retry integration, device credential enrollment, firmware.
+
+**Validation (2026-11-02):** Implemented strict Zod contracts in `src/contracts/mqtt/index.ts` (Config v1 and Snapshot v1), topic builders/parsers (`bmo/v1/devices/<deviceId>/{config,snapshot}`), 8 KiB payload bounds check, and dynamic snapshot projection in `src/server/mqtt/projection.ts`. Implemented zero-dependency EMQX-compatible MQTT 3.1.1 publisher in `src/server/mqtt/publisher.ts` with QoS 1, retained message flag, variable header integer encoding, PUBACK acknowledgement verification, and bounded connect/publish deadlines. Local broker fixture in `tests/fixtures/mqtt-broker.ts` and test suites in `tests/mqtt/{contracts,publisher,projection}.test.ts` verify schema validation, 8 KiB size limits, connection timeouts, broker refusal, and PUBACK verification.
 
 ### Phase 3B — MQTT Outbox & Retry Handling
 
@@ -303,9 +305,9 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Add outbox/lease schema; allocate revisions and exact payload in state transactions.
-- [ ] Drain bounded work after ingestion/config and through authenticated maintenance; add backoff, safe supersession, PUBACK diagnostics, crash/lease recovery, retained-state reconciliation.
-- [ ] Keep scheduler deployment deferred; invoke maintenance locally with a separate development secret.
+- [x] Add outbox/lease schema; allocate revisions and exact payload in state transactions.
+- [x] Drain bounded work after ingestion/config and through authenticated maintenance; add backoff, safe supersession, PUBACK diagnostics, crash/lease recovery, retained-state reconciliation.
+- [x] Keep scheduler deployment deferred; invoke maintenance locally with a separate development secret.
 
 **Key files/modules:** src/server/mqtt/outbox and drain, src/server/maintenance, internal maintenance route, DB migrations, integration tests.
 
@@ -313,9 +315,11 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Definition of Done:**
 
-- [ ] Pending work survives restarts; duplicates are safe; latest retained state reconciles after ambiguous publication; no exactly-once claims.
+- [x] Pending work survives restarts; duplicates are safe; latest retained state reconciles after ambiguous publication; no exactly-once claims.
 
 **Exclusions:** Production cron/EMQX configuration, always-on workers, firmware acknowledgments.
+
+**Validation (2026-11-02):** Added migration `drizzle/0005_mqtt_outbox.sql` with table `mqtt_outbox`, unique `(device_id, topic, revision)` constraint, and lease columns on `operational_state`. Implemented transactional outbox allocation and safe supersession in `src/server/mqtt/outbox.ts`. Implemented atomic lease CAS drain with crashed worker recovery and exponential backoff in `src/server/mqtt/drain.ts`. Connected quota ingestion in `src/server/ingestion/index.ts` to atomically enqueue device snapshot outbox messages on accepted observation. Added authenticated maintenance cron handler in `src/server/maintenance/index.ts` and `POST /api/internal/maintenance`. Test suites in `tests/mqtt/{outbox,drain}.test.ts` and `tests/maintenance/maintenance.test.ts` cover safe supersession, atomic lease locking, backoff retry scheduling, crashed worker recovery, and maintenance state pruning.
 
 ### Phase 3C — Device Registration & Configuration
 
@@ -325,8 +329,8 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Finish protected device CRUD/enabled state, stable IDs, optimistic config revisions, scoped broker provisioning instructions and server-only secret separation.
-- [ ] Connect config changes to outbox; retirement queues retained tombstones and preserves cleanup/revocation obligations.
+- [x] Finish protected device CRUD/enabled state, stable IDs, optimistic config revisions, scoped broker provisioning instructions and server-only secret separation.
+- [x] Connect config changes to outbox; retirement queues retained tombstones and preserves cleanup/revocation obligations.
 
 **Key files/modules:** src/server/devices, protected device handlers/actions, src/app/devices, DB migrations, config/outbox tests.
 
@@ -334,9 +338,11 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Definition of Done:**
 
-- [ ] Device configuration persists and publishes through outbox; lifecycle/isolation tests pass; provisioning boundaries are documented.
+- [x] Device configuration persists and publishes through outbox; lifecycle/isolation tests pass; provisioning boundaries are documented.
 
 **Exclusions:** Production broker account creation, firmware/provisioning on hardware, screen UX refinements in 3D.
+
+**Validation (2026-11-02):** Extended `src/server/devices/repository.ts` with multi-device listing, creation, and retirement. Connected `saveDevice` and `createDevice` to atomically enqueue config and snapshot outbox messages. Connected `retireDevice` to enqueue retained zero-byte tombstones for both config and snapshot topics. Added `getDeviceProvisioningInfo` and `/api/devices/{provisioning,create,retire}` routes with strict secret isolation. Updated `src/app/(protected)/devices/page.tsx` with MQTT provisioning info and security notices. Test suite in `tests/devices/lifecycle.test.ts` verifies device CRUD, optimistic revision conflict rejection, tombstone enqueuing, and zero secret leakage.
 
 ### Phase 3D — Screen Ordering, Retained State & Integration Testing
 
@@ -346,8 +352,8 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Implementation scope:**
 
-- [ ] Complete PET-first ordering, zero-or-more quota pages, stable window selection, byte/count enforcement, preview/config integration.
-- [ ] Test matching configRevision, duplicate/out-of-order delivery, retained reconnect/reboot, stale expiry, unknown windows, retired-device cleanup with a simulated device.
+- [x] Complete PET-first ordering, zero-or-more quota pages, stable window selection, byte/count enforcement, preview/config integration.
+- [x] Test matching configRevision, duplicate/out-of-order delivery, retained reconnect/reboot, stale expiry, unknown windows, retired-device cleanup with a simulated device.
 
 **Key files/modules:** device screen editor/preview, MQTT projections/contracts, tests/integration device subscriber simulator.
 
@@ -355,9 +361,11 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 **Definition of Done:**
 
-- [ ] Ordered configuration and latest retained quota are consumed correctly by simulator, including stale/unsupported/reconnect cases.
+- [x] Ordered configuration and latest retained quota are consumed correctly by simulator, including stale/unsupported/reconnect cases.
 
 **Exclusions:** Physical ESP32 claims, production service deployment.
+
+**Validation (2026-11-02):** Implemented `SimulatedDevice` subscriber fixture in `tests/fixtures/device-simulator.ts` modeling ESP32 MQTT parsing, screen ordering, configRevision matching, stale expiry calculation, missing window fallback, and reboot state recovery. Implemented full end-to-end integration test in `tests/integration/mqtt-pipeline.test.ts` covering: config save -> outbox -> drain -> broker -> simulator rendering; usage ingestion -> outbox snapshot -> drain -> broker -> simulator updated percentage; device reboot and RAM-wipe recovery from retained messages; clock advance and stale transitions; and device retirement via tombstones. Zero physical ESP32 or production EMQX claims. Phase 3 complete locally.
 
 ## Phase 4 — ESP32 Firmware & Physical BMO
 

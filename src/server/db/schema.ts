@@ -209,6 +209,9 @@ export const operationalState = sqliteTable("operational_state", {
   resource: text("resource").primaryKey(),
   updatedAt: integer("updated_at").notNull(),
   lastCode: text("last_code"),
+  leaseOwner: text("lease_owner"),
+  leaseExpiresAt: integer("lease_expires_at"),
+  generation: integer("generation").default(0),
 });
 
 export const devices = sqliteTable("devices", {
@@ -254,4 +257,37 @@ export const collectorHealth = sqliteTable(
     payload: text("payload").notNull(),
   },
   (table) => [primaryKey({ columns: [table.collectorId, table.providerId] })],
+);
+
+export const mqttOutbox = sqliteTable(
+  "mqtt_outbox",
+  {
+    id: text("id").primaryKey(),
+    deviceId: text("device_id")
+      .notNull()
+      .references(() => devices.deviceId),
+    topic: text("topic").notNull(),
+    revision: integer("revision").notNull(),
+    payload: text("payload").notNull(),
+    isTombstone: integer("is_tombstone", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    semanticHash: text("semantic_hash").notNull(),
+    state: text("state").notNull(), // 'pending' | 'in_flight' | 'published' | 'failed' | 'superseded'
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: integer("next_attempt_at").notNull(),
+    acknowledgedAt: integer("acknowledged_at"),
+    lastError: text("last_error"),
+    createdAt: integer("created_at").notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("mqtt_outbox_device_topic_rev_unique").on(
+      table.deviceId,
+      table.topic,
+      table.revision,
+    ),
+    index("mqtt_outbox_due_idx").on(table.state, table.nextAttemptAt),
+    index("mqtt_outbox_device_topic_idx").on(table.deviceId, table.topic),
+  ],
 );

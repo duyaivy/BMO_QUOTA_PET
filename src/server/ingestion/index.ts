@@ -14,6 +14,7 @@ import {
   type QuotaWindow,
 } from "@/contracts/usage";
 import { writeTransaction } from "@/server/db";
+import { enqueueDeviceSnapshot } from "@/server/mqtt/outbox";
 import { parseStrictJson } from "./json";
 
 const PATH = "/api/internal/usage/ingest";
@@ -323,6 +324,19 @@ async function persist(
             event.providerId,
           ],
         });
+        if (outcome === "accepted") {
+          const matchingDevices = (
+            await tx.execute({
+              sql: `SELECT DISTINCT d.device_id FROM devices d
+                    JOIN device_screens s ON s.device_id = d.device_id
+                    WHERE d.enabled = 1 AND s.provider_id = ?`,
+              args: [event.providerId],
+            })
+          ).rows;
+          for (const dev of matchingDevices) {
+            await enqueueDeviceSnapshot(tx, String(dev.device_id), now);
+          }
+        }
       }
     }
     if (event.kind === "heartbeat" && event.health) {

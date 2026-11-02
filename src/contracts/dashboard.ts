@@ -25,6 +25,7 @@ export const screenSchema = z.discriminatedUnion("kind", [
 export type DeviceScreen = z.infer<typeof screenSchema>;
 export const deviceChangeSchema = z
   .object({
+    deviceId: safeId.default("bmo-local"),
     expectedRevision: z.number().int().positive().safe(),
     name: z.string().trim().min(1).max(80),
     screens: z.array(screenSchema).min(1).max(16),
@@ -42,6 +43,30 @@ export const deviceChangeSchema = z
       value.screens.length,
     "ID màn hình phải là duy nhất",
   );
+
+export const deviceCreateSchema = z
+  .object({
+    deviceId: safeId,
+    name: z.string().trim().min(1).max(80),
+  })
+  .strict();
+
+export const deviceRetireSchema = z
+  .object({
+    deviceId: safeId,
+    expectedRevision: z.number().int().positive().safe(),
+  })
+  .strict();
+
+export type DeviceProvisioning = {
+  deviceId: string;
+  configTopic: string;
+  snapshotTopic: string;
+  subscribeAcl: string;
+  brokerHost: string;
+  brokerPort: number;
+  instructions: string;
+};
 export type DeviceConfig = {
   deviceId: string;
   name: string;

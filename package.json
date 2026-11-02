@@ -22,7 +22,8 @@
     "fixture:enroll": "node --conditions=react-server --import tsx scripts/enroll-fixture.ts",
     "collector": "tsx collector/src/cli.ts",
     "collector:native": "tsx collector/src/native-cli.ts",
-    "collector:enroll": "node --conditions=react-server --import tsx scripts/enroll-native.ts"
+    "collector:enroll": "node --conditions=react-server --import tsx scripts/enroll-native.ts",
+    "enroll:native": "BMO_ALLOW_NATIVE_SETUP=true node --conditions=react-server --import tsx scripts/enroll-native.ts native-collector-agy native-key-agy antigravity"
   },
   "dependencies": {
     "@libsql/client": "0.18.0",
