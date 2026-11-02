@@ -1,80 +1,187 @@
 # BMO Personal
 
-Next.js App Router application for one owner's quota companion. Phase 1A–1E is complete and verified locally: owner authentication, signed synthetic ingestion, a durable local fixture collector, persisted quota/collector views and PET-first display configuration. Codex 0.163.0 read-only session observation is verified locally; Claude/Antigravity live callbacks remain unverified. Phase 2 also supplies opt-in wrappers, bounded health reporting and a LaunchAgent template. No provider credentials, native CLI configuration, production infrastructure, MQTT, or firmware are used in Phase 1.
+> Personal subscription-quota monitoring companion for Codex, Claude Code, and Antigravity, featuring honest freshness tracking, durable local ingestion, transactional MQTT delivery, and an ESP32 desk pet display.
 
-## Local setup
+---
 
-Use Node.js **24.18.0** (`.nvmrc`) and pnpm **11.24.0** (`packageManager`). Dependencies and native build approvals are pinned in the manifest, lockfile, and workspace file.
+## 1. Overview
+
+**BMO Personal** monitors subscription quota observations from the owner's official local developer CLIs (Codex, Claude Code, and Antigravity) without extracting credentials or scraping private web sessions. Observations are normalized, cryptographically signed, and ingested into a local Next.js fullstack cloud application backed by Turso (SQLite/libSQL). 
+
+A transactional **MQTT Outbox** publishes versioned retained snapshots to an EMQX broker, where a physical ESP32 OLED desk pet receives and displays real-time quota progress and pixel animations.
+
+### Core Principles & Architecture
+- **Single Owner:** Password-only administration via Argon2id + sealed revocable `iron-session` cookie. No public registration or multi-tenant complexity.
+- **Honest Freshness:** Delivery timestamp does not equal observation timestamp. Missing quota is labeled `unavailable`, expired reset periods are marked `stale`, and unverified providers are never fabricated.
+- **Local Credential Privacy:** Official CLIs manage provider credentials. BMO collector code never touches provider token stores or calls upstream LLM APIs.
+- **Transactional Outbox Pattern:** Device state changes and accepted telemetry atomically queue versioned messages in `mqtt_outbox`. A bounded lease-based drain handles delivery, backoff, and crashed-worker recovery with zero untracked background promises.
+- **Strict Device Secret Isolation:** ESP32 devices connect using per-device subscribe ACLs (`bmo/v1/devices/<deviceId>/#`). Server-only MQTT publisher keys and administrative secrets are never delivered to or stored on personal devices.
+
+---
+
+## 2. Project Status & Roadmap
+
+| Phase | Description | Status | Verification Summary |
+|---|---|---|---|
+| **Phase 1** | Fullstack Foundation & Synthetic Collector MVP | **Complete** | Next.js 16 App Router, Tailwind CSS, shadcn/ui, libSQL migrations, HMAC signed ingestion, 60 Node + 12 Chrome tests passed. |
+| **Phase 2** | Real Provider Integration & Local Automation | **Partial (2A/2D Complete)** | **2A** verified with native Codex 0.163.0 JSONL session capture. **2D** reliability and LaunchAgent template verified. **2B/2C** parser and private spool implemented; awaiting live owner callback evidence. |
+| **Phase 3** | MQTT & Device Configuration | **Complete** | Versioned contracts (8 KiB ceiling), native MQTT 3.1.1 publisher, transactional outbox (`0005_mqtt_outbox.sql`), lease-based drain, device CRUD, retirement tombstones, and ESP32 subscriber simulation. |
+| **Phase 4** | ESP32 Firmware & Physical BMO | *Next* | ESP32-CAM Wi-Fi provisioning, SSD1306 128×64 OLED quota screens, animations, and buttons. |
+| **Phase 5** | Cloud Deployment & End-to-End Release | *Upcoming* | Render web service, production Turso, EMQX Cloud broker, external maintenance cron, and end-to-end reliability verification. |
+
+---
+
+## 3. Prerequisites & Local Setup
+
+### Requirements
+- **Node.js:** `24.18.0` (managed via `.nvmrc`)
+- **pnpm:** `11.24.0` (pinned in `package.json`)
+
+### Installation
 
 ```sh
+# 1. Clone and install dependencies with frozen lockfile
 pnpm install --frozen-lockfile
+
+# 2. Copy local environment template
 cp .env.example .env.local
 ```
 
-Set `SESSION_SECRET` to an independent random secret of at least 32 characters (hex avoids dotenv interpolation). Generate the hash without putting a plaintext password in shell history:
+### Environment Configuration
 
-```sh
-python3 -c 'import getpass,sys; sys.stdout.write(getpass.getpass("Owner password: "))' | pnpm exec tsx scripts/auth-hash.ts
-```
+1. Generate a secure random session secret (minimum 32 characters):
+   ```sh
+   openssl rand -hex 32
+   ```
+   Set `SESSION_SECRET` in `.env.local`.
 
-Paste the emitted `ADMIN_PASSWORD_HASH=...` line into `.env.local`. Its dollar signs are escaped for Next's dotenv expansion; preserve those escapes. Explicit process configuration is preserved by the setup/server scripts. Then run `pnpm db:migrate` and `pnpm dev`. Keep the hash and secret in the ignored `.env.local`. Provider passwords/tokens are never requested. `TURSO_DATABASE_URL=file:./.data/bmo.db` uses local libSQL; no cloud account is needed. `BMO_APP_ORIGIN` must exactly match the browser origin. `BMO_ALLOW_LOCAL_DATABASE=true` explicitly permits local database use when serving a production build with `pnpm start`. Local disk is for development; deployment durability remains Turso's responsibility.
+2. Generate an Argon2id password hash for the owner account:
+   ```sh
+   python3 -c 'import getpass,sys; sys.stdout.write(getpass.getpass("Owner password: "))' | pnpm exec tsx scripts/auth-hash.ts
+   ```
+   Paste the emitted `ADMIN_PASSWORD_HASH=...` line into `.env.local` (preserve escaped `$` characters).
 
-The Phase 1 gate passed: frozen workspace install, typecheck, zero-warning lint, formatting, production build, **60 Node tests and 12 Chrome tests**, plus development-server smoke verification. The crash/restart test kills a disposable collector process after its durable commit and verifies event, checkpoint and sequence recovery. See [the roadmap](docs/IMPLEMENTATION_PHASES.md) for exact subphase evidence. That Phase 1 evidence is synthetic/local. Phase 2A additionally captured new ordinary-session Codex quota through signed local ingestion and Chrome dashboard rendering; upstream freshness remained unknown. See [native setup](collector/README.md) and the roadmap for current evidence and remaining callback gates.
+3. Apply database migrations to local libSQL:
+   ```sh
+   pnpm db:migrate
+   ```
 
-## Commands
+4. Start the local development server:
+   ```sh
+   pnpm dev
+   ```
+   Access the dashboard at `http://127.0.0.1:3000`.
 
-| Command                             | Purpose                                                 |
-| ----------------------------------- | ------------------------------------------------------- |
-| `pnpm dev`                          | Loopback development server, port 3000                  |
-| `pnpm db:migrate`                   | Apply reviewed local database migrations                |
-| `pnpm typecheck`                    | Next.js route types and strict TypeScript               |
-| `pnpm lint`                         | ESLint, zero warnings                                   |
-| `pnpm format:check` / `pnpm format` | Check/apply formatting                                  |
-| `pnpm build` / `pnpm start`         | Build/serve production locally                          |
-| `pnpm test:unit`                    | Node Vitest behavior and persistence checks             |
-| `pnpm test:integration`             | Playwright against a disposable local production server |
+---
 
-Build before browser tests. Install matching Chromium with `pnpm exec playwright install chromium` or use installed Chrome:
+## 4. Environment Variables Reference
 
+| Variable | Required | Default / Example | Purpose |
+|---|---|---|---|
+| `BMO_APP_ORIGIN` | Yes | `http://127.0.0.1:3000` | Canonical application origin for CSRF and cookie validation |
+| `TURSO_DATABASE_URL` | Yes | `file:./.data/bmo.db` | libSQL local database file or remote `libsql://` Turso URL |
+| `TURSO_AUTH_TOKEN` | Remote only | `""` | Auth token for remote Turso database |
+| `ADMIN_PASSWORD_HASH` | Yes | Argon2id string | Encoded Argon2id hash of owner administration password |
+| `SESSION_SECRET` | Yes | 32+ char string | Random secret used for sealing `iron-session` cookies |
+| `BMO_ALLOW_LOCAL_DATABASE` | Optional | `true` | Explicit opt-in for serving local file DB under `pnpm start` |
+| `BMO_INGEST_KEYS_JSON` | Yes (for Ingest) | `{"key-id":"64-char-hex"}` | Key ID to 32-byte secret map for collector HMAC authentication |
+| `MQTT_HOST` | Optional | `localhost` / `mqtt.flespi.io` | EMQX / MQTT broker host |
+| `MQTT_PORT` | Optional | `8883` (TLS) or `1883` | MQTT broker port |
+| `MQTT_USERNAME` | Optional | `""` | Server-only MQTT publisher username |
+| `MQTT_PASSWORD` | Optional | `""` | Server-only MQTT publisher password |
+| `MQTT_USE_TLS` | Optional | `true` | Force TLS on/off for broker connection |
+| `BMO_MAINTENANCE_SECRET` | Optional | `""` | Bearer token for authenticating `POST /api/internal/maintenance` |
+
+---
+
+## 5. Development & Testing Commands
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start loopback development server on port 3000 |
+| `pnpm build` | Production build using supported Webpack compiler |
+| `pnpm start` | Run production server locally via loopback proxy entrypoint (`scripts/serve.ts`) |
+| `pnpm db:migrate` | Apply incremental checksummed migrations from `drizzle/` |
+| `pnpm typecheck` | Generate Next.js route types and verify strict TypeScript |
+| `pnpm lint` | Run ESLint with zero-warning threshold |
+| `pnpm format:check` | Verify Prettier formatting across source and documentation |
+| `pnpm format` | Apply Prettier code formatting |
+| `pnpm test:unit` | Run all Vitest unit and integration tests (MQTT, DB, Ingestion, Collector) |
+| `pnpm test:integration` | Run Playwright browser suite on port 3100 (build first) |
+| `pnpm collector` | Run local CLI fixture collector foreground uploader |
+| `pnpm collector:native` | Run native statusline collector uploader |
+
+### Running Browser Tests
 ```sh
 pnpm build
-PLAYWRIGHT_CHANNEL=chrome pnpm test:integration
+pnpm exec playwright install chromium
+pnpm test:integration
 ```
 
-The browser suite owns port 3100, creates a temporary local database and synthetic owner identity, and removes it after the server exits. It never uses local owner secrets. Do not run another server on that port. This is local integration evidence, not provider or cloud evidence.
+---
 
-## Layout and boundaries
+## 6. Repository Layout
 
-- `src/app/`: public login, five protected pages and Node auth/ingestion/settings handlers.
-- `src/components/`: responsive shell, reusable states and shadcn/ui primitives.
-- `src/contracts/`: browser-safe contracts; never imports server secrets.
-- `src/server/`: server-only config, database/auth, ingestion, quota queries and device repositories.
-- `drizzle/`: four incremental, checksummed SQLite/libSQL migrations; Drizzle schema stays alongside the repositories.
-- `collector/`: private SQLite queue/checkpoints, synthetic and opt-in native adapters, callback spool, HMAC uploader and foreground daemon.
-- `api/README.md`: local ingestion and guarded configuration contracts.
-- `tests/`: focused browser and Node integration checks.
-- `public/`: static assets; `docs/`: approved architecture and roadmap.
-
-Authentication uses a sealed HTTP-only cookie carrying an opaque handle, checked against a hashed revocable database session on each protected request. Same-origin CSRF checks apply to cookie mutations. Database/configuration errors fail closed. Login uses durable source and account limits. The same Next app's local Node entrypoint (`scripts/serve.ts`) derives the TCP peer, overwrites private source metadata, and signs it with an ephemeral process secret; arbitrary forwarded headers are ignored. There is one loopback listener. Direct `next start` omits this trusted boundary, so use the documented pnpm scripts. Before Phase 5 hosting, validate proxy topology: a proxy socket address is a coarse source, not evidence of an individual end-user address. Official local clients retain provider authentication. Missing quota is unknown, never zero.
-
-Direct dependencies are pinned. The pinned Next lint preset's older plugins declare ESLint 9 peer ranges; installation can report peer warnings while project lint requires zero warnings. Builds use system fonts and require no external font service.
-
-## Synthetic ingestion
-
-See [the local API contract and enrollment](api/README.md) for Phase 1C quota-only signed ingestion. Native collector setup uses a distinct local enrollment gate and evidence identity; provider verification remains server-owned. HTTP is allowed only for explicit loopback development; other collector destinations require HTTPS.
-
-Production builds use Next’s supported Webpack compiler. Turbopack’s internal CSS worker could not bind its port in the execution environment; the Webpack build and production HTTP/browser checks passed.
-
-## Collector and dashboard
-
-Follow [synthetic enrollment](api/README.md) and [the collector guide](collector/README.md). Copy `collector/collector.example.json` to ignored `collector.local.json`, supply a private BMO secret file, and enable only selected fixture sources with their assigned generations. From the repository root:
-
-```sh
-pnpm collector ./collector.local.json codex ./fixture.jsonl --upload
+```text
+├── drizzle/                      # Checksummed SQL migrations (0001 to 0005)
+│   ├── 0001_initial.sql          # Core settings, provider metadata, auth sessions
+│   ├── 0002_ingestion.sql        # Quota observations, windows, receipts, nonces
+│   ├── 0003_device_configuration.sql # Devices & ordered OLED screens
+│   ├── 0004_collector_health.sql # Diagnostic collector health telemetry
+│   └── 0005_mqtt_outbox.sql      # Transactional outbox & operational leases
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── (protected)/          # Protected dashboard routes (/, /devices, /collectors, /settings, /status)
+│   │   ├── api/                  # Route handlers (auth, internal ingestion, maintenance, devices)
+│   │   └── login/                # Owner login page
+│   ├── components/               # React UI components
+│   │   ├── device/               # Screen ordering editor & 128×64 OLED pixel preview
+│   │   ├── quota/                # Provider quota cards & dynamic window gauges
+│   │   └── shell/                # App shell, navigation header, status badges
+│   ├── contracts/                # Shared browser-safe schemas & DTOs
+│   │   ├── dashboard.ts          # Device configuration & dashboard views
+│   │   ├── mqtt/                 # Versioned MQTT Config & Snapshot schemas (8 KiB ceiling)
+│   │   └── usage/                # Telemetry event schemas & canonical semantic hash
+│   └── server/                   # Server-only boundary
+│       ├── auth/                 # Sealed cookie session & Argon2id verification
+│       ├── config/               # Validated server runtime environment
+│       ├── db/                   # Drizzle ORM instance, migrations runner, transaction helper
+│       ├── devices/              # Device repository, optimistic revision CAS, provisioning
+│       ├── ingestion/            # HMAC-SHA256 signature check & observation persistence
+│       ├── maintenance/          # Authenticated maintenance runner & database pruning
+│       └── mqtt/                 # MQTT 3.1.1 publisher, projection, outbox & lease drain
+├── collector/                    # Local Mac Companion Collector package
+│   ├── src/adapters/             # Codex JSONL tail, Claude statusline, Antigravity statusline
+│   ├── src/queue/                # Private SQLite spool, deduplication, retry backoff
+│   └── src/transport/            # HMAC signing & HTTPS ingestion upload
+├── tests/
+│   ├── browser/                  # Playwright browser integration specs
+│   ├── db/                       # Database migration & persistence tests
+│   ├── devices/                  # Device CRUD, revision conflict & tombstone tests
+│   ├── fixtures/                 # Mock MQTT broker & simulated ESP32 subscriber
+│   ├── ingestion/                # Telemetry ingestion & signature verification tests
+│   ├── maintenance/              # Maintenance API & state transition tests
+│   ├── mqtt/                     # MQTT contracts, publisher, projection & outbox drain tests
+│   └── integration/              # End-to-end MQTT pipeline tests
+└── docs/                         # Architecture Decision Records (ADRs) & roadmap checkpoints
 ```
 
-The foreground uploader retries immutable events and resumes durable file checkpoints; no service or native CLI configuration is installed. Provider settings toggle application acceptance, never provider login. Overview refresh reads persisted application data. Device saves persist local PET-first configuration and preview only; they do not publish MQTT or confirm hardware.
+---
 
-The two-package pnpm workspace is pinned in the lockfile. Both development and production use Webpack through the single loopback Next server. Browser tests use a disposable DB/owner/collector mapping; Node tests use separate temporary stores. Expected anonymous-access probes can appear as sanitized UNAUTHORIZED entries in Next's test-server output; access/replay assertions pass.
+## 7. MQTT & Device Protocol
 
-Phase 2 is **partial**: 2A and 2D are complete locally; 2B/2C need real Claude/Antigravity callback, quota-meter and lifecycle evidence. Final checks passed: **92 Node tests, 14 Chrome tests**, typecheck, zero-warning lint, formatting, production build and LaunchAgent syntax. Codex ordinary-session quota and health reached the final local dashboard with unknown upstream freshness. Use the disabled-by-default [native config example](collector/collector.native.example.json) and [reversible setup/automation instructions](collector/README.md). No LaunchAgent or native settings were installed automatically. Production deployment, MQTT and firmware remain later phases.
+### Topic Hierarchy
+- `bmo/v1/devices/<deviceId>/config` (QoS 1, Retained): Monotonic configuration revision containing ordered screens (PET screen fixed at index 0, followed by quota screens).
+- `bmo/v1/devices/<deviceId>/snapshot` (QoS 1, Retained): Projected quota snapshot with per-window validity deadlines (`validUntil`), reset timestamps, and dynamic percentage gauges.
+
+### Retained State & Lifecycle
+1. **Outbox Synchronization:** When configuration changes or new quota arrives, the server atomically records a new message in `mqtt_outbox`.
+2. **Lease-based Drain:** Background workers acquire an atomic lease via `operational_state` before publishing to the broker, preventing race conditions.
+3. **Firmware Reboot Recovery:** On power-up or reconnect, the ESP32 receives the latest retained messages from both topics, restoring display state without waiting for a new observation.
+4. **Device Retirement:** Retiring a device queues zero-byte tombstones with the Retained flag, purging broker retained state and prompting connected devices to enter an unconfigured idle state.
+
+---
+
+## 8. License
+
+Personal project — All rights reserved.
