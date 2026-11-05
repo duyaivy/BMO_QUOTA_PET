@@ -184,4 +184,5 @@ pnpm test:integration
 
 ## 8. License
 
-Personal project — All rights reserved.
+Personal project — All rights reserved. 
+from duyaivy with love
