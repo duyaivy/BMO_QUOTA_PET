@@ -197,11 +197,15 @@ test("device screen order persists and the 128 by 64 preview handles null and mi
   await page
     .getByLabel("Thêm màn hình hạn mức")
     .selectOption(JSON.stringify(["claude", "device.fixture"]));
-  await page.getByRole("button", { name: "Thêm màn hình", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Thêm màn hình", exact: true })
+    .click();
   await page
     .getByLabel("Thêm màn hình hạn mức")
     .selectOption(JSON.stringify(["antigravity", "device.amount"]));
-  await page.getByRole("button", { name: "Thêm màn hình", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Thêm màn hình", exact: true })
+    .click();
   const list = page.getByRole("list", { name: "Danh sách màn hình hiển thị" }),
     items = list.getByRole("listitem");
   await expect(items).toHaveCount(3);

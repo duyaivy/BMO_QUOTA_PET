@@ -19,3 +19,6 @@ collector-native.local.json
 
 firmware/include/config.local.h
 firmware/.pio/
+
+image*.png
+*.png

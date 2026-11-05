@@ -189,7 +189,9 @@ echo 'codex-cli 0.999.0'
     await page.reload();
     await expect(
       page
-        .getByRole("region", { name: "Tình trạng sức khỏe bộ thu thập antigravity" })
+        .getByRole("region", {
+          name: "Tình trạng sức khỏe bộ thu thập antigravity",
+        })
         .getByText("Báo cáo sức khỏe đã cũ", { exact: true }),
     ).toBeVisible();
     const future = signedRequest(
@@ -212,7 +214,9 @@ echo 'codex-cli 0.999.0'
     await page.reload();
     await expect(
       page
-        .getByRole("region", { name: "Tình trạng sức khỏe bộ thu thập antigravity" })
+        .getByRole("region", {
+          name: "Tình trạng sức khỏe bộ thu thập antigravity",
+        })
         .getByText("Đồng hồ mẫu sức khỏe không chắc chắn", { exact: true }),
     ).toBeVisible();
     await page.screenshot({

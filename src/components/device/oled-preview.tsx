@@ -39,12 +39,15 @@ export function OledPreview({
         now,
         freshnessThresholdSeconds,
       );
-      const percent =
-        item.window.usedPercent ??
-        (item.window.remainingPercent === null
-          ? null
-          : 100 - item.window.remainingPercent);
-      value = percent === null ? "—" : `${percent}%`;
+      const remaining =
+        item.window.remainingPercent !== null &&
+        item.window.remainingPercent !== undefined
+          ? Math.round(item.window.remainingPercent)
+          : item.window.usedPercent !== null &&
+              item.window.usedPercent !== undefined
+            ? Math.round(100 - item.window.usedPercent)
+            : null;
+      value = remaining === null ? "—" : `${remaining}%`;
       detail = effective.resetExpired
         ? "Hết hạn · gần nhất"
         : item.availability !== "ok"
@@ -53,7 +56,7 @@ export function OledPreview({
             ? "Dữ liệu cũ · gần nhất"
             : effective.effectiveFreshness === "unknown"
               ? "Chưa rõ tuổi"
-              : "Đã quan sát";
+              : `CÒN LẠI ${value}`;
     }
   }
   return (

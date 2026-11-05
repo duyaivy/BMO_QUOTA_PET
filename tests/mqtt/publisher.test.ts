@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { MockMqttBroker } from "../fixtures/mqtt-broker";
-import { MqttClient, MqttError } from "@/server/mqtt/publisher";
+import { MqttClient } from "@/server/mqtt/publisher";
 
 describe("MQTT Publisher Adapter", () => {
   let broker: MockMqttBroker;
@@ -74,7 +74,9 @@ describe("MQTT Publisher Adapter", () => {
         topic: "bmo/v1/devices/bmo-local/config",
         payload: "{}",
       }),
-    ).rejects.toThrow("MQTT connection refused by broker: Bad user name or password");
+    ).rejects.toThrow(
+      "MQTT connection refused by broker: Bad user name or password",
+    );
   });
 
   it("times out when broker does not respond with PUBACK", async () => {

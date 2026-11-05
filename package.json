@@ -22,6 +22,7 @@
     "fixture:enroll": "node --conditions=react-server --import tsx scripts/enroll-fixture.ts",
     "collector": "tsx collector/src/cli.ts",
     "collector:native": "tsx collector/src/native-cli.ts",
+    "collector:build:native": "mkdir -p collector/bin && swiftc -O -whole-module-optimization collector/native/main.swift -o collector/bin/bmo-collector",
     "collector:enroll": "node --conditions=react-server --import tsx scripts/enroll-native.ts",
     "enroll:native": "BMO_ALLOW_NATIVE_SETUP=true node --conditions=react-server --import tsx scripts/enroll-native.ts native-collector-agy native-key-agy antigravity"
   },

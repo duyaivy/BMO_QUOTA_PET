@@ -7,7 +7,7 @@ import {
   deviceMqttConfigSchema,
   assertMqttPayloadSize,
 } from "@/contracts/mqtt";
-import { type DeviceScreen } from "@/contracts/dashboard";
+import { type DeviceScreen, type ProviderId } from "@/contracts/dashboard";
 import {
   projectDeviceSnapshot,
   type PersistedWindowPayload,
@@ -147,7 +147,7 @@ export async function enqueueDeviceSnapshot(
       : {
           kind: "quota",
           screenId: String(r.screen_id),
-          providerId: r.provider_id as any,
+          providerId: r.provider_id as ProviderId,
           windowId: String(r.window_id),
         },
   );
@@ -169,7 +169,9 @@ export async function enqueueDeviceSnapshot(
         usedPercent: parsed.usedPercent ?? null,
         remainingPercent: parsed.remainingPercent ?? null,
         resetAt: parsed.resetAt ?? null,
-        dataStatus: (row.data_status as any) ?? "unavailable",
+        dataStatus:
+          (row.data_status as PersistedWindowPayload["dataStatus"]) ??
+          "unavailable",
         collectedAt: parsed.collectedAt ?? new Date(now).toISOString(),
         upstreamObservedAt: parsed.upstreamObservedAt ?? null,
         freshnessBasis: parsed.freshnessBasis ?? "unknown",
@@ -189,7 +191,7 @@ export async function enqueueDeviceSnapshot(
   const providers = new Map<string, ProviderStatusInfo>();
   for (const row of providerRows) {
     providers.set(String(row.provider_id), {
-      providerId: row.provider_id as any,
+      providerId: row.provider_id as ProviderId,
       enabled: Boolean(row.enabled),
       dataStatus: String(row.data_status),
       verification: String(row.verification),

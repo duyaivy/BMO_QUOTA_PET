@@ -24,7 +24,10 @@ export default async function OverviewPage() {
       >
         <RefreshButton />
       </PageHeader>
-      <section aria-label="Quan sát hạn mức nhà cung cấp" className="grid gap-4">
+      <section
+        aria-label="Quan sát hạn mức nhà cung cấp"
+        className="grid gap-4"
+      >
         {snapshot.providers.map((provider) => (
           <ProviderQuotaCard
             key={provider.providerId}

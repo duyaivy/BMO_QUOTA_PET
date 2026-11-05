@@ -14,7 +14,8 @@ export default async function StatusPage() {
     {
       name: "Cơ sở dữ liệu ứng dụng",
       status: "Khả dụng",
-      detail: "Dữ liệu bảng điều khiển đã lưu được đọc thành công cho trang này.",
+      detail:
+        "Dữ liệu bảng điều khiển đã lưu được đọc thành công cho trang này.",
     },
     {
       name: "Thu nạp dữ liệu sử dụng",
@@ -36,7 +37,8 @@ export default async function StatusPage() {
     {
       name: "Phần cứng và triển khai",
       status: "Đang chờ",
-      detail: "Chưa thực hiện kiểm tra kết nối phần cứng hoặc triển khai thực tế.",
+      detail:
+        "Chưa thực hiện kiểm tra kết nối phần cứng hoặc triển khai thực tế.",
     },
   ];
   return (
@@ -56,9 +58,7 @@ export default async function StatusPage() {
               <div className="flex items-center justify-between gap-3">
                 <CardTitle>{item.name}</CardTitle>
                 <Badge
-                  variant={
-                    item.status === "Khả dụng" ? "secondary" : "outline"
-                  }
+                  variant={item.status === "Khả dụng" ? "secondary" : "outline"}
                 >
                   {item.status}
                 </Badge>

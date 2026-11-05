@@ -15,7 +15,11 @@ export const navigationItems = [
     label: "Bộ thu thập",
     description: "Quan sát và truyền dữ liệu",
   },
-  { href: "/devices", label: "Thiết bị", description: "Thú cưng bàn làm việc của bạn" },
+  {
+    href: "/devices",
+    label: "Thiết bị",
+    description: "Thú cưng bàn làm việc của bạn",
+  },
   { href: "/status", label: "Trạng thái", description: "Vận hành ứng dụng" },
   {
     href: "/login",

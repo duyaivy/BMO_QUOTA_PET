@@ -44,7 +44,7 @@ export class SimulatedDevice {
         this.setupMqttSession().then(resolve).catch(reject);
       });
 
-      let buffer = Buffer.alloc(0);
+      let buffer: Buffer<ArrayBufferLike> = Buffer.alloc(0);
       this.socket.on("data", (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
         buffer = this.processPackets(buffer);
@@ -152,7 +152,10 @@ export class SimulatedDevice {
     if (parsedTopic.kind === "config") {
       try {
         const parsed = deviceMqttConfigSchema.parse(JSON.parse(jsonStr));
-        if (!this.activeConfig || parsed.revision >= this.activeConfig.revision) {
+        if (
+          !this.activeConfig ||
+          parsed.revision >= this.activeConfig.revision
+        ) {
           this.activeConfig = parsed;
         }
       } catch {
@@ -217,7 +220,8 @@ export class SimulatedDevice {
         // Quota screen
         const windowMatch = this.activeSnapshot?.windows.find(
           (w) =>
-            w.providerId === screen.providerId && w.windowId === screen.windowId,
+            w.providerId === screen.providerId &&
+            w.windowId === screen.windowId,
         );
 
         if (!windowMatch) {
@@ -231,8 +235,7 @@ export class SimulatedDevice {
           continue;
         }
 
-        const isExpired =
-          currentClockMs >= Date.parse(windowMatch.validUntil);
+        const isExpired = currentClockMs >= Date.parse(windowMatch.validUntil);
 
         pages.push({
           screenId: screen.screenId,

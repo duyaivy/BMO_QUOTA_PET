@@ -64,9 +64,11 @@ export async function probeStatuslineVersion(
       ["--version"],
       { timeout: 2000, maxBuffer: 1024 },
     );
+    const trimmed = stdout.trim();
     if (
-      stdout.trim() ===
-      (provider === "claude" ? "2.1.299 (Claude Code)" : "1.4.9")
+      (provider === "claude" && trimmed === "2.1.299 (Claude Code)") ||
+      (provider === "antigravity" &&
+        (trimmed === "1.4.9" || trimmed === "1.5.1"))
     )
       return;
   } catch {}

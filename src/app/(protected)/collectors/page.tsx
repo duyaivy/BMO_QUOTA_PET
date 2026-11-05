@@ -57,7 +57,9 @@ export default async function CollectorsPage() {
                     <dd className="mt-1">{timestamp(collector.lastSeenAt)}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground">Sự kiện nguồn gần nhất</dt>
+                    <dt className="text-muted-foreground">
+                      Sự kiện nguồn gần nhất
+                    </dt>
                     <dd className="mt-1">
                       {timestamp(collector.lastSourceEventAt)}
                     </dd>
@@ -137,15 +139,17 @@ export default async function CollectorsPage() {
                               Vùng đệm callback
                             </dt>
                             <dd>
-                              {report.health.callbackPending ?? "Chưa rõ"}{" "}
-                              đang chờ ·{" "}
-                              {report.health.callbackBytes ?? "Chưa rõ"} byte ·{" "}
-                              {report.health.callbackDropped ?? "Chưa rõ"}{" "}
-                              bị loại bỏ
+                              {report.health.callbackPending ?? "Chưa rõ"} đang
+                              chờ · {report.health.callbackBytes ?? "Chưa rõ"}{" "}
+                              byte ·{" "}
+                              {report.health.callbackDropped ?? "Chưa rõ"} bị
+                              loại bỏ
                             </dd>
                           </div>
                           <div>
-                            <dt className="text-muted-foreground">Bộ tải lên</dt>
+                            <dt className="text-muted-foreground">
+                              Bộ tải lên
+                            </dt>
                             <dd>{report.health.lastUploadCode}</dd>
                           </div>
                           <div>
@@ -192,11 +196,12 @@ export default async function CollectorsPage() {
           Tải lên không đồng nghĩa với làm mới hạn mức
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Các mốc thời gian trên hiển thị thời điểm BMO nhận phản hồi gần nhất từ
-          bộ thu thập và thời điểm quan sát được ghi nhận. Việc truyền dữ liệu không
-          làm mới tuổi nguồn hạn mức. Báo cáo tình trạng được ghi nhận cục bộ và bản thân
-          chúng có thể bị cũ sau khi truyền tải ngoại tuyến. Thư mục phiên có thể đọc được
-          hoặc sự im lặng không chứng minh được rằng CLI đang chạy hay đã đóng.
+          Các mốc thời gian trên hiển thị thời điểm BMO nhận phản hồi gần nhất
+          từ bộ thu thập và thời điểm quan sát được ghi nhận. Việc truyền dữ
+          liệu không làm mới tuổi nguồn hạn mức. Báo cáo tình trạng được ghi
+          nhận cục bộ và bản thân chúng có thể bị cũ sau khi truyền tải ngoại
+          tuyến. Thư mục phiên có thể đọc được hoặc sự im lặng không chứng minh
+          được rằng CLI đang chạy hay đã đóng.
         </p>
       </section>
       <Link

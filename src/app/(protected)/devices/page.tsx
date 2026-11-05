@@ -8,7 +8,8 @@ import { getDeviceProvisioningInfo } from "@/server/devices/repository";
 
 export const metadata: Metadata = {
   title: "Thiết bị | BMO Personal",
-  description: "Cấu hình thứ tự màn hình hiển thị BMO và thông số kết nối MQTT.",
+  description:
+    "Cấu hình thứ tự màn hình hiển thị BMO và thông số kết nối MQTT.",
 };
 
 export default async function DevicesPage() {
@@ -25,29 +26,39 @@ export default async function DevicesPage() {
       <div className="grid gap-5 md:grid-cols-2 mb-5">
         <Card className="border shadow-none">
           <CardHeader>
-            <CardTitle className="text-base">Thông số MQTT Broker & ACL</CardTitle>
+            <CardTitle className="text-base">
+              Thông số MQTT Broker & ACL
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div>
-              <span className="font-semibold text-muted-foreground">Topic Cấu hình:</span>
+              <span className="font-semibold text-muted-foreground">
+                Topic Cấu hình:
+              </span>
               <code className="ml-2 rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
                 {provisioning.configTopic}
               </code>
             </div>
             <div>
-              <span className="font-semibold text-muted-foreground">Topic Snapshot:</span>
+              <span className="font-semibold text-muted-foreground">
+                Topic Snapshot:
+              </span>
               <code className="ml-2 rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
                 {provisioning.snapshotTopic}
               </code>
             </div>
             <div>
-              <span className="font-semibold text-muted-foreground">Quyền đăng ký (Subscribe ACL):</span>
+              <span className="font-semibold text-muted-foreground">
+                Quyền đăng ký (Subscribe ACL):
+              </span>
               <code className="ml-2 rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
                 {provisioning.subscribeAcl}
               </code>
             </div>
             <div>
-              <span className="font-semibold text-muted-foreground">Broker Host:</span>
+              <span className="font-semibold text-muted-foreground">
+                Broker Host:
+              </span>
               <span className="ml-2 font-mono text-xs text-muted-foreground">
                 {provisioning.brokerHost}:{provisioning.brokerPort}
               </span>
@@ -57,14 +68,15 @@ export default async function DevicesPage() {
 
         <Card className="border shadow-none">
           <CardHeader>
-            <CardTitle className="text-base">Bảo mật thiết bị & Thông tin xác thực</CardTitle>
+            <CardTitle className="text-base">
+              Bảo mật thiết bị & Thông tin xác thực
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            <p>
-              {provisioning.instructions}
-            </p>
+            <p>{provisioning.instructions}</p>
             <p className="mt-2 text-xs">
-              Các thay đổi cấu hình được lưu cục bộ và xếp hàng vào Transactional Outbox để đẩy tới broker kèm theo cờ Retained.
+              Các thay đổi cấu hình được lưu cục bộ và xếp hàng vào
+              Transactional Outbox để đẩy tới broker kèm theo cờ Retained.
             </p>
           </CardContent>
         </Card>

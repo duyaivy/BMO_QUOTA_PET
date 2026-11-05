@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  MQTT_SCHEMA_VERSION,
   MAX_MQTT_PAYLOAD_BYTES,
   buildDeviceTopic,
   parseDeviceTopic,

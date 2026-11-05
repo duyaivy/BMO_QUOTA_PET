@@ -51,17 +51,13 @@ export function ProviderToggle({
           throw new Error(
             "Cài đặt đã thay đổi. Thay đổi của bạn chưa được lưu; hãy tải lại trang và thử lại.",
           );
-        throw new Error(
-          result?.error?.message || "Không thể lưu cài đặt này.",
-        );
+        throw new Error(result?.error?.message || "Không thể lưu cài đặt này.");
       }
       setMessage("Đã lưu cài đặt nhà cung cấp.");
       router.refresh();
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Không thể lưu cài đặt này.",
+        error instanceof Error ? error.message : "Không thể lưu cài đặt này.",
       );
     } finally {
       setBusy(false);
@@ -80,11 +76,7 @@ export function ProviderToggle({
         disabled={busy}
         onClick={() => void update(!provider.enabled)}
       >
-        {busy
-          ? "Đang lưu…"
-          : provider.enabled
-            ? "Tắt nguồn"
-            : "Bật nguồn"}
+        {busy ? "Đang lưu…" : provider.enabled ? "Tắt nguồn" : "Bật nguồn"}
       </Button>
       {message ? (
         <p className="text-sm" role="status">

@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  runMaintenance,
-  verifyMaintenanceSecret,
-} from "@/server/maintenance";
+import { runMaintenance, verifyMaintenanceSecret } from "@/server/maintenance";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +10,9 @@ export async function POST(request: Request) {
 
   if (!verifyMaintenanceSecret(authHeader)) {
     return NextResponse.json(
-      { error: { code: "UNAUTHORIZED", message: "Invalid maintenance secret" } },
+      {
+        error: { code: "UNAUTHORIZED", message: "Invalid maintenance secret" },
+      },
       { status: 401 },
     );
   }
@@ -21,12 +20,13 @@ export async function POST(request: Request) {
   try {
     const result = await runMaintenance();
     return NextResponse.json({ ok: true, data: result });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
       {
         error: {
           code: "MAINTENANCE_FAILED",
-          message: err?.message ?? "Maintenance execution failed",
+          message:
+            err instanceof Error ? err.message : "Maintenance execution failed",
         },
       },
       { status: 500 },

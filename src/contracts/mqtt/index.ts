@@ -23,7 +23,9 @@ export function buildDeviceTopic(
 export function parseDeviceTopic(
   topic: string,
 ): { deviceId: string; kind: MqttTopicKind } | null {
-  const match = topic.match(/^bmo\/v1\/devices\/([A-Za-z0-9_.-]+)\/(config|snapshot)$/);
+  const match = topic.match(
+    /^bmo\/v1\/devices\/([A-Za-z0-9_.-]+)\/(config|snapshot)$/,
+  );
   if (!match) return null;
   return {
     deviceId: match[1],

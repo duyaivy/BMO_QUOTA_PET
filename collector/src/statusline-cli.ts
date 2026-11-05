@@ -40,7 +40,9 @@ async function main() {
     if (
       config.evidenceMode !== "native" ||
       !config.providers[provider]?.enabled ||
-      version !== (provider === "claude" ? "2.1.299" : "1.4.9")
+      (provider === "claude"
+        ? version !== "2.1.299"
+        : version !== "1.4.9" && version !== "1.5.1")
     )
       throw new Error("NATIVE_STATUSLINE_DISABLED");
     sourceVersion = `${provider === "claude" ? "claude-code" : "antigravity"}/${version}`;

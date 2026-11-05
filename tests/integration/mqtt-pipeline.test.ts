@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { closeDbForTests, getDb, writeTransaction } from "@/server/db";
+import { closeDbForTests } from "@/server/db";
 import { saveDevice, retireDevice } from "@/server/devices/repository";
 import { drainOutbox } from "@/server/mqtt/drain";
 import { MockMqttBroker } from "../fixtures/mqtt-broker";
@@ -22,7 +22,10 @@ describe("End-to-End MQTT Pipeline & Device Simulator", () => {
     vi.stubEnv("TURSO_DATABASE_URL", "file:" + join(directory, "test.db"));
     vi.stubEnv("TURSO_AUTH_TOKEN", "");
     vi.stubEnv("BMO_APP_ORIGIN", "http://127.0.0.1:3000");
-    vi.stubEnv("SESSION_SECRET", "synthetic-test-secret-at-least-32-characters");
+    vi.stubEnv(
+      "SESSION_SECRET",
+      "synthetic-test-secret-at-least-32-characters",
+    );
     vi.stubEnv(
       "ADMIN_PASSWORD_HASH",
       "$argon2id$v=19$m=65536,t=3,p=4$c3ludGhldGlj$c3ludGhldGlj",
@@ -126,7 +129,10 @@ describe("End-to-End MQTT Pipeline & Device Simulator", () => {
 
     // Ingest quota
     const now = Date.now();
+    const nowIso = new Date(now).toISOString();
     const event = observation({
+      collectedAt: nowIso,
+      upstreamObservedAt: nowIso,
       providerId: "codex",
       windows: [
         {
@@ -137,8 +143,8 @@ describe("End-to-End MQTT Pipeline & Device Simulator", () => {
           remainingPercent: 55,
           resetAt: new Date(now + 3600000).toISOString(),
           dataStatus: "ok",
-          collectedAt: new Date(now).toISOString(),
-          upstreamObservedAt: new Date(now).toISOString(),
+          collectedAt: nowIso,
+          upstreamObservedAt: nowIso,
           freshnessBasis: "upstream_timestamp",
           sourceFreshness: "fresh",
         },

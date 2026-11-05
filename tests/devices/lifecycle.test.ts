@@ -21,7 +21,10 @@ describe("Device Lifecycle & Configuration", () => {
     vi.stubEnv("TURSO_DATABASE_URL", "file:" + join(directory, "test.db"));
     vi.stubEnv("TURSO_AUTH_TOKEN", "");
     vi.stubEnv("BMO_APP_ORIGIN", "http://127.0.0.1:3000");
-    vi.stubEnv("SESSION_SECRET", "synthetic-test-secret-at-least-32-characters");
+    vi.stubEnv(
+      "SESSION_SECRET",
+      "synthetic-test-secret-at-least-32-characters",
+    );
     vi.stubEnv(
       "ADMIN_PASSWORD_HASH",
       "$argon2id$v=19$m=65536,t=3,p=4$c3ludGhldGlj$c3ludGhldGlj",

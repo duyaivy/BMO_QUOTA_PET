@@ -51,7 +51,9 @@ export async function listDevices(): Promise<DeviceSummary[]> {
   }));
 }
 
-export async function readDevice(deviceId: string = "bmo-local"): Promise<DeviceConfig> {
+export async function readDevice(
+  deviceId: string = "bmo-local",
+): Promise<DeviceConfig> {
   const db = await getDb();
   const rows = (
     await db.$client.execute({
@@ -108,7 +110,9 @@ export async function createDevice(input: unknown): Promise<DeviceConfig> {
       args: [value.deviceId],
     });
 
-    const initialScreens: DeviceScreen[] = [{ kind: "pet", screenId: "pet-home" }];
+    const initialScreens: DeviceScreen[] = [
+      { kind: "pet", screenId: "pet-home" },
+    ];
     await enqueueDeviceConfig(tx, value.deviceId, 1, initialScreens, now);
     await enqueueDeviceSnapshot(tx, value.deviceId, now);
   });
@@ -168,7 +172,9 @@ export async function saveDevice(input: unknown): Promise<DeviceConfig> {
   };
 }
 
-export async function retireDevice(input: unknown): Promise<{ deviceId: string; enabled: false }> {
+export async function retireDevice(
+  input: unknown,
+): Promise<{ deviceId: string; enabled: false }> {
   const value = deviceRetireSchema.parse(input);
   const now = Date.now();
 
@@ -186,7 +192,9 @@ export async function retireDevice(input: unknown): Promise<{ deviceId: string; 
   return { deviceId: value.deviceId, enabled: false };
 }
 
-export function getDeviceProvisioningInfo(deviceId: string): DeviceProvisioning {
+export function getDeviceProvisioningInfo(
+  deviceId: string,
+): DeviceProvisioning {
   const host = process.env.MQTT_HOST || "configured-at-deploy";
   const port = process.env.MQTT_PORT ? Number(process.env.MQTT_PORT) : 8883;
 
@@ -198,7 +206,7 @@ export function getDeviceProvisioningInfo(deviceId: string): DeviceProvisioning 
     brokerHost: host,
     brokerPort: port,
     instructions:
-      "Configure the physical ESP32 device with Wi-Fi credentials and its own device-scoped MQTT subscriber credentials. Backend server-only publisher keys and administrator passwords must never be stored on or delivered to personal devices.",
+      "Configure the physical ESP32 device with Wi-Fi credentials and its own device-scoped MQTT subscriber credentials. Backend server-only publisher keys and administrator credentials must never be stored on or delivered to personal devices.",
   };
 }
 

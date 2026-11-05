@@ -43,7 +43,7 @@ function encodeRemainingLength(length: number): Buffer {
   return Buffer.from(bytes);
 }
 
-function decodeRemainingLength(
+export function decodeRemainingLength(
   buffer: Buffer,
   offset: number,
 ): { length: number; bytesRead: number } | null {
@@ -57,7 +57,10 @@ function decodeRemainingLength(
     bytesRead++;
     value += (digit & 127) * multiplier;
     if (multiplier > 128 * 128 * 128) {
-      throw new MqttError("Malformed remaining length in MQTT packet", "MALFORMED_PACKET");
+      throw new MqttError(
+        "Malformed remaining length in MQTT packet",
+        "MALFORMED_PACKET",
+      );
     }
     multiplier *= 128;
   } while ((digit & 128) !== 0);
@@ -104,7 +107,14 @@ export class MqttClient {
 
     try {
       const packetId = qos === 1 ? nextPacketId() : 0;
-      await this.sendPublish(socket, options.topic, payloadBuffer, qos, retain, packetId);
+      await this.sendPublish(
+        socket,
+        options.topic,
+        payloadBuffer,
+        qos,
+        retain,
+        packetId,
+      );
 
       if (qos === 1) {
         await this.waitForPuback(socket, packetId);
@@ -146,7 +156,13 @@ export class MqttClient {
           isSettled = true;
           cleanup();
           socket.destroy();
-          reject(new MqttError(`MQTT connection error: ${err.message}`, "CONNECTION_FAILED", err));
+          reject(
+            new MqttError(
+              `MQTT connection error: ${err.message}`,
+              "CONNECTION_FAILED",
+              err,
+            ),
+          );
         }
       };
 
@@ -208,7 +224,12 @@ export class MqttClient {
     const keepAliveBuf = Buffer.alloc(2);
     keepAliveBuf.writeUInt16BE(30, 0);
 
-    const variableHeader = Buffer.concat([protoName, protoLevel, flagsBuf, keepAliveBuf]);
+    const variableHeader = Buffer.concat([
+      protoName,
+      protoLevel,
+      flagsBuf,
+      keepAliveBuf,
+    ]);
 
     // Payload: Client Identifier, Username (opt), Password (opt)
     const clientIdBuf = encodeUtf8String(this.config.clientId);
@@ -222,22 +243,43 @@ export class MqttClient {
     }
 
     const payload = Buffer.concat(payloadParts);
-    const remainingLength = encodeRemainingLength(variableHeader.length + payload.length);
+    const remainingLength = encodeRemainingLength(
+      variableHeader.length + payload.length,
+    );
     const fixedHeader = Buffer.from([0x10]); // CONNECT packet type = 1, flags = 0
 
-    const packet = Buffer.concat([fixedHeader, remainingLength, variableHeader, payload]);
+    const packet = Buffer.concat([
+      fixedHeader,
+      remainingLength,
+      variableHeader,
+      payload,
+    ]);
 
     await new Promise<void>((resolve, reject) => {
       socket.write(packet, (err) => {
-        if (err) reject(new MqttError(`Failed to write CONNECT: ${err.message}`, "WRITE_FAILED", err));
+        if (err)
+          reject(
+            new MqttError(
+              `Failed to write CONNECT: ${err.message}`,
+              "WRITE_FAILED",
+              err,
+            ),
+          );
         else resolve();
       });
     });
 
     // Read CONNACK (expect 4 bytes: 0x20, 0x02, sessionPresent, returnCode)
-    const connack = await this.readExactBytes(socket, 4, this.config.connectTimeoutMs);
+    const connack = await this.readExactBytes(
+      socket,
+      4,
+      this.config.connectTimeoutMs,
+    );
     if (connack[0] !== 0x20 || connack[1] !== 0x02) {
-      throw new MqttError(`Unexpected response from broker: ${connack.toString("hex")}`, "PROTOCOL_ERROR");
+      throw new MqttError(
+        `Unexpected response from broker: ${connack.toString("hex")}`,
+        "PROTOCOL_ERROR",
+      );
     }
 
     const returnCode = connack[3];
@@ -250,7 +292,10 @@ export class MqttClient {
         5: "Not authorized",
       };
       const reason = returnMessages[returnCode] ?? `Code ${returnCode}`;
-      throw new MqttError(`MQTT connection refused by broker: ${reason}`, "CONNACK_REFUSED");
+      throw new MqttError(
+        `MQTT connection refused by broker: ${reason}`,
+        "CONNACK_REFUSED",
+      );
     }
   }
 
@@ -274,22 +319,46 @@ export class MqttClient {
       variableHeader = topicBuf;
     }
 
-    const remainingLength = encodeRemainingLength(variableHeader.length + payload.length);
-    const packet = Buffer.concat([Buffer.from([fixedHeaderByte]), remainingLength, variableHeader, payload]);
+    const remainingLength = encodeRemainingLength(
+      variableHeader.length + payload.length,
+    );
+    const packet = Buffer.concat([
+      Buffer.from([fixedHeaderByte]),
+      remainingLength,
+      variableHeader,
+      payload,
+    ]);
 
     await new Promise<void>((resolve, reject) => {
       socket.write(packet, (err) => {
-        if (err) reject(new MqttError(`Failed to write PUBLISH: ${err.message}`, "WRITE_FAILED", err));
+        if (err)
+          reject(
+            new MqttError(
+              `Failed to write PUBLISH: ${err.message}`,
+              "WRITE_FAILED",
+              err,
+            ),
+          );
         else resolve();
       });
     });
   }
 
-  private async waitForPuback(socket: net.Socket, expectedPacketId: number): Promise<void> {
+  private async waitForPuback(
+    socket: net.Socket,
+    expectedPacketId: number,
+  ): Promise<void> {
     // PUBACK is 4 bytes: 0x40, 0x02, MSB, LSB
-    const puback = await this.readExactBytes(socket, 4, this.config.publishTimeoutMs);
+    const puback = await this.readExactBytes(
+      socket,
+      4,
+      this.config.publishTimeoutMs,
+    );
     if (puback[0] !== 0x40 || puback[1] !== 0x02) {
-      throw new MqttError(`Expected PUBACK but received 0x${puback.toString("hex")}`, "PROTOCOL_ERROR");
+      throw new MqttError(
+        `Expected PUBACK but received 0x${puback.toString("hex")}`,
+        "PROTOCOL_ERROR",
+      );
     }
 
     const receivedPacketId = puback.readUInt16BE(2);
@@ -321,7 +390,12 @@ export class MqttClient {
         if (!isSettled) {
           isSettled = true;
           cleanup();
-          reject(new MqttError(`Read deadline exceeded waiting for ${count} bytes`, "TIMEOUT"));
+          reject(
+            new MqttError(
+              `Read deadline exceeded waiting for ${count} bytes`,
+              "TIMEOUT",
+            ),
+          );
         }
       }, timeoutMs);
 
@@ -347,7 +421,13 @@ export class MqttClient {
         if (!isSettled) {
           isSettled = true;
           cleanup();
-          reject(new MqttError(`Socket error while reading: ${err.message}`, "SOCKET_ERROR", err));
+          reject(
+            new MqttError(
+              `Socket error while reading: ${err.message}`,
+              "SOCKET_ERROR",
+              err,
+            ),
+          );
         }
       };
 

@@ -46,7 +46,7 @@ const schema = z
           .optional(),
         antigravity: z
           .object({
-            version: z.literal("1.4.9"),
+            version: z.enum(["1.4.9", "1.5.1"]),
             subscriptionQuotaConfirmed: z.boolean().default(false),
           })
           .strict()

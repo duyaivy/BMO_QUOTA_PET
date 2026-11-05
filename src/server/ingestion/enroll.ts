@@ -43,10 +43,9 @@ async function enroll(input: z.input<typeof enrollment>, native: boolean) {
       sql: "SELECT fixture_mode FROM collectors WHERE collector_id=?",
       args: [value.collectorId],
     });
+    const val = collector.rows[0]?.fixture_mode;
     const isFixture =
-      collector.rows[0]?.fixture_mode === true ||
-      collector.rows[0]?.fixture_mode === 1 ||
-      collector.rows[0]?.fixture_mode === "1";
+      val === 1 || val === "1" || val === (true as unknown) || val === "true";
     if (isFixture === native)
       throw new Error("Collector evidence mode conflict");
     const existing = await tx.execute({

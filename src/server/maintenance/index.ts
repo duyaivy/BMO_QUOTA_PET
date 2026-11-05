@@ -1,6 +1,6 @@
 import "server-only";
 import { timingSafeEqual } from "node:crypto";
-import { getDb, writeTransaction } from "@/server/db";
+import { writeTransaction } from "@/server/db";
 import { drainOutbox, type DrainResult } from "@/server/mqtt/drain";
 import { enqueueDeviceSnapshot } from "@/server/mqtt/outbox";
 
@@ -39,7 +39,6 @@ export async function runMaintenance(options?: {
   nowMs?: number;
 }): Promise<MaintenanceResult> {
   const now = options?.nowMs ?? Date.now();
-  const db = await getDb();
 
   // 1. Drain pending outbox work
   const outboxResult = await drainOutbox({ nowMs: now });

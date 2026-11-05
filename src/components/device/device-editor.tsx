@@ -301,7 +301,9 @@ export function DeviceEditor({
               {screens.map((screen, index) => (
                 <option key={screen.screenId} value={screen.screenId}>
                   {index + 1}.{" "}
-                  {screen.kind === "pet" ? "Màn hình chính BMO" : screen.windowId}
+                  {screen.kind === "pet"
+                    ? "Màn hình chính BMO"
+                    : screen.windowId}
                 </option>
               ))}
             </select>

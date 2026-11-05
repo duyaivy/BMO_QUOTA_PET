@@ -3,10 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { closeDbForTests, getDb, writeTransaction } from "@/server/db";
-import {
-  runMaintenance,
-  verifyMaintenanceSecret,
-} from "@/server/maintenance";
+import { verifyMaintenanceSecret } from "@/server/maintenance";
 import { POST } from "@/app/api/internal/maintenance/route";
 
 describe("Maintenance Route & Logic", () => {
@@ -18,7 +15,10 @@ describe("Maintenance Route & Logic", () => {
     vi.stubEnv("TURSO_DATABASE_URL", "file:" + join(directory, "test.db"));
     vi.stubEnv("TURSO_AUTH_TOKEN", "");
     vi.stubEnv("BMO_APP_ORIGIN", "http://127.0.0.1:3000");
-    vi.stubEnv("SESSION_SECRET", "synthetic-test-secret-at-least-32-characters");
+    vi.stubEnv(
+      "SESSION_SECRET",
+      "synthetic-test-secret-at-least-32-characters",
+    );
     vi.stubEnv(
       "ADMIN_PASSWORD_HASH",
       "$argon2id$v=19$m=65536,t=3,p=4$c3ludGhldGlj$c3ludGhldGlj",
@@ -41,10 +41,13 @@ describe("Maintenance Route & Logic", () => {
   });
 
   it("returns 401 on unauthorized POST request", async () => {
-    const request = new Request("http://127.0.0.1:3000/api/internal/maintenance", {
-      method: "POST",
-      headers: { authorization: "Bearer invalid" },
-    });
+    const request = new Request(
+      "http://127.0.0.1:3000/api/internal/maintenance",
+      {
+        method: "POST",
+        headers: { authorization: "Bearer invalid" },
+      },
+    );
 
     const response = await POST(request);
     expect(response.status).toBe(401);
@@ -83,6 +86,13 @@ describe("Maintenance Route & Logic", () => {
         args: [now - 100, now - 1000],
       });
 
+      // Insert observation for current_windows FK
+      await tx.execute({
+        sql: `INSERT INTO quota_observations(observation_id, collector_id, provider_id, event_id, generation, sequence, collected_at, received_at, payload)
+              VALUES('obs-1', 'col-1', 'codex', 'evt-1', 1, 1, ?, ?, '{}')`,
+        args: [now, now],
+      });
+
       // Window with reset in the past
       await tx.execute({
         sql: `INSERT INTO current_windows(provider_id, window_id, observation_id, payload, data_status)
@@ -96,10 +106,13 @@ describe("Maintenance Route & Logic", () => {
       });
     });
 
-    const request = new Request("http://127.0.0.1:3000/api/internal/maintenance", {
-      method: "POST",
-      headers: { authorization: `Bearer ${SECRET}` },
-    });
+    const request = new Request(
+      "http://127.0.0.1:3000/api/internal/maintenance",
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${SECRET}` },
+      },
+    );
 
     const response = await POST(request);
     expect(response.status).toBe(200);

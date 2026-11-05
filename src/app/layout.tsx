@@ -4,7 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "BMO Personal",
-  description: "Bản xem trước nền tảng cục bộ cho thú cưng theo dõi hạn mức cá nhân.",
+  description:
+    "Bản xem trước nền tảng cục bộ cho thú cưng theo dõi hạn mức cá nhân.",
   icons: { icon: "/bmo-mark.svg" },
   robots: { index: false, follow: false },
 };

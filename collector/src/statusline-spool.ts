@@ -176,7 +176,7 @@ export class StatuslineSpool {
       !(
         provider === "claude"
           ? /^claude-code\/2\.1\.299$/
-          : /^antigravity\/1\.4\.9$/
+          : /^antigravity\/(?:1\.4\.9|1\.5\.1)$/
       ).test(version)
     )
       return { code: "INVALID_SOURCE_VERSION" };

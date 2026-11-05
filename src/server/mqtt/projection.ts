@@ -40,9 +40,10 @@ export interface SnapshotProjectionInput {
   nowMs?: number;
 }
 
-export function projectDeviceSnapshot(
-  input: SnapshotProjectionInput,
-): { snapshot: DeviceMqttSnapshot; jsonPayload: string } {
+export function projectDeviceSnapshot(input: SnapshotProjectionInput): {
+  snapshot: DeviceMqttSnapshot;
+  jsonPayload: string;
+} {
   const nowMs = input.nowMs ?? Date.now();
   const thresholdSeconds = input.freshnessThresholdSeconds ?? 900;
   const nowIso = new Date(nowMs).toISOString();
@@ -116,8 +117,8 @@ export function projectDeviceSnapshot(
     const sourceFreshness = isStale
       ? "stale"
       : persisted.freshnessBasis === "unknown"
-      ? "unknown"
-      : persisted.sourceFreshness;
+        ? "unknown"
+        : persisted.sourceFreshness;
 
     // Check if reset has passed; if so, dataStatus becomes unavailable and percentages null
     const hasResetPassed =
@@ -129,9 +130,7 @@ export function projectDeviceSnapshot(
       ? "unavailable"
       : persisted.dataStatus;
     const usedPercent = hasResetPassed ? null : persisted.usedPercent;
-    const remainingPercent = hasResetPassed
-      ? null
-      : persisted.remainingPercent;
+    const remainingPercent = hasResetPassed ? null : persisted.remainingPercent;
 
     projectedWindows.push({
       providerId,

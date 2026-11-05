@@ -628,4 +628,3 @@ it("enrolls native collectors with distinct identity, explicit authorization and
     }),
   ).rejects.toThrow("Collector evidence mode conflict");
 });
-

@@ -1,0 +1,15 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../.." && pwd )"
+BIN="$DIR/collector/bin/bmo-collector"
+CONFIG="$DIR/collector-native.local.json"
+LOG="$DIR/.data/bmo-collector.log"
+
+mkdir -p "$DIR/.data"
+
+if pgrep -f "bmo-collector .*collector-native.local.json" > /dev/null; then
+    osascript -e 'display notification "BMO Collector đã đang chạy ngầm trên máy!" with title "BMO Collector" sound name "Submarine"'
+    exit 0
+fi
+
+nohup "$BIN" "$CONFIG" >> "$LOG" 2>&1 &
+osascript -e 'display notification "BMO Collector đã khởi động thành công! (Native Apple Silicon, RAM ~16MB)" with title "BMO Quota Pet" sound name "Glass"'

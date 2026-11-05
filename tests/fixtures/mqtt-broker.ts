@@ -52,7 +52,7 @@ export class MockMqttBroker {
 
   private handleConnection(socket: net.Socket) {
     this.clientCount++;
-    let buffer = Buffer.alloc(0);
+    let buffer: Buffer<ArrayBufferLike> = Buffer.alloc(0);
 
     socket.on("data", (chunk) => {
       buffer = Buffer.concat([buffer, chunk]);
@@ -94,7 +94,12 @@ export class MockMqttBroker {
       const packetBody = buffer.subarray(pos, packetEnd);
       buffer = buffer.subarray(packetEnd);
 
-      this.handlePacket(socket, packetType, packetTypeAndFlags & 0x0f, packetBody);
+      this.handlePacket(
+        socket,
+        packetType,
+        packetTypeAndFlags & 0x0f,
+        packetBody,
+      );
     }
     return buffer;
   }

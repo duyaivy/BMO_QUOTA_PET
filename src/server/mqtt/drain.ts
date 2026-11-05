@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { getDb, writeTransaction } from "@/server/db";
+import { writeTransaction } from "@/server/db";
 import { MqttClient } from "./publisher";
 
 export interface DrainOptions {
@@ -21,7 +21,6 @@ export interface DrainResult {
 export async function drainOutbox(
   options: DrainOptions = {},
 ): Promise<DrainResult> {
-  const db = await getDb();
   const now = options.nowMs ?? Date.now();
   const batchSize = options.batchSize ?? 10;
   const leaseDurationMs = options.leaseDurationMs ?? 15000;
@@ -124,8 +123,8 @@ export async function drainOutbox(
           });
         });
         publishedCount++;
-      } catch (err: any) {
-        const errMsg = err?.message ?? String(err);
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
         errors.push(`Failed to publish message ${id} to ${topic}: ${errMsg}`);
         failedCount++;
 

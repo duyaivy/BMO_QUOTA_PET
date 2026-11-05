@@ -117,4 +117,3 @@ it("provides safe diagnostics when runtime configuration validation fails withou
     expect((error as Error).message).not.toContain("short");
   }
 });
-

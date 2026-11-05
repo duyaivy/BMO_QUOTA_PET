@@ -64,9 +64,7 @@ export default async function ProviderSettingsPage() {
                   <dd>{provider.sourceType ?? "Chưa cấu hình"}</dd>
                 </div>
                 <div className="flex flex-wrap justify-between gap-2">
-                  <dt className="text-muted-foreground">
-                    Thế hệ sở hữu
-                  </dt>
+                  <dt className="text-muted-foreground">Thế hệ sở hữu</dt>
                   <dd>{provider.ownershipGeneration}</dd>
                 </div>
                 <div className="flex flex-wrap justify-between gap-2">
@@ -85,8 +83,9 @@ export default async function ProviderSettingsPage() {
         ))}
       </div>
       <p className="text-sm text-muted-foreground">
-        Hãy sử dụng hướng dẫn thiết lập bộ thu thập cục bộ cho các nguồn thực tế và mẫu;
-        tuyệt đối không nhập thông tin đăng nhập của nhà cung cấp vào đây.
+        Hãy sử dụng hướng dẫn thiết lập bộ thu thập cục bộ cho các nguồn thực tế
+        và mẫu; tuyệt đối không nhập thông tin đăng nhập của nhà cung cấp vào
+        đây.
       </p>
       <Link
         className="text-sm font-medium underline underline-offset-4"

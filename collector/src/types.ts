@@ -17,7 +17,10 @@ export type CollectorConfig = {
   timeoutMs?: number;
   nativeStatuslines?: {
     claude?: { version: "2.1.299"; subscriptionQuotaConfirmed?: boolean };
-    antigravity?: { version: "1.4.9"; subscriptionQuotaConfirmed?: boolean };
+    antigravity?: {
+      version: "1.4.9" | "1.5.1";
+      subscriptionQuotaConfirmed?: boolean;
+    };
   };
   nativeCodex?: { sessionDirectory: string; version: "0.163.0" };
 };

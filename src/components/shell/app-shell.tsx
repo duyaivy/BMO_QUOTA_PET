@@ -28,7 +28,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         router.refresh();
       } else setLogoutError("Đăng xuất thất bại. Vui lòng thử lại.");
     } catch {
-      setLogoutError("Tính năng đăng xuất tạm thời không khả dụng. Vui lòng thử lại.");
+      setLogoutError(
+        "Tính năng đăng xuất tạm thời không khả dụng. Vui lòng thử lại.",
+      );
     }
   }
 
@@ -87,7 +89,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="hidden px-6 lg:absolute lg:inset-x-0 lg:bottom-5 lg:block">
             <p className="text-xs leading-5 text-muted-foreground">
-              Độ mới của hạn mức phụ thuộc vào dữ liệu nguồn được quan sát gần nhất.
+              Độ mới của hạn mức phụ thuộc vào dữ liệu nguồn được quan sát gần
+              nhất.
             </p>
           </div>
         </aside>
@@ -96,7 +99,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             role="status"
             className="flex items-center justify-center gap-2 border-b border-border bg-primary/5 px-4 py-2 text-center text-xs font-medium text-foreground"
           >
-            Không gian làm việc riêng của chủ sở hữu · Nguồn nhà cung cấp chưa xác minh
+            Không gian làm việc riêng của chủ sở hữu · Nguồn nhà cung cấp chưa
+            xác minh
             <ArrowUpRight
               aria-hidden="true"
               className="hidden size-3.5 sm:block"
