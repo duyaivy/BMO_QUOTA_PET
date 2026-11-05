@@ -1,5 +1,14 @@
 #include "quota_renderer.h"
 #include "mqtt_client.h"
+#include <time.h>
+
+static bool expired(const char* value) {
+    struct tm parsed = {};
+    time_t now = time(nullptr);
+    if (now < 1700000000 || !strptime(value, "%Y-%m-%dT%H:%M:%S", &parsed)) return true;
+    return now >= mktime(&parsed);
+}
+
 
 BMOQuotaRenderer quotaRenderer;
 
@@ -107,10 +116,10 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t quotaScreenIndex, bool wifiConn
     oled.setCursor(2, 45);
 
     if (sw->dataStatus == DataStatus::STATUS_OK) {
-        if (sw->sourceFreshness == SourceFreshness::STALE) {
+        if (expired(sw->validUntil) || expired(mqttClient.getSnapshot().validUntil) || sw->sourceFreshness == SourceFreshness::STALE) {
             oled.print("[STALE] ");
         } else {
-            oled.print("[OK] ");
+            oled.print(sw->sourceFreshness == SourceFreshness::FRESH ? "[OK] " : "[UNKNOWN] ");
         }
     } else if (sw->dataStatus == DataStatus::STATUS_UNAVAILABLE) {
         oled.print("[UNAVAILABLE] ");

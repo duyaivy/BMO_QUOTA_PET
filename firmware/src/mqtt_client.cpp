@@ -1,5 +1,7 @@
 #include "mqtt_client.h"
 #include <ArduinoJson.h>
+#include <time.h>
+#include <initializer_list>
 
 BMOMqttClient mqttClient;
 
@@ -20,8 +22,12 @@ BMOMqttClient::BMOMqttClient()
 }
 
 void BMOMqttClient::begin() {
+    #if BMO_MQTT_TLS
+    _wifiClient.setCACert(BMO_MQTT_CA_CERT);
+    #endif
+    _mqtt.setSocketTimeout(1);
     _mqtt.setServer(BMO_MQTT_BROKER, BMO_MQTT_PORT);
-    _mqtt.setBufferSize(BMO_MQTT_BUFFER_SIZE); // Support up to 8 KiB MQTT payloads
+    _mqtt.setBufferSize(BMO_MQTT_BUFFER_SIZE + 256); // Support up to 8 KiB MQTT payloads
 
     _mqtt.setCallback([this](char* topic, uint8_t* payload, unsigned int length) {
         this->onMessage(topic, payload, length);
@@ -52,6 +58,9 @@ bool BMOMqttClient::isConnected() {
 
 void BMOMqttClient::reconnect() {
     if (_mqtt.connected()) return;
+    #if BMO_MQTT_TLS
+    if (strlen(BMO_MQTT_CA_CERT) == 0 || time(nullptr) < 1700000000) return;
+    #endif
 
     Serial.printf("[MQTT] Attempting connection to %s:%d as %s...\n",
                   BMO_MQTT_BROKER, BMO_MQTT_PORT, BMO_DEVICE_ID);
@@ -80,6 +89,9 @@ void BMOMqttClient::reconnect() {
 void BMOMqttClient::onMessage(char* topic, uint8_t* payload, unsigned int length) {
     Serial.printf("[MQTT] Received message on %s (%u bytes)\n", topic, length);
 
+    if (strcmp(topic, _configTopic) != 0 && strcmp(topic, _snapshotTopic) != 0) return;
+    if (length > BMO_MQTT_BUFFER_SIZE) return;
+
     // Check for Tombstone (zero-byte payload = retirement per Architecture §11)
     if (length == 0) {
         Serial.println("[MQTT] Tombstone received! Device is marked RETIRED.");
@@ -104,12 +116,27 @@ void BMOMqttClient::handleConfigPayload(const uint8_t* payload, unsigned int len
         return;
     }
 
+    if (doc["schemaVersion"].as<JsonVariantConst>() != 1 || strcmp(doc["deviceId"] | "", BMO_DEVICE_ID) != 0 ||
+        !doc["revision"].is<uint32_t>() || doc["revision"].as<uint32_t>() == 0) return;
     uint32_t revision = doc["revision"] | 0;
     if (_config.valid && revision < _config.revision) {
         Serial.printf("[MQTT] Ignoring older config revision: %u (current: %u)\n", revision, _config.revision);
         return;
     }
 
+    if (!doc["screens"].is<JsonArray>()) return;
+    JsonArray validatedScreens = doc["screens"].as<JsonArray>();
+    if (validatedScreens.size() == 0 || validatedScreens.size() > MAX_CONFIG_SCREENS) return;
+    unsigned index = 0;
+    for (JsonObject screen : validatedScreens) {
+        const char* kind = screen["kind"] | "";
+        if (strcmp(kind, index++ == 0 ? "pet" : "quota") != 0) return;
+        if (!screen["screenId"].is<const char*>() || strlen(screen["screenId"].as<const char*>()) >= sizeof(_config.screens[0].screenId)) return;
+        if (strcmp(kind, "quota") == 0 &&
+            (!screen["providerId"].is<const char*>() || !screen["windowId"].is<const char*>() ||
+             strlen(screen["providerId"].as<const char*>()) >= sizeof(_config.screens[0].providerId) ||
+             strlen(screen["windowId"].as<const char*>()) >= sizeof(_config.screens[0].windowId))) return;
+    }
     _config.schemaVersion = doc["schemaVersion"] | 1;
     strncpy(_config.deviceId, doc["deviceId"] | "", sizeof(_config.deviceId) - 1);
     _config.revision = revision;
@@ -146,12 +173,28 @@ void BMOMqttClient::handleSnapshotPayload(const uint8_t* payload, unsigned int l
         return;
     }
 
+    if (doc["schemaVersion"].as<JsonVariantConst>() != 1 || strcmp(doc["deviceId"] | "", BMO_DEVICE_ID) != 0 ||
+        !doc["revision"].is<uint32_t>() || doc["revision"].as<uint32_t>() == 0) return;
     uint32_t revision = doc["revision"] | 0;
     if (_snapshot.valid && revision < _snapshot.revision) {
         Serial.printf("[MQTT] Ignoring older snapshot revision: %u (current: %u)\n", revision, _snapshot.revision);
         return;
     }
 
+    if (!doc["configRevision"].is<uint32_t>() || doc["configRevision"].as<uint32_t>() == 0 ||
+        !doc["windows"].is<JsonArray>() || doc["windows"].size() > MAX_SNAPSHOT_WINDOWS ||
+        !doc["validUntil"].is<const char*>()) return;
+    for (JsonObject w : doc["windows"].as<JsonArray>()) {
+        if (!w["providerId"].is<const char*>() || !w["windowId"].is<const char*>() ||
+            !w["validUntil"].is<const char*>() || !w["dataStatus"].is<const char*>() ||
+            !w["sourceFreshness"].is<const char*>()) return;
+        if (strlen(w["providerId"].as<const char*>()) >= sizeof(_snapshot.windows[0].providerId) ||
+            strlen(w["windowId"].as<const char*>()) >= sizeof(_snapshot.windows[0].windowId)) return;
+        for (const char* key : {"usedPercent", "remainingPercent"}) {
+            if (!w.containsKey(key)) return;
+            if (!w[key].isNull() && (!w[key].is<float>() || w[key].as<float>() < 0 || w[key].as<float>() > 100)) return;
+        }
+    }
     _snapshot.schemaVersion = doc["schemaVersion"] | 1;
     strncpy(_snapshot.deviceId, doc["deviceId"] | "", sizeof(_snapshot.deviceId) - 1);
     _snapshot.revision = revision;
@@ -234,7 +277,7 @@ const ConfigScreen* BMOMqttClient::getQuotaScreenAt(uint8_t index) const {
 }
 
 const SnapshotWindow* BMOMqttClient::findSnapshotWindow(const char* providerId, const char* windowId) const {
-    if (!_snapshot.valid) return nullptr;
+    if (!_snapshot.valid || !_config.valid || _snapshot.configRevision != _config.revision) return nullptr;
     for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
         if (strcmp(_snapshot.windows[i].providerId, providerId) == 0 &&
             strcmp(_snapshot.windows[i].windowId, windowId) == 0) {

@@ -32,6 +32,7 @@ void BMOConnectionManager::startConnecting() {
 
 void BMOConnectionManager::loop() {
     unsigned long now = millis();
+    _timeSynced = getCurrentEpoch() >= 1700000000;
 
     if (_state == WifiState::CONNECTING) {
         if (WiFi.status() == WL_CONNECTED) {
@@ -68,16 +69,10 @@ void BMOConnectionManager::syncTime() {
     Serial.println("[SNTP] Configuring SNTP time synchronization...");
     configTime(BMO_GMT_OFFSET_SEC, BMO_DAYLIGHT_OFFSET_SEC, BMO_NTP_SERVER_1, BMO_NTP_SERVER_2);
 
-    struct tm timeinfo;
-    if (getLocalTime(&timeinfo, 2000)) {
-        _timeSynced = true;
-        _lastNtpSync = millis();
-        Serial.printf("[SNTP] Clock synchronized: %04d-%02d-%02d %02d:%02d:%02d UTC\n",
-                      timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-                      timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-    } else {
-        Serial.println("[SNTP] Warning: Unable to sync time with NTP server yet.");
-    }
+    _lastNtpSync = millis();
+    // SNTP runs asynchronously; never wait for network time in the UI loop.
+    _timeSynced = getCurrentEpoch() >= 1700000000;
+
 }
 
 bool BMOConnectionManager::isWifiConnected() const {

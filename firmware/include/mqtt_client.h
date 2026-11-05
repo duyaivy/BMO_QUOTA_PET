@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include "config.h"
 #include "contracts.h"
@@ -28,7 +29,11 @@ private:
     void handleConfigPayload(const uint8_t* payload, unsigned int length);
     void handleSnapshotPayload(const uint8_t* payload, unsigned int length);
 
+    #if BMO_MQTT_TLS
+    WiFiClientSecure _wifiClient;
+    #else
     WiFiClient _wifiClient;
+    #endif
     PubSubClient _mqtt;
 
     DeviceConfig _config;

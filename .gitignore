@@ -16,3 +16,6 @@ collector/.data/
 
 collector.local.json
 collector-native.local.json
+
+firmware/include/config.local.h
+firmware/.pio/
