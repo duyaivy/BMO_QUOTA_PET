@@ -173,97 +173,188 @@ class StateManager {
 
 class CodexTailer {
     let sessionDir: URL
+    let stateDir: URL
+    let offsetFile: URL
     var fileOffsets: [String: UInt64] = [:]
-    var isInitialized = false
 
-    init(directory: String) {
+    init(directory: String, stateDirectory: String) {
         self.sessionDir = URL(fileURLWithPath: directory)
+        self.stateDir = URL(fileURLWithPath: stateDirectory)
+        self.offsetFile = stateDir.appendingPathComponent("codex-offsets.json")
+        try? FileManager.default.createDirectory(at: stateDir, withIntermediateDirectories: true)
+
+        if let data = try? Data(contentsOf: offsetFile),
+           let map = try? JSONDecoder().decode([String: UInt64].self, from: data) {
+            self.fileOffsets = map
+        }
+    }
+
+    func saveOffsets() {
+        if let data = try? JSONEncoder().encode(fileOffsets) {
+            try? data.write(to: offsetFile)
+        }
+    }
+
+    func findRecentSessionFiles() -> [(url: URL, date: Date, size: UInt64)] {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: sessionDir.path) else { return [] }
+
+        var results: [(url: URL, date: Date, size: UInt64)] = []
+        var searchDirPaths = Set<String>()
+        let now = Date()
+        let cal = Calendar(identifier: .gregorian)
+
+        // Fast path: Check today and past 2 days in both Local and UTC timezones (< 5ms)
+        for tz in [TimeZone.current, TimeZone(secondsFromGMT: 0)!] {
+            let fmt = DateFormatter()
+            fmt.timeZone = tz
+            fmt.dateFormat = "yyyy/MM/dd"
+            for dayOffset in [0, -1, -2] {
+                if let d = cal.date(byAdding: .day, value: dayOffset, to: now) {
+                    let sub = fmt.string(from: d)
+                    let dir = sessionDir.appendingPathComponent(sub)
+                    if fm.fileExists(atPath: dir.path) {
+                        searchDirPaths.insert(dir.path)
+                    }
+                }
+            }
+        }
+
+        // If subdirectories found, only inspect those recent day folders
+        if !searchDirPaths.isEmpty {
+            for path in searchDirPaths {
+                let dir = URL(fileURLWithPath: path)
+                if let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
+                    for f in files where f.pathExtension == "jsonl" {
+                        guard let attrs = try? fm.attributesOfItem(atPath: f.path),
+                              let type = attrs[.type] as? FileAttributeType, type == .typeRegular else { continue }
+                        let size = (attrs[.size] as? NSNumber)?.uint64Value ?? 0
+                        let date = (attrs[.modificationDate] as? Date) ?? Date.distantPast
+                        results.append((url: f, date: date, size: size))
+                    }
+                }
+            }
+        } else {
+            // Fallback for flat directory structure
+            if let files = try? fm.contentsOfDirectory(at: sessionDir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
+                for f in files where f.pathExtension == "jsonl" {
+                    guard let attrs = try? fm.attributesOfItem(atPath: f.path),
+                          let type = attrs[.type] as? FileAttributeType, type == .typeRegular else { continue }
+                    let size = (attrs[.size] as? NSNumber)?.uint64Value ?? 0
+                    let date = (attrs[.modificationDate] as? Date) ?? Date.distantPast
+                    results.append((url: f, date: date, size: size))
+                }
+            }
+        }
+
+        results.sort { $0.date > $1.date }
+        return results
+    }
+
+    func parseLine(_ line: String) -> (pUsed: Double, pSecs: Int, pReset: String?, sUsed: Double, sSecs: Int, sReset: String?)? {
+        guard line.contains("\"type\":\"token_count\""),
+              let lineData = line.data(using: .utf8),
+              let root = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
+              let payload = root["payload"] as? [String: Any],
+              let rateLimits = payload["rate_limits"] as? [String: Any] else { return nil }
+
+        var pUsed: Double?
+        var pSecs = 18000
+        var pReset: String?
+
+        if let primary = rateLimits["primary"] as? [String: Any],
+           let used = (primary["used_percent"] as? NSNumber)?.doubleValue {
+            pUsed = used
+            if let mins = (primary["window_minutes"] as? NSNumber)?.intValue { pSecs = mins * 60 }
+            if let resets = (primary["resets_at"] as? NSNumber)?.intValue {
+                pReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
+            }
+        }
+
+        var sUsed: Double?
+        var sSecs = 604800
+        var sReset: String?
+
+        if let secondary = rateLimits["secondary"] as? [String: Any],
+           let used = (secondary["used_percent"] as? NSNumber)?.doubleValue {
+            sUsed = used
+            if let mins = (secondary["window_minutes"] as? NSNumber)?.intValue { sSecs = mins * 60 }
+            if let resets = (secondary["resets_at"] as? NSNumber)?.intValue {
+                sReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
+            }
+        }
+
+        if let pu = pUsed, let su = sUsed {
+            return (pu, pSecs, pReset, su, sSecs, sReset)
+        }
+        return nil
     }
 
     func scan(onQuotaFound: (_ primaryUsed: Double, _ primarySecs: Int, _ primaryReset: String?, _ secondaryUsed: Double, _ secondarySecs: Int, _ secondaryReset: String?) -> Void) {
-        guard FileManager.default.fileExists(atPath: sessionDir.path) else { return }
-
-        let fm = FileManager.default
-        let enumerator = fm.enumerator(at: sessionDir, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey], options: [.skipsHiddenFiles])
-
-        var jsonlFiles: [(url: URL, date: Date, size: UInt64)] = []
-
-        while let fileURL = enumerator?.nextObject() as? URL {
-            guard fileURL.pathExtension == "jsonl" else { continue }
-            guard let values = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey]),
-                  values.isRegularFile == true else { continue }
-            let size = UInt64(values.fileSize ?? 0)
-            let date = values.contentModificationDate ?? Date.distantPast
-            jsonlFiles.append((url: fileURL, date: date, size: size))
-        }
-
-        // Sort descending by date
-        jsonlFiles.sort { $0.date > $1.date }
-
-        if !isInitialized {
-            // Baseline existing files at current EOF
-            for file in jsonlFiles {
-                fileOffsets[file.url.path] = file.size
-            }
-            isInitialized = true
+        let files = findRecentSessionFiles()
+        guard !files.isEmpty else {
+            print("[CodexTailer] No jsonl files found in \(sessionDir.path)")
             return
         }
 
-        // Inspect only recently active files (top 32)
-        for file in jsonlFiles.prefix(32) {
-            let path = file.url.path
+        // FIRST RUN: If offsets are empty, discover live quota from newest session file
+        if fileOffsets.isEmpty {
+            print("[CodexTailer] First run: Inspecting latest session file to load current quota...")
+            if let newest = files.first {
+                print("[CodexTailer] Checking newest file: \(newest.url.path)")
+                if let content = try? String(contentsOf: newest.url, encoding: .utf8) {
+                    let lines = content.components(separatedBy: .newlines)
+                    for line in lines.reversed() {
+                        if let q = parseLine(line) {
+                            print("[CodexTailer] Found quota in \(newest.url.lastPathComponent): Primary \(q.pUsed)%, Secondary \(q.sUsed)%")
+                            onQuotaFound(q.pUsed, q.pSecs, q.pReset, q.sUsed, q.sSecs, q.sReset)
+                            break
+                        }
+                    }
+                }
+            }
+
+            for f in files {
+                fileOffsets[f.url.path] = f.size
+            }
+            saveOffsets()
+            print("[CodexTailer] Baselined \(files.count) files and saved offsets to \(offsetFile.path)")
+            return
+        }
+
+        // TAILING SCAN FOR UPDATES:
+
+        for f in files.prefix(16) {
+            let path = f.url.path
             let prevOffset = fileOffsets[path] ?? 0
-            guard file.size > prevOffset else { continue }
 
-            guard let handle = try? FileHandle(forReadingFrom: file.url) else { continue }
-            defer { try? handle.close() }
+            if f.size > prevOffset {
+                guard let handle = try? FileHandle(forReadingFrom: f.url) else { continue }
+                defer { try? handle.close() }
 
-            try? handle.seek(toOffset: prevOffset)
-            guard let newBytes = try? handle.readToEnd(),
-                  let content = String(data: newBytes, encoding: .utf8) else { continue }
+                try? handle.seek(toOffset: prevOffset)
+                guard let data = try? handle.readToEnd(), !data.isEmpty else { continue }
 
-            fileOffsets[path] = file.size
+                // Only consume complete lines ending with newline (0x0a)
+                guard let lastNewline = data.lastIndex(of: 0x0a) else { continue }
+                let validData = data[...lastNewline]
+                let bytesConsumed = UInt64(validData.count)
 
-            let lines = content.components(separatedBy: .newlines)
-            for line in lines where line.contains("\"type\":\"token_count\"") {
-                guard let lineData = line.data(using: .utf8),
-                      let root = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
-                      let payload = root["payload"] as? [String: Any],
-                      let rateLimits = payload["rate_limits"] as? [String: Any] else { continue }
+                fileOffsets[path] = prevOffset + bytesConsumed
+                saveOffsets()
 
-                var pUsed: Double?
-                var pSecs = 18000
-                var pReset: String?
-
-                if let primary = rateLimits["primary"] as? [String: Any],
-                   let used = primary["used_percent"] as? Double {
-                    pUsed = used
-                    if let mins = primary["window_minutes"] as? Int { pSecs = mins * 60 }
-                    if let resets = primary["resets_at"] as? Int {
-                        pReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
+                guard let content = String(data: validData, encoding: .utf8) else { continue }
+                let lines = content.components(separatedBy: .newlines)
+                for line in lines {
+                    if let q = parseLine(line) {
+                        onQuotaFound(q.pUsed, q.pSecs, q.pReset, q.sUsed, q.sSecs, q.sReset)
                     }
-                }
-
-                var sUsed: Double?
-                var sSecs = 604800
-                var sReset: String?
-
-                if let secondary = rateLimits["secondary"] as? [String: Any],
-                   let used = secondary["used_percent"] as? Double {
-                    sUsed = used
-                    if let mins = secondary["window_minutes"] as? Int { sSecs = mins * 60 }
-                    if let resets = secondary["resets_at"] as? Int {
-                        sReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
-                    }
-                }
-
-                if let pu = pUsed, let su = sUsed {
-                    onQuotaFound(pu, pSecs, pReset, su, sSecs, sReset)
                 }
             }
         }
     }
 }
+
 
 // MARK: - Spool Drainer
 
@@ -284,13 +375,20 @@ class SpoolDrainer {
         try? "".write(to: spoolFile, atomically: true, encoding: .utf8)
 
         let lines = content.components(separatedBy: .newlines)
-        for line in lines where !line.trimmingCharacters(in: .whitespaces).isEmpty {
+        var latestPerProvider: [String: (quota: [String: Any], timestamp: String)] = [:]
+        for line in lines.reversed() where !line.trimmingCharacters(in: .whitespaces).isEmpty {
             guard let lineData = line.data(using: .utf8),
                   let obj = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
                   let provider = obj["provider"] as? String,
                   let quota = obj["quota"] as? [String: Any],
                   let collectedAt = obj["timestamp"] as? String else { continue }
-            onPacket(provider, quota, collectedAt)
+            if latestPerProvider[provider] == nil {
+                latestPerProvider[provider] = (quota, collectedAt)
+            }
+        }
+
+        for (provider, info) in latestPerProvider {
+            onPacket(provider, info.quota, info.timestamp)
         }
     }
 }
@@ -314,7 +412,7 @@ class App {
         self.stateManager = StateManager(directory: cfg.stateDirectory)
         self.ingestion = try IngestionClient(config: cfg)
         if let codex = cfg.nativeCodex, cfg.providers["codex"]?.enabled == true {
-            self.codexTailer = CodexTailer(directory: codex.sessionDirectory)
+            self.codexTailer = CodexTailer(directory: codex.sessionDirectory, stateDirectory: cfg.stateDirectory)
         } else {
             self.codexTailer = nil
         }
@@ -325,20 +423,21 @@ class App {
         print("[BMO] Native Collector (Swift Native, RAM < 6MB) started.")
         print("[BMO] Collector ID: \(config.collectorId), Key ID: \(config.keyId)")
         print("[BMO] Ingest URL: \(config.url)")
+        print("[BMO] Codex tailer: \(codexTailer == nil ? "DISABLED" : "ENABLED")")
 
         var lastHeartbeat = Date.distantPast
 
         // Main Loop
         while isRunning {
             autoreleasepool {
-                // 1. Drain Antigravity Statusline Spool
-                spoolDrainer.drain { provider, quota, collectedAt in
-                    handleAntigravityCallback(quota: quota, collectedAt: collectedAt)
-                }
-
-                // 2. Scan Codex Sessions
+                // 1. Scan Codex Sessions
                 codexTailer?.scan { pUsed, pSecs, pReset, sUsed, sSecs, sReset in
                     handleCodexObservation(pUsed: pUsed, pSecs: pSecs, pReset: pReset, sUsed: sUsed, sSecs: sSecs, sReset: sReset)
+                }
+
+                // 2. Drain Antigravity Statusline Spool (coalesced to latest)
+                spoolDrainer.drain { provider, quota, collectedAt in
+                    handleAntigravityCallback(quota: quota, collectedAt: collectedAt)
                 }
 
                 // 3. Heartbeat every 60 seconds
@@ -355,8 +454,6 @@ class App {
     func handleCodexObservation(pUsed: Double, pSecs: Int, pReset: String?, sUsed: Double, sSecs: Int, sReset: String?) {
         guard let codexSetting = config.providers["codex"], codexSetting.enabled else { return }
         let generation = codexSetting.generation
-        let seq = stateManager.nextSequence(for: "codex")
-        let eventId = UUID().uuidString.lowercased()
         let now = isoNow()
 
         let windows: [[String: Any]] = [
@@ -388,15 +485,13 @@ class App {
             ]
         ]
 
-        let payload: [String: Any] = [
+        let basePayload: [String: Any] = [
             "schemaVersion": 1,
             "collectorId": config.collectorId,
-            "eventId": eventId,
             "providerId": "codex",
             "sourceType": "codex-session-jsonl",
             "sourceVersion": "codex-cli/0.163.0",
             "ownershipGeneration": generation,
-            "sequence": seq,
             "sourceAvailability": "available",
             "dataStatus": "ok",
             "errorCode": NSNull(),
@@ -409,16 +504,30 @@ class App {
             "windows": windows
         ]
 
-        guard let jsonBytes = try? JSONSerialization.data(withJSONObject: payload),
-              let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return }
+        var attempts = 0
+        while attempts < 3 {
+            attempts += 1
+            let seq = stateManager.nextSequence(for: "codex")
+            let eventId = UUID().uuidString.lowercased()
 
-        let res = ingestion.signAndUpload(payloadJson: jsonStr, eventId: eventId)
-        if case .success = res {
-            print("[BMO] [Codex] Observation uploaded (Primary: \(Int(pUsed))% used, Secondary: \(Int(sUsed))% used) -> ACKNOWLEDGED")
-        } else if case .sequenceConflict = res {
-            _ = stateManager.nextSequence(for: "codex")
-            _ = stateManager.nextSequence(for: "codex")
-            _ = stateManager.nextSequence(for: "codex")
+            var payload = basePayload
+            payload["sequence"] = seq
+            payload["eventId"] = eventId
+
+            guard let jsonBytes = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return }
+
+            let res = ingestion.signAndUpload(payloadJson: jsonStr, eventId: eventId)
+            if case .success = res {
+                print("[BMO] [Codex] Observation uploaded (Primary: \(Int(pUsed))% used, Secondary: \(Int(sUsed))% used) -> ACKNOWLEDGED")
+                break
+            } else if case .sequenceConflict = res {
+                _ = stateManager.nextSequence(for: "codex")
+                _ = stateManager.nextSequence(for: "codex")
+                continue
+            } else {
+                break
+            }
         }
     }
 
