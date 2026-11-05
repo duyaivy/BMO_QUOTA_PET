@@ -22,7 +22,7 @@ void setup() {
     // 2. Initialize Hardware Buttons
     buttonManager.begin();
 
-    // 3. Initialize OLED Display (I2C SDA=GPIO 15, SCL=GPIO 14 for ESP32-CAM)
+    // 3. Initialize OLED Display (I2C SDA=GPIO 13, SCL=GPIO 14 for ESP32-CAM)
     if (!display.begin()) {
         Serial.println("[MAIN] Fatal: OLED display failed to initialize! Halting.");
         while (true) {
@@ -34,12 +34,17 @@ void setup() {
     display.showSplashScreen("v1.0 (ESP32-CAM)");
     delay(1500);
 
+    // Bench build exercises the real UI without network credentials or services.
+#if defined(BMO_BENCH_OFFLINE) && BMO_BENCH_OFFLINE
+    Serial.println("[BENCH] Offline OLED/buttons test; Wi-Fi and MQTT disabled.");
+#else
     // 5. Initialize Wi-Fi Connection Manager & SNTP Time
     display.showConnectingScreen("Connecting Wi-Fi...");
     connManager.begin();
 
     // 6. Initialize MQTT Client for Quota & Screen Topics
     mqttClient.begin();
+#endif
 
     // 7. Initialize UI Navigation Controller (Defaults to BMO Happy Face)
     navigation.begin();
@@ -51,16 +56,13 @@ void loop() {
     unsigned long now = millis();
 
     // 1. Service Network & Background Tasks (Non-blocking)
+#if !defined(BMO_BENCH_OFFLINE) || !BMO_BENCH_OFFLINE
     connManager.loop();
     mqttClient.loop();
+#endif
 
     // 2. Poll Physical Buttons and Update Navigation State
     navigation.update();
-
-    // 3. Reset power activity timer if user interacted with any button
-    if (buttonManager.wasClicked(ButtonId::BUTTON_A) || buttonManager.wasClicked(ButtonId::BUTTON_B)) {
-        powerManager.resetActivityTimer();
-    }
 
     // 4. Render UI Frame at target frame rate (30 FPS)
     if (now - lastFrameTick >= ANIMATION_TICK_MS) {

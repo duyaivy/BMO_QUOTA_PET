@@ -7,11 +7,21 @@ BMODisplay::BMODisplay()
       _initialized(false) {}
 
 bool BMODisplay::begin() {
-    // Custom I2C pin mapping for ESP32-CAM: GPIO 15 (SDA), GPIO 14 (SCL)
+    // Preserve the old ESP32-CAM wiring: GPIO 13 (SDA), GPIO 14 (SCL).
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000); // 400kHz I2C clock for snappy frame rate
 
-    if (!_oled.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
-        Serial.printf("[DISPLAY] SSD1306 allocation failed at address 0x%02X! Check wiring.\n", OLED_I2C_ADDRESS);
+    Serial.printf("[DISPLAY] SDA=%d SCL=%d address=0x%02X\n",
+                  PIN_I2C_SDA, PIN_I2C_SCL, OLED_I2C_ADDRESS);
+    Wire.beginTransmission(OLED_I2C_ADDRESS);
+    if (Wire.endTransmission() != 0) {
+        Serial.println("[DISPLAY] No I2C ACK. Check power, SDA/SCL and OLED address (0x3C/0x3D).");
+        _initialized = false;
+        return false;
+    }
+
+    // Wire is already initialized with custom pins; do not initialize it again.
+    if (!_oled.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS, true, false)) {
+        Serial.printf("[DISPLAY] SSD1306 buffer allocation failed at 0x%02X.\n", OLED_I2C_ADDRESS);
         _initialized = false;
         return false;
     }
@@ -159,7 +169,7 @@ void BMODisplay::showEndOfListScreen() {
     _oled.setCursor(6, 40);
     _oled.print("[A] Back to BMO Face");
     _oled.setCursor(6, 52);
-    _oled.print("[B] Restart Quota List");
+    _oled.print("Auto return in 3s");
 
     _oled.display();
 }
@@ -170,7 +180,7 @@ void BMODisplay::showEmptyQuotaScreen() {
 
     drawCenteredText("NO QUOTA CONFIGURED", 14, 1);
     drawCenteredText("Configure in Dashboard", 30, 1);
-    drawCenteredText("Press [A] for Face", 48, 1);
+    drawCenteredText("Returning to face...", 48, 1);
 
     _oled.display();
 }

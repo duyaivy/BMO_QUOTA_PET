@@ -1,6 +1,7 @@
 #include "navigation.h"
 #include "mqtt_client.h"
 #include "wifi_manager.h"
+#include "power_manager.h"
 
 BMONavigationController navigation;
 
@@ -19,18 +20,24 @@ void BMONavigationController::update() {
     buttonManager.update();
 
     if (buttonManager.wasClicked(ButtonId::BUTTON_A)) {
+        powerManager.resetActivityTimer();
         handleButtonA();
     }
 
     if (buttonManager.wasClicked(ButtonId::BUTTON_B)) {
+        powerManager.resetActivityTimer();
         handleButtonB();
     }
 
-    // Optional: Auto-wrap or auto-return from END_OF_LIST after timeout if configured
+    // Empty lists also show a bounded notification before returning home.
+    if (_mode == UIMode::QUOTA_VIEW && mqttClient.getQuotaScreenCount() == 0) {
+        _mode = UIMode::END_OF_LIST;
+        _endOfListEnteredAt = millis();
+    }
     if (_mode == UIMode::END_OF_LIST) {
         if (END_OF_LIST_AUTO_WRAP_MS > 0 && millis() - _endOfListEnteredAt > END_OF_LIST_AUTO_WRAP_MS) {
-            Serial.println("[NAV] End of list timeout reached. Returning to first quota screen.");
-            _mode = UIMode::QUOTA_VIEW;
+            Serial.println("[NAV] End of list timeout reached. Returning to face.");
+            _mode = UIMode::PET_FACE;
             _quotaIndex = 0;
         }
     }
@@ -105,7 +112,8 @@ void BMONavigationController::render() {
             break;
 
         case UIMode::END_OF_LIST:
-            display.showEndOfListScreen();
+            if (mqttClient.getQuotaScreenCount() == 0) display.showEmptyQuotaScreen();
+            else display.showEndOfListScreen();
             break;
     }
 }
