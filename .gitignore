@@ -1,24 +1,45 @@
+# Dependencies and generated build output
 node_modules/
 .next/
 out/
+.build/
+/collector/bin/
+*.dSYM/
+.pnpm-store/
+*.tsbuildinfo
+
+# Test output and local reference screenshots
 coverage/
 playwright-report/
 test-results/
-.pnpm-store/
-*.tsbuildinfo
+/image*.png
+
+# Local environment, configuration, and runtime state
 .env*
 !.env.example
-.DS_Store
-*.log
-
 .data/
 collector/.data/
-
 collector.local.json
 collector-native.local.json
-
 firmware/include/config.local.h
 firmware/.pio/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.log
 
-image*.png
-*.png
+# Python caches and editor/OS temporary files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+._*
+*.swp
+*.swo
+*~

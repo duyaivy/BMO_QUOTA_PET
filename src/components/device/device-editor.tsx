@@ -149,7 +149,7 @@ export function DeviceEditor({
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.7fr)]">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.7fr)]">
       <Card>
         <CardHeader>
           <CardTitle>Cài đặt hiển thị</CardTitle>
@@ -164,7 +164,7 @@ export function DeviceEditor({
               value={name}
               maxLength={80}
               onChange={(event) => setName(event.target.value)}
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 min-w-0 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           <div className="grid gap-2">
@@ -178,7 +178,7 @@ export function DeviceEditor({
                 value={selectedValue}
                 disabled={!choices.length || screens.length >= 16}
                 onChange={(event) => setSelection(event.target.value)}
-                className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                className="h-11 min-h-11 w-full min-w-0 shrink-0 rounded-lg border border-input bg-background px-3 text-sm sm:w-auto sm:flex-1"
               >
                 <option value="">
                   {choices.length
@@ -296,7 +296,7 @@ export function DeviceEditor({
               id="preview-screen"
               value={previewScreen.screenId}
               onChange={(event) => setPreviewId(event.target.value)}
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 min-w-0 w-full rounded-lg border border-input bg-background px-3 text-sm"
             >
               {screens.map((screen, index) => (
                 <option key={screen.screenId} value={screen.screenId}>

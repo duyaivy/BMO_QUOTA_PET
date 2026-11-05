@@ -81,17 +81,16 @@ test("persisted unknown, stale and reset values stay honest after heartbeat and 
     name: "Khung hạn mức Unknown source age",
   });
   await expect(
-    unknown.getByText("Tuổi dữ liệu nguồn chưa xác định", { exact: true }),
+    unknown.getByText("Chưa xác minh độ mới", { exact: true }),
   ).toBeVisible();
   await expect(unknown.getByRole("progressbar")).toHaveAttribute(
     "aria-valuenow",
-    "45",
+    "55",
   );
   const stale = page.getByRole("group", { name: "Khung hạn mức Old quota" });
   await expect(stale.getByText("70%", { exact: true })).toBeVisible();
-  await expect(
-    stale.getByText("Dữ liệu cũ · giá trị gần nhất", { exact: true }),
-  ).toBeVisible();
+  await expect(stale.getByText("Dữ liệu cũ", { exact: true })).toBeVisible();
+  await stale.getByText("Chi tiết dữ liệu", { exact: true }).click();
   const captureBefore = await stale
     .locator("time")
     .first()

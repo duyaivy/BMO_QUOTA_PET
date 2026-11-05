@@ -283,10 +283,11 @@ test("native Codex collector recovers quota across offline retry, suspend, resum
     const window = page.getByRole("group", { name: "Khung hạn mức Primary" });
     await expect(window.getByText("33%", { exact: true })).toBeVisible();
     await expect(
-      window.getByText("Tuổi dữ liệu nguồn chưa xác định", { exact: true }),
+      window.getByText("Chưa xác minh độ mới", { exact: true }),
     ).toBeVisible();
+    await window.getByText("Chi tiết dữ liệu", { exact: true }).click();
     await expect(
-      window.getByText("Thời điểm nguồn quan sát", { exact: true }),
+      window.getByText("Thời điểm nguồn quan sát (UTC)", { exact: true }),
     ).toBeVisible();
     await expect(
       window.locator("dl").getByText("Chưa xác định", { exact: true }),

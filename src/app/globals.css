@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f8f5;
-  --foreground: #213d33;
-  --card: #ffffff;
-  --card-foreground: #213d33;
-  --primary: #275e4d;
+  color-scheme: dark;
+  --background: #090d1b;
+  --foreground: #f5f7ff;
+  --card: #141b31;
+  --card-foreground: #f5f7ff;
+  --primary: #b39aff;
   --primary-foreground: #ffffff;
-  --secondary: #dcefe5;
-  --secondary-foreground: #214a3c;
-  --muted: #edf1ec;
-  --muted-foreground: #53665d;
-  --accent: #e0efe6;
-  --accent-foreground: #214a3c;
-  --destructive: #b42318;
-  --border: #dce4dc;
-  --input: #c6d4c9;
-  --ring: #35755d;
-  --radius: 0.75rem;
+  --secondary: #183831;
+  --secondary-foreground: #79f3a7;
+  --muted: #1b2340;
+  --muted-foreground: #a6b1cc;
+  --accent: #262747;
+  --accent-foreground: #f5f7ff;
+  --destructive: #fb7185;
+  --border: #2b3556;
+  --input: #394567;
+  --ring: #a78bfa;
+  --radius: 0.875rem;
 }
 
 @theme inline {
@@ -37,7 +38,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -51,6 +52,11 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
     margin: 0;
+    background-image: radial-gradient(
+      ellipse at 60% 0%,
+      #20203c55,
+      transparent 65%
+    );
   }
   a,
   button {
@@ -60,5 +66,32 @@
   button:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 3px;
+  }
+  summary:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+  summary {
+    cursor: pointer;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  main {
+    overflow-wrap: anywhere;
+  }
+  [data-slot="card"] {
+    background-image: linear-gradient(125deg, #a78bfa06, transparent 65%);
+    box-shadow: 0 6px 24px #00000012;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
 }

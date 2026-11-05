@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { DeviceScreen, ProviderView } from "@/contracts/dashboard";
 import { effectiveWindow } from "@/contracts/usage";
+import { freshnessLabel } from "@/components/quota/presentation";
 
 export function OledPreview({
   screen,
@@ -54,8 +55,9 @@ export function OledPreview({
           ? "Nguồn không khả dụng"
           : effective.effectiveFreshness === "stale"
             ? "Dữ liệu cũ · gần nhất"
-            : effective.effectiveFreshness === "unknown"
-              ? "Chưa rõ tuổi"
+            : freshnessLabel(item.window, now, freshnessThresholdSeconds) ===
+                "Chưa xác minh độ mới"
+              ? "Chưa xác minh độ mới"
               : `CÒN LẠI ${value}`;
     }
   }
@@ -121,7 +123,8 @@ export function OledPreview({
         <p className="text-xs">Dữ liệu mẫu mô phỏng</p>
       ) : null}
       <p className="mt-2 text-xs text-muted-foreground">
-        Chỉ dùng hỗ trợ cấu hình. Chưa xác minh MQTT và hiển thị phần cứng.
+        Bản xem trước cấu hình, không phản ánh trạng thái kết nối hoặc màn hình
+        thiết bị thực tế.
       </p>
     </div>
   );

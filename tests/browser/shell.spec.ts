@@ -35,6 +35,8 @@ for (const width of [375, 1440]) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
     for (const route of routes) {
+      if (width < 1024)
+        await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
       const link = page
         .getByRole("navigation", { name: "Điều hướng chính" })
         .getByRole("link", { name: route.label, exact: true });
@@ -43,7 +45,10 @@ for (const width of [375, 1440]) {
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(
         route.heading,
       );
+      if (width < 1024)
+        await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
       await expect(link).toHaveAttribute("aria-current", "page");
+      if (width < 1024) await page.keyboard.press("Escape");
       await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
       expect(
         await page.evaluate(
@@ -67,19 +72,26 @@ test("keyboard skip link and mobile navigation reach every route", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
 
-  // Restart the tab order to exercise the horizontally scrolling mobile links.
-  await page.goto("/");
+  await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Menu điều hướng" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Đóng menu điều hướng" }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(
+    page.getByRole("button", { name: "Đăng xuất", exact: true }),
+  ).toBeFocused();
   await page.keyboard.press("Tab");
-  for (const route of routes) {
-    await page.keyboard.press("Tab");
-    const link = page
-      .getByRole("navigation")
-      .getByRole("link", { name: route.label, exact: true });
-    await expect(link).toBeFocused();
-    await expect(link).toBeInViewport();
-  }
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL("/login");
+  await expect(
+    page.getByRole("button", { name: "Đóng menu điều hướng" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Mở menu điều hướng" }),
+  ).toBeFocused();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
 test("unverified sources remain explicit", async ({ page }) => {

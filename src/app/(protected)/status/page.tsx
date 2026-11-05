@@ -19,26 +19,27 @@ export default async function StatusPage() {
     },
     {
       name: "Thu nạp dữ liệu sử dụng",
-      status: "Khả dụng",
+      status: "Đã cấu hình",
       detail:
         "Đường dẫn thu nạp của ứng dụng đã được cấu hình. Điều này không xác minh việc truyền tải từ bên ngoài.",
     },
     {
       name: "Tích hợp nhà cung cấp",
-      status: "Chưa xác minh",
+      status: `${snapshot.providers.filter((provider) => provider.verification === "verified").length}/${snapshot.providers.length} đã xác minh`,
       detail:
-        "Định dạng hạn mức và hành vi nguồn gốc của nhà cung cấp vẫn chưa được xác minh.",
+        "Trạng thái xác minh theo cấu hình từng nhà cung cấp. Việc bật nguồn không xác nhận dữ liệu mới.",
     },
     {
       name: "MQTT broker",
-      status: "Đang chờ",
-      detail: "Cấu hình và khả năng kết nối tới broker chưa được triển khai.",
+      status: "Chưa kiểm tra",
+      detail:
+        "Trang này không kiểm tra kết nối MQTT broker. Xem thông số kết nối đã cấu hình tại Thiết bị.",
     },
     {
       name: "Phần cứng và triển khai",
-      status: "Đang chờ",
+      status: "Chưa xác minh",
       detail:
-        "Chưa thực hiện kiểm tra kết nối phần cứng hoặc triển khai thực tế.",
+        "Không có bằng chứng kiểm tra phần cứng hay triển khai thực tế trong dữ liệu của trang này.",
     },
   ];
   return (
@@ -55,7 +56,7 @@ export default async function StatusPage() {
         {items.map((item) => (
           <Card key={item.name}>
             <CardHeader>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <CardTitle>{item.name}</CardTitle>
                 <Badge
                   variant={item.status === "Khả dụng" ? "secondary" : "outline"}

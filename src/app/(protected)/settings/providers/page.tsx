@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProviderToggle } from "@/components/settings/provider-toggle";
+import { ProviderIcon } from "@/components/quota/provider-icon";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default async function ProviderSettingsPage() {
         title="Nguồn nhà cung cấp"
         description="BMO không đăng nhập vào tài khoản nhà cung cấp hay xử lý thông tin đăng nhập của họ. Việc đăng nhập được thực hiện độc lập trên ứng dụng chính thức của từng bên."
       />
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {snapshot.providers.map((provider) => (
           <Card
             key={provider.providerId}
@@ -42,6 +43,7 @@ export default async function ProviderSettingsPage() {
             aria-label={"Cài đặt nguồn " + provider.name}
           >
             <CardHeader>
+              <ProviderIcon provider={provider.providerId} />
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <CardTitle>{provider.name}</CardTitle>
                 <Badge variant="outline">
@@ -54,9 +56,17 @@ export default async function ProviderSettingsPage() {
               </div>
               <CardDescription>{guidance[provider.providerId]}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="mt-auto flex flex-col items-start gap-4">
+              <Link
+                href={`/providers/${provider.providerId}`}
+                className="inline-flex min-h-10 items-center text-sm font-medium text-primary hover:underline"
+              >
+                Xem hạn mức {provider.name} →
+              </Link>
               {provider.synthetic ? (
-                <Badge variant="secondary">Dữ liệu mẫu mô phỏng</Badge>
+                <div>
+                  <Badge variant="secondary">Dữ liệu mẫu mô phỏng</Badge>
+                </div>
               ) : null}
               <dl className="grid gap-2 text-sm">
                 <div className="flex flex-wrap justify-between gap-2">

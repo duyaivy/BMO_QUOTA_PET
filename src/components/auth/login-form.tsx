@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export function LoginForm() {
           maxLength={1024}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
       {message ? (
@@ -68,13 +69,9 @@ export function LoginForm() {
           {message}
         </p>
       ) : null}
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-      >
+      <Button type="submit" disabled={busy} className="h-11 w-full rounded-lg">
         {busy ? "Đang đăng nhập…" : "Đăng nhập"}
-      </button>
+      </Button>
     </form>
   );
 }

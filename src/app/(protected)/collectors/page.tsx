@@ -30,7 +30,7 @@ export default async function CollectorsPage() {
       </PageHeader>
       {snapshot.collectors.length ? (
         <section
-          className="grid gap-4 lg:grid-cols-2"
+          className="grid gap-4 xl:grid-cols-2"
           aria-label="Các bộ thu thập đã đăng ký"
         >
           {snapshot.collectors.map((collector) => (
