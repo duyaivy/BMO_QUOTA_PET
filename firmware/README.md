@@ -27,9 +27,9 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
   - Renders provider quota percentages, dynamic progress bars, and status pills (`[OK]`, `[STALE]`, `[UNAVAILABLE]`, `[UNSUPPORTED]`, `[ERROR]`).
   - Supports tombstones (zero-byte retirement messages).
 - **ESP32-CAM Hardware Hardening:**
-  - Custom I2C pin assignment: SDA on **GPIO 15**, SCL on **GPIO 14**.
+  - Custom I2C pin assignment: SDA on **GPIO 13**, SCL on **GPIO 14** (existing wiring).
   - Immediate boot suppression of the blinding GPIO 4 flash LED.
-  - 160 MHz CPU power optimization for cool operation and brownout immunity.
+  - 160 MHz CPU power optimization for cool operation and reduced CPU frequency (power stability requires bench testing).
   - Idle screen saver timeout (5 minutes) to protect OLED phosphor from burn-in.
 
 ---
@@ -44,7 +44,7 @@ firmware/
 ├── README.md                   # This documentation
 ├── include/
 │   ├── config.example.h        # Configuration template
-│   ├── config.h                # Active local configuration (create from example)
+│   ├── config.h                # Loader for ignored config.local.h or example defaults
 │   ├── contracts.h             # C++ data structures for MQTT Config & Snapshot v1
 │   ├── display.h               # OLED driver wrapper & primitive drawing widgets
 │   ├── wifi_manager.h          # Non-blocking Wi-Fi manager & SNTP clock client
@@ -70,15 +70,20 @@ firmware/
 
 ## Getting Started
 
+For the first physical test, follow [BENCH_TEST.md](BENCH_TEST.md). Use the
+`esp32cam_bench` environment to test OLED/buttons without Wi-Fi or MQTT.
+Battery, charging and enclosure power design are deferred. The normal `esp32cam`
+environment still enables Wi-Fi and MQTT and requires the configuration below.
+
 ### 1. Configuration
 
-Copy `include/config.example.h` to `include/config.h`:
+Copy `include/config.example.h` to `include/config.local.h`:
 
 ```bash
-cp firmware/include/config.example.h firmware/include/config.h
+cp firmware/include/config.example.h firmware/include/config.local.h
 ```
 
-Edit `include/config.h` and update:
+Edit `include/config.local.h` and update:
 - `BMO_WIFI_SSID` & `BMO_WIFI_PASSWORD`
 - `BMO_MQTT_BROKER` (IP or hostname of your local EMQX or staging broker)
 - `BMO_DEVICE_ID` (matches the device enrolled on the BMO dashboard, e.g. `bmo-dev-01`)
@@ -86,14 +91,15 @@ Edit `include/config.h` and update:
 ### 2. Building & Flashing with PlatformIO (Recommended)
 
 1. Connect your USB-to-UART adapter to the ESP32-CAM:
-   - FTDI 3.3V/5V -> ESP32-CAM 5V/3V3
+   - Stable external 5V supply -> ESP32-CAM **5V**; supply GND -> board GND.
+   - USB-UART uses **3.3V logic**; leave its VCC disconnected when using external power.
    - FTDI GND -> ESP32-CAM GND
    - FTDI TX -> ESP32-CAM U0R (GPIO 3)
    - FTDI RX -> ESP32-CAM U0T (GPIO 1)
    - **Connect IO0 to GND** before powering on to enter bootloader mode.
 2. Build and upload:
    ```bash
-   pio run -e esp32cam -t upload
+   pio run -d firmware -e esp32cam -t upload
    ```
 3. Disconnect **IO0 from GND** and press the **Reset** button on the bottom of the ESP32-CAM.
 4. Monitor serial logs:
@@ -125,3 +131,22 @@ Edit `include/config.h` and update:
 | **Button B** | Quota View | Press | Advances to next Quota screen |
 | **Button B** | Last Quota Screen | Press | Displays **"ALL PROVIDERS VIEWED / End of Quota List"** screen |
 | **Button B** | End of List | Press | Wraps back to first Quota screen |
+
+## Correction and verification status
+
+Button A cycles faces. Button B advances configured quota pages. Empty lists and
+end-of-list notifications return to the current face after 3 seconds. A returns
+immediately; B on the end notification restarts the list. A zero remaining quota
+is displayed as a quota value; it does not mean the list has ended.
+
+Use ignored `include/config.local.h` for credentials. The tracked `config.h` is
+only a loader. TLS is enabled by default: supply the broker hostname, port 8883,
+and PEM root CA in `BMO_MQTT_CA_CERT`. Missing CA or unsynchronized time prevents
+connection. Plaintext (`BMO_MQTT_TLS=0`, port 1883) is for trusted local tests only.
+
+Run `python3 tests/firmware/native/navigation_test.py` from the repository root
+for host tests of the production navigation implementation. The TypeScript
+simulator alone is not firmware validation. Both `esp32cam` and `esp32cam_bench`
+compiled successfully on 2026-11-03. TLS integration, OLED output, electrical
+design, runtime and charging require physical validation.
+Arduino IDE compatibility has not been validated; use the PlatformIO project.

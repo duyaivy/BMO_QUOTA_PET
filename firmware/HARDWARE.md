@@ -1,5 +1,10 @@
 # BMO Hardware Assembly & ESP32-CAM Integration Guide
 
+> **2026-11-03: Historical draft below; do not assemble from its old pin/power tables.**
+> The current bench wiring is in [BENCH_TEST.md](BENCH_TEST.md): OLED SDA=13,
+> SCL=14, Button A=15, Button B=12. Battery/charging design is deferred by the
+> owner. See [reuse design](../docs/HARDWARE_REUSE_DESIGN.md) for the comparison.
+
 This guide details the physical assembly, schematic wiring, power management design, and enclosure guidelines for building the **BMO Personal Desk Pet** using an **AI-Thinker ESP32-CAM** and a **0.96-inch SSD1306 OLED display**.
 
 ---
