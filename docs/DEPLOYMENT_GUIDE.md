@@ -105,6 +105,14 @@ Mở rộng mục **Environment Variables** và nhập đầy đủ các biến 
 3. Sau khi deploy thành công, sao chép URL production được cấp (ví dụ: `https://bom-quota-pet.vercel.app`).
 4. Nếu URL khác với biến `BMO_APP_ORIGIN` đã nhập, cập nhật lại biến `BMO_APP_ORIGIN` trong **Settings $\rightarrow$ Environment Variables** và chọn **Redeploy**.
 
+### Kiểm tra đăng nhập trên Vercel
+
+- Đặt `BMO_APP_ORIGIN` đúng origin đang mở, ví dụ `https://bmo-pet.vercel.app`, không có dấu `/` cuối hoặc đường dẫn.
+- Giá trị `ADMIN_PASSWORD_HASH` trên Vercel phải bắt đầu bằng `$argon2id$`, không có dấu `\` trước `$`, không có tiền tố `ADMIN_PASSWORD_HASH=` hoặc dấu nháy bao quanh. Không đặt `ADMIN_PASSWORD`.
+- Bản code hỗ trợ Vercel đọc `x-vercel-forwarded-for` khi biến nền tảng `VERCEL=1`. Không cần cấu hình `BMO_CLIENT_SOURCE_SECRET` hoặc tự tạo header `X-BMO-Trusted-Client` trên Vercel. Trên server Node riêng, tiếp tục dùng `pnpm start` để tạo và kiểm tra header ký.
+- Sau khi đổi biến môi trường, redeploy và thử đăng nhập bằng mật khẩu gốc. Database production phải được migrate trước khi tạo phiên đăng nhập.
+- Nếu đăng nhập thất bại, kiểm tra Response của `POST /api/auth/login`: `ORIGIN_INVALID` là origin không khớp; `CLIENT_SOURCE_INVALID` là thiếu/sai nguồn request; `CSRF_INVALID` là token/cookie không hợp lệ; `UNAVAILABLE` cần kiểm tra cấu hình và kết nối/migrations database trong runtime logs, không ghi secret vào log.
+
 ---
 
 ## 4. Các Bước Triển Khai Lên Render

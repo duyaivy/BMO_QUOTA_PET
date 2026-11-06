@@ -80,6 +80,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   directory = await mkdtemp(join(tmpdir(), "bmo-auth-routes-"));
   vi.stubEnv("BMO_APP_ORIGIN", origin);
+  vi.stubEnv("VERCEL", "");
   vi.stubEnv("BMO_CLIENT_SOURCE_SECRET", "a".repeat(64));
   vi.stubEnv("TURSO_DATABASE_URL", `file:${join(directory, "test.db")}`);
   vi.stubEnv("TURSO_AUTH_TOKEN", "");
@@ -98,6 +99,52 @@ afterEach(async () => {
   vi.unstubAllEnvs();
 });
 describe("auth HTTP boundaries with real seals and local libSQL", () => {
+  it.each(["192.0.2.42", "2001:db8::42"])(
+    "accepts a valid password on Vercel using the platform IP %s without the custom server",
+    async (address) => {
+      vi.stubEnv("VERCEL", "1");
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("BMO_ALLOW_LOCAL_DATABASE", "true");
+      vi.stubEnv("BMO_CLIENT_SOURCE_SECRET", "");
+      const input = request("/api/auth/login", await credentials(), {
+        "x-vercel-forwarded-for": address,
+      });
+      input.headers.delete("X-BMO-Trusted-Client");
+      expect((await signIn(input)).status).toBe(200);
+      expect(await getAdminSession()).not.toBeNull();
+    },
+  );
+  it.each(["", "invalid", "192.0.2.1, 192.0.2.2"])(
+    "rejects missing or malformed Vercel source %j without trusting fallback headers",
+    async (address) => {
+      vi.stubEnv("VERCEL", "1");
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("BMO_ALLOW_LOCAL_DATABASE", "true");
+      vi.stubEnv("BMO_CLIENT_SOURCE_SECRET", "");
+      const input = request("/api/auth/login", await credentials(), {
+        "x-vercel-forwarded-for": address,
+        "x-forwarded-for": "192.0.2.5",
+        "x-real-ip": "192.0.2.5",
+      });
+      expect((await signIn(input)).status).toBe(403);
+      expect(await getAdminSession()).toBeNull();
+    },
+  );
+  it("throttles Vercel login failures despite changing client-supplied source headers", async () => {
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("BMO_ALLOW_LOCAL_DATABASE", "true");
+    vi.stubEnv("BMO_CLIENT_SOURCE_SECRET", "");
+    const data = await credentials("incorrect-fixture");
+    for (let i = 0; i < 6; i++) {
+      const input = request("/api/auth/login", data, {
+        "x-vercel-forwarded-for": "192.0.2.42",
+        "x-forwarded-for": `192.0.2.${i + 1}`,
+        "X-BMO-Trusted-Client": trustedSource(`192.0.2.${i + 1}`),
+      });
+      expect((await signIn(input)).status).toBe(i < 5 ? 401 : 429);
+    }
+  });
   it.each([
     "hardcoded password",
     "stored hash",
