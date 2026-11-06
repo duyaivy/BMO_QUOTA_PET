@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/states/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshButton } from "@/components/quota/refresh-button";
+import { absoluteTime } from "@/components/quota/presentation";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 function timestamp(value: number | null) {
   return value === null
     ? "Chưa xác định"
-    : new Date(value).toISOString().replace("T", " ").replace(".000Z", " UTC");
+    : absoluteTime(new Date(value).toISOString());
 }
 
 export default async function CollectorsPage() {

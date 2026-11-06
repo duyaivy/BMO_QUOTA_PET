@@ -1,6 +1,10 @@
 import Foundation
 import CryptoKit
 
+// Ensure stdout and stderr are unbuffered/line-buffered when redirected to log files
+let _ = setlinebuf(stdout)
+let _ = setlinebuf(stderr)
+
 // MARK: - Utilities & Extensions
 
 extension Data {
@@ -171,6 +175,15 @@ class StateManager {
 
 // MARK: - Codex Tailer
 
+struct CodexQuotaSnapshot {
+    let pUsed: Double
+    let pSecs: Int
+    let pReset: String?
+    let sUsed: Double
+    let sSecs: Int
+    let sReset: String?
+}
+
 class CodexTailer {
     let sessionDir: URL
     let stateDir: URL
@@ -204,12 +217,12 @@ class CodexTailer {
         let now = Date()
         let cal = Calendar(identifier: .gregorian)
 
-        // Fast path: Check today and past 2 days in both Local and UTC timezones (< 5ms)
+        // 1. Direct path check for today and past 3 days in both Local and UTC timezones (< 2ms)
         for tz in [TimeZone.current, TimeZone(secondsFromGMT: 0)!] {
             let fmt = DateFormatter()
             fmt.timeZone = tz
             fmt.dateFormat = "yyyy/MM/dd"
-            for dayOffset in [0, -1, -2] {
+            for dayOffset in [0, -1, -2, -3] {
                 if let d = cal.date(byAdding: .day, value: dayOffset, to: now) {
                     let sub = fmt.string(from: d)
                     let dir = sessionDir.appendingPathComponent(sub)
@@ -220,23 +233,37 @@ class CodexTailer {
             }
         }
 
-        // If subdirectories found, only inspect those recent day folders
-        if !searchDirPaths.isEmpty {
-            for path in searchDirPaths {
-                let dir = URL(fileURLWithPath: path)
-                if let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
-                    for f in files where f.pathExtension == "jsonl" {
-                        guard let attrs = try? fm.attributesOfItem(atPath: f.path),
-                              let type = attrs[.type] as? FileAttributeType, type == .typeRegular else { continue }
-                        let size = (attrs[.size] as? NSNumber)?.uint64Value ?? 0
-                        let date = (attrs[.modificationDate] as? Date) ?? Date.distantPast
-                        results.append((url: f, date: date, size: size))
+        // 2. Structural discovery fallback: traverse newest year -> month -> day folders
+        if searchDirPaths.count < 3 {
+            if let years = try? fm.contentsOfDirectory(atPath: sessionDir.path).sorted(by: >) {
+                for year in years where year.count == 4 && Int(year) != nil {
+                    let yearDir = sessionDir.appendingPathComponent(year)
+                    if let months = try? fm.contentsOfDirectory(atPath: yearDir.path).sorted(by: >) {
+                        for month in months where month.count == 2 && Int(month) != nil {
+                            let monthDir = yearDir.appendingPathComponent(month)
+                            if let days = try? fm.contentsOfDirectory(atPath: monthDir.path).sorted(by: >) {
+                                for day in days where day.count == 2 && Int(day) != nil {
+                                    searchDirPaths.insert(monthDir.appendingPathComponent(day).path)
+                                    if searchDirPaths.count >= 7 { break }
+                                }
+                            }
+                            if searchDirPaths.count >= 7 { break }
+                        }
                     }
+                    if searchDirPaths.count >= 7 { break }
                 }
             }
-        } else {
-            // Fallback for flat directory structure
-            if let files = try? fm.contentsOfDirectory(at: sessionDir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
+        }
+
+        // 3. Fallback for flat directory structure if no subfolders exist
+        if searchDirPaths.isEmpty {
+            searchDirPaths.insert(sessionDir.path)
+        }
+
+        // 4. Collect regular jsonl files
+        for path in searchDirPaths {
+            let dir = URL(fileURLWithPath: path)
+            if let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles) {
                 for f in files where f.pathExtension == "jsonl" {
                     guard let attrs = try? fm.attributesOfItem(atPath: f.path),
                           let type = attrs[.type] as? FileAttributeType, type == .typeRegular else { continue }
@@ -247,11 +274,17 @@ class CodexTailer {
             }
         }
 
-        results.sort { $0.date > $1.date }
+        // Sort by modification date descending; tie-break with filename descending
+        results.sort {
+            if $0.date != $1.date {
+                return $0.date > $1.date
+            }
+            return $0.url.lastPathComponent > $1.url.lastPathComponent
+        }
         return results
     }
 
-    func parseLine(_ line: String) -> (pUsed: Double, pSecs: Int, pReset: String?, sUsed: Double, sSecs: Int, sReset: String?)? {
+    func parseLine(_ line: String) -> CodexQuotaSnapshot? {
         guard line.contains("\"type\":\"token_count\""),
               let lineData = line.data(using: .utf8),
               let root = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
@@ -264,65 +297,73 @@ class CodexTailer {
 
         if let primary = rateLimits["primary"] as? [String: Any],
            let used = (primary["used_percent"] as? NSNumber)?.doubleValue {
-            pUsed = used
+            pUsed = round(used * 100.0) / 100.0
             if let mins = (primary["window_minutes"] as? NSNumber)?.intValue { pSecs = mins * 60 }
-            if let resets = (primary["resets_at"] as? NSNumber)?.intValue {
+            if let resets = (primary["resets_at"] as? NSNumber)?.doubleValue {
                 pReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
             }
         }
 
-        var sUsed: Double?
+        var sUsed: Double = 0.0
         var sSecs = 604800
         var sReset: String?
 
         if let secondary = rateLimits["secondary"] as? [String: Any],
            let used = (secondary["used_percent"] as? NSNumber)?.doubleValue {
-            sUsed = used
+            sUsed = round(used * 100.0) / 100.0
             if let mins = (secondary["window_minutes"] as? NSNumber)?.intValue { sSecs = mins * 60 }
-            if let resets = (secondary["resets_at"] as? NSNumber)?.intValue {
+            if let resets = (secondary["resets_at"] as? NSNumber)?.doubleValue {
                 sReset = ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: TimeInterval(resets)))
             }
         }
 
-        if let pu = pUsed, let su = sUsed {
-            return (pu, pSecs, pReset, su, sSecs, sReset)
+        if let pu = pUsed {
+            return CodexQuotaSnapshot(pUsed: pu, pSecs: pSecs, pReset: pReset, sUsed: sUsed, sSecs: sSecs, sReset: sReset)
         }
         return nil
     }
 
-    func scan(onQuotaFound: (_ primaryUsed: Double, _ primarySecs: Int, _ primaryReset: String?, _ secondaryUsed: Double, _ secondarySecs: Int, _ secondaryReset: String?) -> Void) {
+    /// Discovers the latest active quota from recent session files (inspecting reverse order)
+    func discoverLatestQuota() -> CodexQuotaSnapshot? {
         let files = findRecentSessionFiles()
-        guard !files.isEmpty else {
-            print("[CodexTailer] No jsonl files found in \(sessionDir.path)")
-            return
-        }
+        guard !files.isEmpty else { return nil }
 
-        // FIRST RUN: If offsets are empty, discover live quota from newest session file
-        if fileOffsets.isEmpty {
-            print("[CodexTailer] First run: Inspecting latest session file to load current quota...")
-            if let newest = files.first {
-                print("[CodexTailer] Checking newest file: \(newest.url.path)")
-                if let content = try? String(contentsOf: newest.url, encoding: .utf8) {
-                    let lines = content.components(separatedBy: .newlines)
-                    for line in lines.reversed() {
-                        if let q = parseLine(line) {
-                            print("[CodexTailer] Found quota in \(newest.url.lastPathComponent): Primary \(q.pUsed)%, Secondary \(q.sUsed)%")
-                            onQuotaFound(q.pUsed, q.pSecs, q.pReset, q.sUsed, q.sSecs, q.sReset)
-                            break
-                        }
-                    }
+        for f in files.prefix(12) {
+            guard let handle = try? FileHandle(forReadingFrom: f.url) else { continue }
+            defer { try? handle.close() }
+
+            let readLen: UInt64 = min(f.size, 256 * 1024)
+            let startOffset = f.size > readLen ? (f.size - readLen) : 0
+            try? handle.seek(toOffset: startOffset)
+            guard let data = try? handle.readToEnd(), let content = String(data: data, encoding: .utf8) else { continue }
+
+            let lines = content.components(separatedBy: .newlines)
+            for line in lines.reversed() {
+                if let q = parseLine(line) {
+                    print("[CodexTailer] Discovered active Codex quota in \(f.url.lastPathComponent): Primary \(q.pUsed)%, Secondary \(q.sUsed)%")
+                    return q
                 }
             }
-
-            for f in files {
-                fileOffsets[f.url.path] = f.size
-            }
-            saveOffsets()
-            print("[CodexTailer] Baselined \(files.count) files and saved offsets to \(offsetFile.path)")
-            return
         }
+        return nil
+    }
 
-        // TAILING SCAN FOR UPDATES:
+    /// Baseline all current session file offsets to their end
+    func baselineOffsets() {
+        let files = findRecentSessionFiles()
+        for f in files {
+            fileOffsets[f.url.path] = f.size
+        }
+        saveOffsets()
+        print("[CodexTailer] Baselined \(files.count) files to offsets")
+    }
+
+    /// Scan recent files for newly appended lines and emit the latest quota
+    func scan(onQuotaFound: (_ quota: CodexQuotaSnapshot) -> Void) {
+        let files = findRecentSessionFiles()
+        guard !files.isEmpty else { return }
+
+        var latestQuota: CodexQuotaSnapshot?
 
         for f in files.prefix(16) {
             let path = f.url.path
@@ -345,16 +386,20 @@ class CodexTailer {
 
                 guard let content = String(data: validData, encoding: .utf8) else { continue }
                 let lines = content.components(separatedBy: .newlines)
-                for line in lines {
+                for line in lines.reversed() {
                     if let q = parseLine(line) {
-                        onQuotaFound(q.pUsed, q.pSecs, q.pReset, q.sUsed, q.sSecs, q.sReset)
+                        latestQuota = q
+                        break // Captured the latest quota in this file chunk
                     }
                 }
             }
         }
+
+        if let q = latestQuota {
+            onQuotaFound(q)
+        }
     }
 }
-
 
 // MARK: - Spool Drainer
 
@@ -404,6 +449,12 @@ class App {
     let spoolDrainer: SpoolDrainer
     var isRunning = true
 
+    // Persistent pending quotas for retry when server is temporarily unreachable
+    var pendingCodexQuota: CodexQuotaSnapshot?
+    var pendingAntigravityPayload: (quota: [String: Any], collectedAt: String)?
+    var lastCodexAttempt = Date.distantPast
+    var lastAgyAttempt = Date.distantPast
+
     init(configPath: String) throws {
         self.configPath = configPath
         let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
@@ -412,7 +463,13 @@ class App {
         self.stateManager = StateManager(directory: cfg.stateDirectory)
         self.ingestion = try IngestionClient(config: cfg)
         if let codex = cfg.nativeCodex, cfg.providers["codex"]?.enabled == true {
-            self.codexTailer = CodexTailer(directory: codex.sessionDirectory, stateDirectory: cfg.stateDirectory)
+            let tailer = CodexTailer(directory: codex.sessionDirectory, stateDirectory: cfg.stateDirectory)
+            // Initial discovery: find latest known quota from sessions
+            if let activeQuota = tailer.discoverLatestQuota() {
+                self.pendingCodexQuota = activeQuota
+            }
+            tailer.baselineOffsets()
+            self.codexTailer = tailer
         } else {
             self.codexTailer = nil
         }
@@ -430,20 +487,38 @@ class App {
         // Main Loop
         while isRunning {
             autoreleasepool {
-                // 1. Scan Codex Sessions
-                codexTailer?.scan { pUsed, pSecs, pReset, sUsed, sSecs, sReset in
-                    handleCodexObservation(pUsed: pUsed, pSecs: pSecs, pReset: pReset, sUsed: sUsed, sSecs: sSecs, sReset: sReset)
+                let now = Date()
+
+                // 1. Scan Codex Sessions for live updates
+                codexTailer?.scan { quota in
+                    self.pendingCodexQuota = quota
+                }
+
+                // Retry or upload pending Codex quota
+                if let codexQuota = self.pendingCodexQuota, now.timeIntervalSince(lastCodexAttempt) >= 3.0 {
+                    lastCodexAttempt = now
+                    if uploadCodexObservation(quota: codexQuota) {
+                        self.pendingCodexQuota = nil
+                    }
                 }
 
                 // 2. Drain Antigravity Statusline Spool (coalesced to latest)
                 spoolDrainer.drain { provider, quota, collectedAt in
-                    handleAntigravityCallback(quota: quota, collectedAt: collectedAt)
+                    self.pendingAntigravityPayload = (quota, collectedAt)
+                }
+
+                // Retry or upload pending Antigravity quota
+                if let agy = self.pendingAntigravityPayload, now.timeIntervalSince(lastAgyAttempt) >= 3.0 {
+                    lastAgyAttempt = now
+                    if uploadAntigravityCallback(quota: agy.quota, collectedAt: agy.collectedAt) {
+                        self.pendingAntigravityPayload = nil
+                    }
                 }
 
                 // 3. Heartbeat every 60 seconds
-                if Date().timeIntervalSince(lastHeartbeat) >= 60 {
+                if now.timeIntervalSince(lastHeartbeat) >= 60 {
                     sendHeartbeats()
-                    lastHeartbeat = Date()
+                    lastHeartbeat = now
                 }
             }
 
@@ -451,19 +526,24 @@ class App {
         }
     }
 
-    func handleCodexObservation(pUsed: Double, pSecs: Int, pReset: String?, sUsed: Double, sSecs: Int, sReset: String?) {
-        guard let codexSetting = config.providers["codex"], codexSetting.enabled else { return }
+    func uploadCodexObservation(quota: CodexQuotaSnapshot) -> Bool {
+        guard let codexSetting = config.providers["codex"], codexSetting.enabled else { return true }
         let generation = codexSetting.generation
         let now = isoNow()
+
+        let pUsed = quota.pUsed
+        let pRem = round((100.0 - pUsed) * 100.0) / 100.0
+        let sUsed = quota.sUsed
+        let sRem = round((100.0 - sUsed) * 100.0) / 100.0
 
         let windows: [[String: Any]] = [
             [
                 "windowId": "codex.primary",
                 "label": "Primary",
-                "windowDurationSeconds": pSecs,
+                "windowDurationSeconds": quota.pSecs,
                 "usedPercent": pUsed,
-                "remainingPercent": max(0, 100 - pUsed),
-                "resetAt": pReset as Any,
+                "remainingPercent": max(0, pRem),
+                "resetAt": quota.pReset as Any,
                 "dataStatus": "ok",
                 "collectedAt": now,
                 "upstreamObservedAt": NSNull(),
@@ -473,10 +553,10 @@ class App {
             [
                 "windowId": "codex.secondary",
                 "label": "Secondary",
-                "windowDurationSeconds": sSecs,
+                "windowDurationSeconds": quota.sSecs,
                 "usedPercent": sUsed,
-                "remainingPercent": max(0, 100 - sUsed),
-                "resetAt": sReset as Any,
+                "remainingPercent": max(0, sRem),
+                "resetAt": quota.sReset as Any,
                 "dataStatus": "ok",
                 "collectedAt": now,
                 "upstreamObservedAt": NSNull(),
@@ -515,24 +595,25 @@ class App {
             payload["eventId"] = eventId
 
             guard let jsonBytes = try? JSONSerialization.data(withJSONObject: payload),
-                  let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return }
+                  let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return false }
 
             let res = ingestion.signAndUpload(payloadJson: jsonStr, eventId: eventId)
             if case .success = res {
                 print("[BMO] [Codex] Observation uploaded (Primary: \(Int(pUsed))% used, Secondary: \(Int(sUsed))% used) -> ACKNOWLEDGED")
-                break
+                return true
             } else if case .sequenceConflict = res {
                 _ = stateManager.nextSequence(for: "codex")
                 _ = stateManager.nextSequence(for: "codex")
                 continue
             } else {
-                break
+                return false
             }
         }
+        return false
     }
 
-    func handleAntigravityCallback(quota: [String: Any], collectedAt: String) {
-        guard let agySetting = config.providers["antigravity"], agySetting.enabled else { return }
+    func uploadAntigravityCallback(quota: [String: Any], collectedAt: String) -> Bool {
+        guard let agySetting = config.providers["antigravity"], agySetting.enabled else { return true }
         let generation = agySetting.generation
         let seq = stateManager.nextSequence(for: "antigravity")
         let eventId = UUID().uuidString.lowercased()
@@ -562,10 +643,11 @@ class App {
             var remaining: Double?
 
             if let fraction = bucket["remaining_fraction"] as? Double {
-                remaining = fraction * 100.0
-                used = (1.0 - fraction) * 100.0
+                remaining = round(fraction * 10000.0) / 100.0
+                used = round((100.0 - remaining!) * 100.0) / 100.0
             } else if let amount = bucket["remaining_amount"] as? Double {
-                remaining = amount
+                remaining = round(amount * 100.0) / 100.0
+                used = round((100.0 - remaining!) * 100.0) / 100.0
             }
 
             var resetAt: Any = NSNull()
@@ -610,16 +692,19 @@ class App {
         ]
 
         guard let jsonBytes = try? JSONSerialization.data(withJSONObject: payload),
-              let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return }
+              let jsonStr = String(data: jsonBytes, encoding: .utf8) else { return false }
 
         let res = ingestion.signAndUpload(payloadJson: jsonStr, eventId: eventId)
         if case .success = res {
             print("[BMO] [Antigravity] Statusline observation uploaded (\(windows.count) windows) -> ACKNOWLEDGED")
+            return true
         } else if case .sequenceConflict = res {
             _ = stateManager.nextSequence(for: "antigravity")
             _ = stateManager.nextSequence(for: "antigravity")
             _ = stateManager.nextSequence(for: "antigravity")
+            return false
         }
+        return false
     }
 
     func sendHeartbeats() {

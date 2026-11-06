@@ -164,7 +164,7 @@ export function WindowViewCard({
             <dd>{window.windowId}</dd>
           </div>
           <div>
-            <dt>Mốc đặt lại (UTC)</dt>
+            <dt>Mốc đặt lại (Giờ VN)</dt>
             <dd>
               {window.resetAt && Number.isFinite(Date.parse(window.resetAt)) ? (
                 <time dateTime={window.resetAt}>

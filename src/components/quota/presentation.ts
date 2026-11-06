@@ -29,10 +29,19 @@ export function remainingPercent(window: QuotaWindow): number | null {
 }
 export function absoluteTime(value: string | null) {
   if (!value || !Number.isFinite(Date.parse(value))) return "Chưa xác định";
-  return new Date(value)
-    .toISOString()
-    .replace("T", " ")
-    .replace(/\.\d{3}Z$/, " UTC");
+  const date = new Date(value);
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("hour")}:${get("minute")}:${get("second")} ${get("day")}/${get("month")}/${get("year")} (Giờ VN)`;
 }
 export function countdown(resetAt: string | null, now: number) {
   if (!resetAt || !Number.isFinite(Date.parse(resetAt)))

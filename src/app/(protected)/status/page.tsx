@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/shell/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { absoluteTime } from "@/components/quota/presentation";
 import { readDashboard } from "@/server/quota/queries";
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default async function StatusPage() {
       <PageHeader
         eyebrow="Vận hành"
         title="Trạng thái dịch vụ"
-        description={`Trạng thái ứng dụng cục bộ được đọc lúc ${new Date(snapshot.generatedAt).toISOString()}. Không thực hiện truy vấn nhà cung cấp hay kiểm tra tình trạng broker.`}
+        description={`Trạng thái ứng dụng cục bộ được đọc lúc ${absoluteTime(new Date(snapshot.generatedAt).toISOString())}. Không thực hiện truy vấn nhà cung cấp hay kiểm tra tình trạng broker.`}
       />
       <section
         className="grid gap-4 md:grid-cols-2"
