@@ -51,8 +51,7 @@ Sao chép và cấu hình các biến sau trên trang quản trị Vercel hoặc
 | Tên biến | Bắt buộc | Ví dụ giá trị | Giải thích |
 | :--- | :---: | :--- | :--- |
 | `BMO_APP_ORIGIN` | **Có** | `https://bmo-pet.vercel.app` | **URL chính thức của Web App**. Bắt buộc dùng `https://` trên môi trường Cloud. |
-| `ADMIN_PASSWORD` | **Có** | `MatKhauCuaBan123!!` | Mật khẩu quản trị viên để đăng nhập Dashboard. |
-| `ADMIN_PASSWORD_HASH` | **Có** | `$argon2id$v=19$m=65536,p=4,t=3$...` | Mã hash Argon2id tương ứng với `ADMIN_PASSWORD` (tạo bằng script bên dưới). |
+| `ADMIN_PASSWORD_HASH` | **Có** | `$argon2id$v=19$m=65536,t=3,p=4$...` | Mã hash Argon2id của mật khẩu quản trị viên (tạo bằng script bên dưới). Không lưu mật khẩu rõ trong biến môi trường. |
 | `SESSION_SECRET` | **Có** | `delconhaaesiuuu_bmo_personal_session_secret_at_least_32_chars` | Chuỗi bí mật ngẫu nhiên tối thiểu 32 ký tự để mã hóa session cookie. |
 | `TURSO_DATABASE_URL` | **Có** | `libsql://bmoquotabot-duyaivyz.aws-ap-southeast-1.turso.io` | Đường dẫn kết nối CSDL Turso Cloud (dùng chung CSDL hiện tại). |
 | `TURSO_AUTH_TOKEN` | **Có** | `eyJhbGciOiJFZERTQS...` | Auth token JWT của Turso Database. |
@@ -70,12 +69,12 @@ Sao chép và cấu hình các biến sau trên trang quản trị Vercel hoặc
 ```bash
 pnpm exec tsx scripts/auth-hash.ts
 ```
-1. Nhập mật khẩu mới của bạn và nhấn Enter.
-2. Script sẽ xuất ra dòng hash có dạng:
+1. Script không hiện lời nhắc. Nhập mật khẩu mới, nhấn Enter rồi Ctrl+D để kết thúc đầu vào. Mật khẩu sẽ hiện trên terminal khi gõ theo cách này.
+2. Script sẽ xuất ra dòng `ADMIN_PASSWORD_HASH=...` chứa hash có dạng:
    ```text
    $argon2id$v=19$m=65536,p=4,t=3$...
    ```
-3. Cập nhật `ADMIN_PASSWORD` (mật khẩu dạng chữ) và `ADMIN_PASSWORD_HASH` (chuỗi hash vừa tạo) lên Vercel / Render.
+3. Trên Vercel / Render, đặt biến `ADMIN_PASSWORD_HASH` bằng phần giá trị sau `ADMIN_PASSWORD_HASH=`, bỏ dấu `\` trước mỗi `$` nếu có. Khi lưu vào `.env.local`, giữ nguyên các dấu `\` mà script xuất ra để tránh nội suy biến. Không cấu hình `ADMIN_PASSWORD`; xóa biến này nếu đã thêm trước đó. Khi đăng nhập Dashboard, nhập mật khẩu gốc, không nhập chuỗi hash.
 
 ---
 

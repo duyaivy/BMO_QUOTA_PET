@@ -98,6 +98,29 @@ afterEach(async () => {
   vi.unstubAllEnvs();
 });
 describe("auth HTTP boundaries with real seals and local libSQL", () => {
+  it.each([
+    "hardcoded password",
+    "stored hash",
+    "plaintext environment password",
+    "padded owner password",
+  ])("rejects %s instead of bypassing Argon2 verification", async (kind) => {
+    vi.stubEnv("ADMIN_PASSWORD", "synthetic-legacy-password");
+    const password = {
+      "hardcoded password": "12345Zxcv!!",
+      "stored hash": encoded,
+      "plaintext environment password": "synthetic-legacy-password",
+      "padded owner password": " synthetic-owner-password ",
+    }[kind]!;
+    expect(
+      (await signIn(request("/api/auth/login", await credentials(password))))
+        .status,
+    ).toBe(401);
+    expect(await getAdminSession()).toBeNull();
+    expect(
+      (await (await getDb()).$client.execute("SELECT * FROM admin_sessions"))
+        .rows,
+    ).toHaveLength(0);
+  });
   it("checks the database on every access, rejects tampering, and revokes captured-cookie replay", async () => {
     await expect(requireAdmin()).rejects.toMatchObject({ status: 401 });
     expect(

