@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  startTransition,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Activity,
   Bot,
@@ -19,6 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingState } from "@/components/states/loading-state";
 
 const providers = [
   { id: "antigravity", name: "Antigravity" },
@@ -34,6 +42,8 @@ export function AppShell({
 }) {
   const pathname = usePathname(),
     router = useRouter();
+  const [navigationPath, setNavigationPath] = useOptimistic(pathname);
+  const navigating = navigationPath !== pathname;
   const [expanded, setExpanded] = useState(true),
     [drawerOpen, setDrawerOpen] = useState(false),
     [logoutError, setLogoutError] = useState("");
@@ -97,12 +107,21 @@ export function AppShell({
       );
     }
   }
+  function navigate(href: string, event: { preventDefault: () => void }) {
+    event.preventDefault();
+    setDrawerOpen(false);
+    startTransition(() => {
+      setNavigationPath(href);
+      router.push(href);
+    });
+  }
   function navLink(href: string, label: string, Icon: typeof House) {
-    const active = pathname === href && label !== "Cài đặt";
+    const active = navigationPath === href && label !== "Cài đặt";
     return (
       <Link
         href={href}
         onClick={() => setDrawerOpen(false)}
+        onNavigate={(event) => navigate(href, event)}
         aria-current={active ? "page" : undefined}
         className={cn(
           "flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
@@ -223,12 +242,16 @@ export function AppShell({
                     className="mt-1 ml-6 space-y-1 border-l border-border pl-3"
                   >
                     {providers.map((provider) => {
-                      const active = pathname === `/providers/${provider.id}`;
+                      const active =
+                        navigationPath === `/providers/${provider.id}`;
                       return (
                         <li key={provider.id}>
                           <Link
                             href={`/providers/${provider.id}`}
                             onClick={() => setDrawerOpen(false)}
+                            onNavigate={(event) =>
+                              navigate(`/providers/${provider.id}`, event)
+                            }
                             aria-current={active ? "page" : undefined}
                             className={cn(
                               "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
@@ -295,10 +318,11 @@ export function AppShell({
           <main
             id="main-content"
             tabIndex={-1}
+            aria-busy={navigating}
             className="w-full flex-1 px-4 py-6 outline-none sm:px-6 lg:px-7 lg:py-6 xl:px-8"
           >
             <div className="mx-auto w-full max-w-[1440px] space-y-5">
-              {children}
+              {navigating ? <LoadingState /> : children}
             </div>
           </main>
           <footer className="px-6 py-5 text-center text-[11px] leading-5 text-muted-foreground">

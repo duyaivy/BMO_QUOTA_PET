@@ -15,6 +15,46 @@ test.beforeEach(async ({ page }) => {
   await login(page.request);
 });
 
+test("provider navigation responds before the server finishes loading", async ({
+  page,
+}) => {
+  let releaseResponse!: () => void;
+  const blockedResponse = new Promise<void>((resolve) => {
+    releaseResponse = resolve;
+  });
+  await page.route("**/providers/antigravity?*", async (route) => {
+    await blockedResponse;
+    await route.continue();
+  });
+  try {
+    await page.goto("/settings/providers");
+    const navigation = page.getByRole("navigation", {
+      name: "Điều hướng chính",
+    });
+    const link = navigation.getByRole("link", {
+      name: "Antigravity",
+      exact: true,
+    });
+    await link.click();
+    await expect(link).toHaveAttribute("aria-current", "page");
+    await expect(
+      page.getByRole("status", { name: "Đang tải nội dung" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Nguồn nhà cung cấp", exact: true }),
+    ).toHaveCount(0);
+    await expect(navigation).toBeVisible();
+    releaseResponse();
+    await expect(page).toHaveURL("/providers/antigravity");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Antigravity", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("status")).toHaveCount(0);
+  } finally {
+    releaseResponse();
+  }
+});
+
 const routes = [
   { label: "Tổng quan", path: "/", heading: "Tổng quan hạn mức của bạn" },
   {
@@ -27,6 +67,46 @@ const routes = [
   { label: "Trạng thái", path: "/status", heading: "Trạng thái dịch vụ" },
   { label: "Đăng nhập quản trị", path: "/login", heading: "Đăng nhập" },
 ];
+
+test("mobile navigation can switch providers while an earlier request is pending", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  let releaseResponse!: () => void;
+  const blockedResponse = new Promise<void>((resolve) => {
+    releaseResponse = resolve;
+  });
+  await page.route("**/providers/antigravity?*", async (route) => {
+    await blockedResponse;
+    await route.continue();
+  });
+  try {
+    await page.goto("/providers/claude");
+    await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
+    const navigation = page.getByRole("navigation", {
+      name: "Điều hướng chính",
+    });
+    await navigation
+      .getByRole("link", { name: "Antigravity", exact: true })
+      .click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(
+      page.getByRole("status", { name: "Đang tải nội dung" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
+    await navigation.getByRole("link", { name: "Codex", exact: true }).click();
+    await expect(page).toHaveURL("/providers/codex");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Codex", exact: true }),
+    ).toBeVisible();
+    releaseResponse();
+    await page.unrouteAll({ behavior: "wait" });
+    await expect(page).toHaveURL("/providers/codex");
+    await expect(page.getByRole("status")).toHaveCount(0);
+  } finally {
+    releaseResponse();
+  }
+});
 
 for (const width of [375, 1440]) {
   test(`navigation and layout work at ${width}px`, async ({ page }) => {
