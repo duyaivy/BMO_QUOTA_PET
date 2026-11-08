@@ -26,16 +26,24 @@ export default async function StatusPage() {
   const lastUpload = uploads.length
     ? Math.max(...uploads.map((collector) => collector.lastSeenAt!))
     : null;
+  const verifiedProviders = snapshot.providers.filter(
+    (provider) => provider.verification === "verified",
+  );
+  const enabledProviders = snapshot.providers.filter(
+    (provider) => provider.enabled,
+  );
   const items = [
     {
       name: "Cơ sở dữ liệu ứng dụng",
       status: "Khả dụng",
+      healthy: true,
       detail:
         "Dữ liệu bảng điều khiển đã lưu được đọc thành công cho trang này.",
     },
     {
       name: "Thu nạp dữ liệu sử dụng",
       status: lastUpload === null ? "Chưa ghi nhận tải lên" : "Đã nhận dữ liệu",
+      healthy: lastUpload !== null,
       detail:
         lastUpload === null
           ? "Chưa có lần tải lên thành công được ghi nhận từ collector trong cơ sở dữ liệu này."
@@ -43,12 +51,18 @@ export default async function StatusPage() {
     },
     {
       name: "Tích hợp nhà cung cấp",
-      status: `${snapshot.providers.filter((provider) => provider.verification === "verified").length}/${snapshot.providers.length} đã xác minh`,
+      status: `${verifiedProviders.length}/${snapshot.providers.length} đã xác minh`,
+      healthy:
+        enabledProviders.length > 0 &&
+        enabledProviders.every(
+          (provider) => provider.verification === "verified",
+        ),
       detail:
         "Trạng thái xác minh theo cấu hình từng nhà cung cấp. Việc bật nguồn không xác nhận dữ liệu mới.",
     },
     {
       name: "MQTT broker",
+      healthy: broker.state === "connected",
       status:
         broker.state === "connected"
           ? "Kết nối thành công"
@@ -62,6 +76,7 @@ export default async function StatusPage() {
     },
     {
       name: "Môi trường ứng dụng",
+      healthy: false,
       status:
         process.env.VERCEL === "1"
           ? "Vercel"
@@ -74,6 +89,7 @@ export default async function StatusPage() {
     },
     {
       name: "Phần cứng BMO",
+      healthy: false,
       status: "Chưa xác minh",
       detail:
         "Trang này chưa có tín hiệu xác nhận phần cứng đang kết nối. Cấu hình thiết bị hoặc bản xem trước không xác nhận thiết bị thật hoạt động.",
@@ -127,7 +143,13 @@ export default async function StatusPage() {
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">
+                  <Badge
+                    variant={
+                      provider.verification === "verified"
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
                     {provider.verification === "verified"
                       ? "Tích hợp đã xác minh"
                       : provider.verification === "unsupported"
@@ -211,9 +233,7 @@ export default async function StatusPage() {
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <CardTitle>{item.name}</CardTitle>
-                <Badge
-                  variant={item.status === "Khả dụng" ? "secondary" : "outline"}
-                >
+                <Badge variant={item.healthy ? "secondary" : "outline"}>
                   {item.status}
                 </Badge>
               </div>

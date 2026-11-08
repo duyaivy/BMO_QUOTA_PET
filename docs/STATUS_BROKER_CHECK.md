@@ -36,3 +36,19 @@ The full test suites were also executed and are not entirely green:
 
 The additional nonnumeric-port regression was then added; all 31 focused tests
 passed on the final code. The full suites were not repeated after that addition.
+
+## Owner confirmation of provider integrations
+
+On 2026-11-08 the owner confirmed the Antigravity and Codex integrations. A guarded
+database transaction checked both enabled sources against their active,
+non-synthetic authoritative collectors and current ownership generations. It
+found two successful current quota windows for Codex and four for Antigravity,
+then recorded `verification=verified` with an owner-confirmation note for both.
+Claude stayed disabled and unverified. Readback confirmed 2/3 verified providers.
+No complete-set or freshness claims were changed, and collector uploads still
+cannot promote their own verification.
+
+Service badge color now uses explicit health state instead of matching the
+Vietnamese label `Khả dụng`. MQTT connection success is green. Integration health
+requires at least one enabled provider and verification of every enabled provider;
+disabled providers remain in the displayed total without blocking enabled sources.

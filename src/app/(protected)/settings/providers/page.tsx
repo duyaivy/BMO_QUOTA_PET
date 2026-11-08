@@ -46,7 +46,13 @@ export default async function ProviderSettingsPage() {
               <ProviderIcon provider={provider.providerId} />
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <CardTitle>{provider.name}</CardTitle>
-                <Badge variant="outline">
+                <Badge
+                  variant={
+                    provider.verification === "verified"
+                      ? "secondary"
+                      : "outline"
+                  }
+                >
                   {provider.verification === "unverified"
                     ? "Tích hợp chưa xác minh"
                     : provider.verification === "verified"
@@ -54,7 +60,11 @@ export default async function ProviderSettingsPage() {
                       : provider.verification}
                 </Badge>
               </div>
-              <CardDescription>{guidance[provider.providerId]}</CardDescription>
+              <CardDescription>
+                {provider.verification === "verified"
+                  ? "Tích hợp nguồn quota đã được chủ sở hữu xác nhận. Độ mới dữ liệu được đánh giá riêng theo từng quan sát quota."
+                  : guidance[provider.providerId]}
+              </CardDescription>
             </CardHeader>
             <CardContent className="mt-auto flex flex-col items-start gap-4">
               <Link
