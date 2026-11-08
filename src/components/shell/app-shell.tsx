@@ -283,7 +283,9 @@ export function AppShell({
               {authenticated && (
                 <li>{navLink("/settings/providers", "Cài đặt", Settings2)}</li>
               )}
-              <li>{navLink("/login", "Đăng nhập quản trị", LogIn)}</li>
+              {!authenticated && (
+                <li>{navLink("/login", "Đăng nhập quản trị", LogIn)}</li>
+              )}
             </ul>
           </nav>
           <div className="space-y-3 border-t border-border/50 px-6 py-5">

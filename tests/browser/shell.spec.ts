@@ -28,6 +28,9 @@ test("provider navigation responds before the server finishes loading", async ({
   });
   try {
     await page.goto("/settings/providers");
+    await expect(
+      page.getByRole("link", { name: "Đăng nhập quản trị", exact: true }),
+    ).toHaveCount(0);
     const navigation = page.getByRole("navigation", {
       name: "Điều hướng chính",
     });
@@ -65,7 +68,6 @@ const routes = [
   { label: "Bộ thu thập", path: "/collectors", heading: "Bộ thu thập" },
   { label: "Thiết bị", path: "/devices", heading: "Màn hình hiển thị BMO" },
   { label: "Trạng thái", path: "/status", heading: "Trạng thái dịch vụ" },
-  { label: "Đăng nhập quản trị", path: "/login", heading: "Đăng nhập" },
 ];
 
 test("mobile navigation can switch providers while an earlier request is pending", async ({
@@ -205,6 +207,9 @@ test("protected pages reject anonymous and tampered sessions; logout revokes coo
   expect(logout.ok()).toBe(true);
   await page.goto("/");
   await expect(page).toHaveURL("/login");
+  await expect(
+    page.getByRole("link", { name: "Đăng nhập quản trị", exact: true }),
+  ).toBeVisible();
   const replay = await browser.newContext();
   await replay.addCookies(original);
   const replayPage = await replay.newPage();
