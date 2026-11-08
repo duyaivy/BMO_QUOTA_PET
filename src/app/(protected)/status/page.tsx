@@ -9,6 +9,7 @@ import { providerStatus } from "@/components/quota/provider-status";
 import { ProviderIcon } from "@/components/quota/provider-icon";
 import { RefreshButton } from "@/components/quota/refresh-button";
 import { getRuntimeConfig } from "@/server/config";
+import { checkMqttHealth } from "@/server/mqtt/health";
 
 export const metadata: Metadata = {
   title: "Trạng thái vận hành | BMO Personal",
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 };
 export default async function StatusPage() {
   const snapshot = await readDashboard();
+  // readDashboard authenticates the owner before initiating a network probe.
+  const broker = await checkMqttHealth();
   const origin = getRuntimeConfig().BMO_APP_ORIGIN;
   const uploads = snapshot.collectors.filter(
     (collector) => collector.lastSeenAt !== null,
@@ -46,9 +49,16 @@ export default async function StatusPage() {
     },
     {
       name: "MQTT broker",
-      status: "Chưa kiểm tra",
+      status:
+        broker.state === "connected"
+          ? "Kết nối thành công"
+          : broker.state === "unconfigured"
+            ? "Chưa cấu hình"
+            : "Kết nối thất bại",
       detail:
-        "Trang này không kiểm tra kết nối MQTT broker. Xem thông số kết nối đã cấu hình tại Thiết bị.",
+        broker.state === "unconfigured"
+          ? "Chưa có MQTT_HOST trong môi trường ứng dụng."
+          : `Kiểm tra lúc ${absoluteTime(new Date(broker.checkedAt).toISOString())} (${broker.durationMs} ms). ${broker.state === "connected" ? "Broker đã chấp nhận bắt tay MQTT bằng cấu hình hiện tại. Chưa xác minh quyền publish hoặc thiết bị nhận dữ liệu." : `Mã lỗi: ${broker.errorCode}. ${broker.errorCode === "CONNACK_REFUSED" ? "Broker từ chối kết nối; kiểm tra thông tin xác thực và quyền CONNECT." : broker.errorCode === "CONFIG_INVALID" ? "Kiểm tra cấu hình MQTT trong môi trường ứng dụng." : "Kiểm tra DNS, mạng, cổng và chứng chỉ TLS của broker."}`}`,
     },
     {
       name: "Môi trường ứng dụng",
@@ -74,7 +84,7 @@ export default async function StatusPage() {
       <PageHeader
         eyebrow="Vận hành"
         title="Trạng thái dịch vụ"
-        description={`Dữ liệu đã lưu được đọc lúc ${absoluteTime(new Date(snapshot.generatedAt).toISOString())}. Không truy vấn trực tiếp nhà cung cấp hoặc kiểm tra kết nối broker.`}
+        description={`Dữ liệu đã lưu được đọc lúc ${absoluteTime(new Date(snapshot.generatedAt).toISOString())}. Broker được kiểm tra bằng bắt tay MQTT khi tải hoặc làm mới trang; không truy vấn trực tiếp nhà cung cấp.`}
       >
         <RefreshButton />
       </PageHeader>

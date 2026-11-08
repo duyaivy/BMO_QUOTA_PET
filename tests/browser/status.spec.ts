@@ -61,6 +61,13 @@ test("status reflects persisted provider quota without treating upload or verifi
   ).toBe(200);
 
   await page.goto("/status");
+  const brokerCard = page.locator('[data-slot="card"]').filter({
+    has: page.getByRole("heading", { name: "MQTT broker", exact: true }),
+  });
+  await expect(
+    brokerCard.getByText("Chưa cấu hình", { exact: true }),
+  ).toBeVisible();
+  await expect(brokerCard.getByText(/Chưa có MQTT_HOST/)).toBeVisible();
   const card = page.getByRole("region", {
     name: "Trạng thái từng nhà cung cấp",
   });

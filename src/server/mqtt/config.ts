@@ -19,7 +19,7 @@ export function getMqttConfig(overrides?: Partial<MqttConfig>): MqttConfig {
   const rawPort =
     overrides?.port ??
     (process.env.MQTT_PORT ? Number(process.env.MQTT_PORT) : undefined);
-  const port = rawPort !== undefined && !Number.isNaN(rawPort) ? rawPort : 8883;
+  const port = rawPort ?? 8883;
   const username =
     overrides?.username ?? process.env.MQTT_USERNAME ?? undefined;
   const password =

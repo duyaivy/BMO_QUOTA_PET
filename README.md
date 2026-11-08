@@ -178,6 +178,17 @@ pnpm test:integration
 
 ## 7. MQTT & Device Protocol
 
+The protected `/status` page checks the configured broker with a bounded MQTT
+CONNECT/CONNACK handshake on each load or refresh. It shows the check time,
+duration and a safe error code. A successful connection does not establish
+publish ACL access, outbox delivery or device reception. TLS certificates are
+verified, and probes use a separate client ID without publishing messages.
+To repeat the same check locally using Next.js env precedence:
+
+```bash
+node --conditions=react-server --import tsx scripts/check-mqtt.ts
+```
+
 ### Topic Hierarchy
 
 - `bmo/v1/devices/<deviceId>/config` (QoS 1, Retained): Monotonic configuration revision containing ordered screens (PET screen fixed at index 0, followed by quota screens).

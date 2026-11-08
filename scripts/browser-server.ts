@@ -13,6 +13,8 @@ async function main() {
   const directory = await mkdtemp(join(tmpdir(), "bmo-browser-"));
   const env = {
     ...process.env,
+    // Keep status probes isolated from the owner's real broker in .env.
+    MQTT_HOST: "",
     BMO_APP_ORIGIN: `http://127.0.0.1:${port}`,
     TURSO_DATABASE_URL: `file:${join(directory, "test.db")}`,
     TURSO_AUTH_TOKEN: "",

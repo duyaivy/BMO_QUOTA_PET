@@ -88,6 +88,15 @@ export class MqttClient {
     this.config = getMqttConfig(config);
   }
 
+  /** Verify CONNECT/CONNACK without publishing or changing retained state. */
+  async checkConnection(): Promise<void> {
+    const socket = await this.connect();
+    // CONNECT uses Clean Session with no Will. Closing immediately has no
+    // retained-state effects and avoids another write racing a broker reset.
+    socket.on("error", () => {});
+    socket.destroy();
+  }
+
   /**
    * Connects, publishes a single message with bounded deadlines, verifies PUBACK if QoS 1,
    * sends DISCONNECT, and closes the connection.
@@ -173,7 +182,7 @@ export class MqttClient {
           host: this.config.host,
           port: this.config.port,
           servername: this.config.host,
-          rejectUnauthorized: process.env.NODE_ENV === "production",
+          rejectUnauthorized: true,
         });
       } else {
         socket = net.connect({
