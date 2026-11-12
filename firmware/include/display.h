@@ -21,6 +21,7 @@ public:
     void drawCenteredText(const char* text, int16_t y, uint8_t size = 1, bool highlight = false);
     void drawHeader(const char* title, bool wifiConnected, bool mqttConnected);
     void drawBitmap128x64(const uint8_t* bitmap);
+    void drawProviderIcon(const char* providerId, int16_t x, int16_t y);
 
     // Standard notification & status screens
     void showSplashScreen(const char* version = "v1.0-ESP32CAM");
@@ -37,3 +38,11 @@ private:
 };
 
 extern BMODisplay display;
+
+// 10x10 Monochrome Provider Icons (20 bytes each, 2 bytes/row, 10 rows)
+extern const uint8_t CODEX_ICON_10x10[] PROGMEM;
+extern const uint8_t CLAUDE_ICON_10x10[] PROGMEM;
+extern const uint8_t GEMINI_ICON_10x10[] PROGMEM;
+extern const uint8_t DEFAULT_PROVIDER_ICON_10x10[] PROGMEM;
+#define ANTIGRAVITY_ICON_10x10 GEMINI_ICON_10x10
+

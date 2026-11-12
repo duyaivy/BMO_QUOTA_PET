@@ -120,6 +120,80 @@ void BMODisplay::drawBitmap128x64(const uint8_t* bitmap) {
     _oled.drawBitmap(0, 0, bitmap, OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, SSD1306_WHITE);
 }
 
+// 10x10 Monochrome Provider Bitmaps (2 bytes per row, MSB first)
+// Codex icon: OpenAI pinwheel whorl
+const uint8_t CODEX_ICON_10x10[] PROGMEM = {
+    0x1E, 0x00, // ...####...
+    0x61, 0x00, // .##....#..
+    0xCC, 0xC0, // ##..##..##
+    0x92, 0x40, // #..#..#..#
+    0xAC, 0x40, // #.#.##...#
+    0x8D, 0x40, // #...##.#.#
+    0x92, 0x40, // #..#..#..#
+    0xCC, 0xC0, // ##..##..##
+    0x21, 0x80, // ..#....##.
+    0x1E, 0x00  // ...####...
+};
+
+// Claude icon: Anthropic sunburst / asterisk
+const uint8_t CLAUDE_ICON_10x10[] PROGMEM = {
+    0x0C, 0x00, // ....##....
+    0xCC, 0xC0, // ##..##..##
+    0x6D, 0x80, // .##.##.##.
+    0x3F, 0x00, // ..######..
+    0xFF, 0xC0, // ##########
+    0xFF, 0xC0, // ##########
+    0x3F, 0x00, // ..######..
+    0x6D, 0x80, // .##.##.##.
+    0xCC, 0xC0, // ##..##..##
+    0x0C, 0x00  // ....##....
+};
+
+// Gemini icon: Google 4-pointed diamond sparkle
+const uint8_t GEMINI_ICON_10x10[] PROGMEM = {
+    0x0C, 0x00, // ....##....
+    0x0C, 0x00, // ....##....
+    0x1E, 0x00, // ...####...
+    0x3F, 0x00, // ..######..
+    0xFF, 0xC0, // ##########
+    0xFF, 0xC0, // ##########
+    0x3F, 0x00, // ..######..
+    0x1E, 0x00, // ...####...
+    0x0C, 0x00, // ....##....
+    0x0C, 0x00  // ....##....
+};
+
+// Default / fallback icon: Cute mini robot head
+const uint8_t DEFAULT_PROVIDER_ICON_10x10[] PROGMEM = {
+    0x0C, 0x00, // ....##....
+    0x0C, 0x00, // ....##....
+    0x7F, 0x80, // .########.
+    0xC0, 0xC0, // ##......##
+    0xD2, 0xC0, // ##.#..#.##
+    0xC0, 0xC0, // ##......##
+    0x5E, 0x80, // .#.####.#.
+    0x40, 0x80, // .#......#.
+    0x7F, 0x80, // .########.
+    0x00, 0x00  // ..........
+};
+
+void BMODisplay::drawProviderIcon(const char* providerId, int16_t x, int16_t y) {
+    if (!_initialized) return;
+
+    const uint8_t* icon = DEFAULT_PROVIDER_ICON_10x10;
+    if (providerId != nullptr) {
+        if (strcasecmp(providerId, "codex") == 0) {
+            icon = CODEX_ICON_10x10;
+        } else if (strcasecmp(providerId, "claude") == 0) {
+            icon = CLAUDE_ICON_10x10;
+        } else if (strcasecmp(providerId, "gemini") == 0 || strcasecmp(providerId, "antigravity") == 0) {
+            icon = GEMINI_ICON_10x10;
+        }
+    }
+
+    _oled.drawBitmap(x, y, icon, 10, 10, SSD1306_WHITE);
+}
+
 void BMODisplay::showSplashScreen(const char* version) {
     if (!_initialized) return;
     _oled.clearDisplay();
