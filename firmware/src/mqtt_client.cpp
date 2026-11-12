@@ -285,17 +285,6 @@ const ConfigScreen* BMOMqttClient::getQuotaScreenAt(uint8_t index) const {
     return nullptr;
 }
 
-const SnapshotWindow* BMOMqttClient::findSnapshotWindow(const char* providerId, const char* windowId) const {
-    if (!_snapshot.valid || !_config.valid || _snapshot.configRevision != _config.revision) return nullptr;
-    for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
-        if (strcmp(_snapshot.windows[i].providerId, providerId) == 0 &&
-            strcmp(_snapshot.windows[i].windowId, windowId) == 0) {
-            return &_snapshot.windows[i];
-        }
-    }
-    return nullptr;
-}
-
 static bool isSameProvider(const char* a, const char* b) {
     if (!a || !b) return false;
     if (strcasecmp(a, b) == 0) return true;
@@ -323,6 +312,75 @@ static bool containsIgnoreCase(const char* str, const char* sub) {
         if (match) return true;
     }
     return false;
+}
+
+const SnapshotWindow* BMOMqttClient::findSnapshotWindow(const char* providerId, const char* windowId) const {
+    if (!_snapshot.valid) return nullptr;
+    for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
+        if (isSameProvider(_snapshot.windows[i].providerId, providerId)) {
+            if (windowId && windowId[0] != '\0') {
+                if (strcasecmp(_snapshot.windows[i].windowId, windowId) == 0) {
+                    return &_snapshot.windows[i];
+                }
+            } else {
+                return &_snapshot.windows[i];
+            }
+        }
+    }
+    // Suffix / substring match fallback (e.g. "primary" matches "codex.primary" or vice versa)
+    if (windowId && windowId[0] != '\0') {
+        for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
+            if (isSameProvider(_snapshot.windows[i].providerId, providerId)) {
+                if (containsIgnoreCase(_snapshot.windows[i].windowId, windowId) ||
+                    containsIgnoreCase(windowId, _snapshot.windows[i].windowId)) {
+                    return &_snapshot.windows[i];
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+static const char* resolveBadgeText(const char* providerId, const char* windowId, const SnapshotWindow* sw) {
+    if (windowId && windowId[0] != '\0') {
+        if (containsIgnoreCase(windowId, "3p-5h") || containsIgnoreCase(windowId, "3p_5h")) {
+            return "3P 5h";
+        }
+        if (containsIgnoreCase(windowId, "3p-week") || containsIgnoreCase(windowId, "3p_week") || containsIgnoreCase(windowId, "3p-7d")) {
+            return "3P Wk";
+        }
+        if (containsIgnoreCase(windowId, "gemini-5h") || containsIgnoreCase(windowId, "five") || containsIgnoreCase(windowId, "primary") || strcasecmp(windowId, "5h") == 0) {
+            return "5h";
+        }
+        if (containsIgnoreCase(windowId, "gemini-week") || containsIgnoreCase(windowId, "week") || containsIgnoreCase(windowId, "secondary") || containsIgnoreCase(windowId, "7d")) {
+            return "Weekly";
+        }
+    }
+
+    if (sw) {
+        if (containsIgnoreCase(sw->windowId, "3p-5h") || containsIgnoreCase(sw->windowId, "3p_5h") ||
+            containsIgnoreCase(sw->label, "3p-5h") || containsIgnoreCase(sw->label, "3p 5h")) {
+            return "3P 5h";
+        }
+        if (containsIgnoreCase(sw->windowId, "3p-week") || containsIgnoreCase(sw->windowId, "3p_week") || containsIgnoreCase(sw->windowId, "3p-7d") ||
+            containsIgnoreCase(sw->label, "3p-week") || containsIgnoreCase(sw->label, "3p week") || containsIgnoreCase(sw->label, "3p-7d")) {
+            return "3P Wk";
+        }
+        if (containsIgnoreCase(sw->windowId, "primary") || containsIgnoreCase(sw->label, "primary") ||
+            containsIgnoreCase(sw->windowId, "5h") || containsIgnoreCase(sw->label, "5h")) {
+            return "5h";
+        }
+        if (containsIgnoreCase(sw->windowId, "secondary") || containsIgnoreCase(sw->label, "secondary") ||
+            containsIgnoreCase(sw->windowId, "week") || containsIgnoreCase(sw->label, "week") ||
+            containsIgnoreCase(sw->windowId, "7d") || containsIgnoreCase(sw->label, "7d")) {
+            return "Weekly";
+        }
+        if (sw->label[0] != '\0' && strlen(sw->label) <= 8) {
+            return sw->label;
+        }
+    }
+
+    return "Quota";
 }
 
 static int getWindowTier(const SnapshotWindow* w) {
@@ -468,68 +526,59 @@ uint8_t BMOMqttClient::getProviderWindows(const char* providerId, const Snapshot
 }
 
 uint8_t BMOMqttClient::getTotalQuotaPages() const {
-    const char* providers[MAX_CONFIG_SCREENS];
-    uint8_t totalProviders = collectUniqueProviders(providers);
-    if (totalProviders == 0) return 0;
-    uint8_t pageCount = 0;
-    for (uint8_t p = 0; p < totalProviders; p++) {
-        const char* pid = providers[p];
-        const SnapshotWindow* windows[2] = {nullptr, nullptr};
-        uint8_t winCount = getProviderWindows(pid, windows);
-        if (winCount == 0) {
-            pageCount += 1;
-        } else {
-            pageCount += winCount;
-        }
+    // 1. Primary: Use configured screens from dashboard if available
+    uint8_t configuredCount = getQuotaScreenCount();
+    if (configuredCount > 0) {
+        return configuredCount;
     }
-    return pageCount;
+
+    // 2. Fallback: If no configured quota screens, use snapshot windows directly
+    if (_snapshot.valid && _snapshot.windowCount > 0) {
+        return _snapshot.windowCount;
+    }
+
+    // 3. Fallback: Unique providers awaiting data
+    return getUniqueQuotaProviderCount();
 }
 
 bool BMOMqttClient::getQuotaPage(uint8_t pageIndex, const char** outProviderId, const SnapshotWindow** outWindow, const char** outDefaultBadge) const {
-    const char* providers[MAX_CONFIG_SCREENS];
-    uint8_t totalProviders = collectUniqueProviders(providers);
-    if (totalProviders == 0) return false;
+    // 1. Primary: Use configured screens from dashboard if available
+    uint8_t configuredCount = getQuotaScreenCount();
+    if (configuredCount > 0) {
+        if (pageIndex >= configuredCount) return false;
+        const ConfigScreen* cs = getQuotaScreenAt(pageIndex);
+        if (!cs) return false;
 
-    uint8_t curPage = 0;
-    for (uint8_t p = 0; p < totalProviders; p++) {
-        const char* pid = providers[p];
-        const SnapshotWindow* windows[2] = {nullptr, nullptr};
-        uint8_t winCount = getProviderWindows(pid, windows);
-
-        if (winCount == 0) {
-            if (curPage == pageIndex) {
-                if (outProviderId) *outProviderId = pid;
-                if (outWindow) *outWindow = nullptr;
-                if (outDefaultBadge) *outDefaultBadge = "Quota";
-                return true;
-            }
-            curPage++;
-        } else {
-            for (uint8_t w = 0; w < winCount; w++) {
-                if (curPage == pageIndex) {
-                    if (outProviderId) *outProviderId = pid;
-                    if (outWindow) *outWindow = windows[w];
-                    if (outDefaultBadge) {
-                        const SnapshotWindow* sw = windows[w];
-                        if (w == 0) {
-                            if (sw && sw->label[0] != '\0' && !containsIgnoreCase(sw->label, "primary") && strlen(sw->label) <= 8) {
-                                *outDefaultBadge = sw->label;
-                            } else {
-                                *outDefaultBadge = "5h";
-                            }
-                        } else {
-                            if (sw && sw->label[0] != '\0' && !containsIgnoreCase(sw->label, "secondary") && strlen(sw->label) <= 8) {
-                                *outDefaultBadge = sw->label;
-                            } else {
-                                *outDefaultBadge = "Weekly";
-                            }
-                        }
-                    }
-                    return true;
-                }
-                curPage++;
-            }
+        if (outProviderId) *outProviderId = cs->providerId;
+        const SnapshotWindow* sw = findSnapshotWindow(cs->providerId, cs->windowId);
+        if (outWindow) *outWindow = sw;
+        if (outDefaultBadge) {
+            *outDefaultBadge = resolveBadgeText(cs->providerId, cs->windowId, sw);
         }
+        return true;
     }
+
+    // 2. Fallback: If no configured quota screens, use snapshot windows directly
+    if (_snapshot.valid && _snapshot.windowCount > 0) {
+        if (pageIndex >= _snapshot.windowCount) return false;
+        const SnapshotWindow* sw = &_snapshot.windows[pageIndex];
+        if (outProviderId) *outProviderId = sw->providerId;
+        if (outWindow) *outWindow = sw;
+        if (outDefaultBadge) {
+            *outDefaultBadge = resolveBadgeText(sw->providerId, sw->windowId, sw);
+        }
+        return true;
+    }
+
+    // 3. Fallback: Unique providers awaiting data
+    uint8_t totalProviders = getUniqueQuotaProviderCount();
+    if (totalProviders > 0 && pageIndex < totalProviders) {
+        const char* pid = getUniqueQuotaProviderAt(pageIndex);
+        if (outProviderId) *outProviderId = pid;
+        if (outWindow) *outWindow = nullptr;
+        if (outDefaultBadge) *outDefaultBadge = "Quota";
+        return true;
+    }
+
     return false;
 }
