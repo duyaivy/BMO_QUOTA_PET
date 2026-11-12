@@ -466,3 +466,68 @@ uint8_t BMOMqttClient::getProviderWindows(const char* providerId, const Snapshot
     outWindows[1] = matched[1];
     return 2;
 }
+
+uint8_t BMOMqttClient::getTotalQuotaPages() const {
+    uint8_t totalProviders = getUniqueQuotaProviderCount();
+    if (totalProviders == 0) return 0;
+    uint8_t pageCount = 0;
+    for (uint8_t p = 0; p < totalProviders; p++) {
+        const char* pid = getUniqueQuotaProviderAt(p);
+        const SnapshotWindow* windows[2] = {nullptr, nullptr};
+        uint8_t winCount = getProviderWindows(pid, windows);
+        if (winCount == 0) {
+            pageCount += 1;
+        } else {
+            pageCount += winCount;
+        }
+    }
+    return pageCount;
+}
+
+bool BMOMqttClient::getQuotaPage(uint8_t pageIndex, const char** outProviderId, const SnapshotWindow** outWindow, const char** outDefaultBadge) const {
+    uint8_t totalProviders = getUniqueQuotaProviderCount();
+    if (totalProviders == 0) return false;
+
+    uint8_t curPage = 0;
+    for (uint8_t p = 0; p < totalProviders; p++) {
+        const char* pid = getUniqueQuotaProviderAt(p);
+        const SnapshotWindow* windows[2] = {nullptr, nullptr};
+        uint8_t winCount = getProviderWindows(pid, windows);
+
+        if (winCount == 0) {
+            if (curPage == pageIndex) {
+                if (outProviderId) *outProviderId = pid;
+                if (outWindow) *outWindow = nullptr;
+                if (outDefaultBadge) *outDefaultBadge = "Quota";
+                return true;
+            }
+            curPage++;
+        } else {
+            for (uint8_t w = 0; w < winCount; w++) {
+                if (curPage == pageIndex) {
+                    if (outProviderId) *outProviderId = pid;
+                    if (outWindow) *outWindow = windows[w];
+                    if (outDefaultBadge) {
+                        const SnapshotWindow* sw = windows[w];
+                        if (w == 0) {
+                            if (sw && sw->label[0] != '\0' && !containsIgnoreCase(sw->label, "primary") && strlen(sw->label) <= 8) {
+                                *outDefaultBadge = sw->label;
+                            } else {
+                                *outDefaultBadge = "5h";
+                            }
+                        } else {
+                            if (sw && sw->label[0] != '\0' && !containsIgnoreCase(sw->label, "secondary") && strlen(sw->label) <= 8) {
+                                *outDefaultBadge = sw->label;
+                            } else {
+                                *outDefaultBadge = "Weekly";
+                            }
+                        }
+                    }
+                    return true;
+                }
+                curPage++;
+            }
+        }
+    }
+    return false;
+}

@@ -26,6 +26,8 @@ public:
     uint8_t getUniqueQuotaProviderCount() const;
     const char* getUniqueQuotaProviderAt(uint8_t index) const;
     uint8_t getProviderWindows(const char* providerId, const SnapshotWindow* outWindows[2]) const;
+    uint8_t getTotalQuotaPages() const;
+    bool getQuotaPage(uint8_t pageIndex, const char** outProviderId, const SnapshotWindow** outWindow, const char** outDefaultBadge) const;
 
 private:
     void reconnect();
