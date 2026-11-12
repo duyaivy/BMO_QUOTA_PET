@@ -30,7 +30,7 @@ void BMONavigationController::update() {
     }
 
     // Empty lists also show a bounded notification before returning home.
-    if (_mode == UIMode::QUOTA_VIEW && mqttClient.getUniqueQuotaProviderCount() == 0) {
+    if (_mode == UIMode::QUOTA_VIEW && mqttClient.getTotalQuotaPages() == 0) {
         _mode = UIMode::END_OF_LIST;
         _endOfListEnteredAt = millis();
     }
@@ -59,21 +59,21 @@ void BMONavigationController::handleButtonA() {
 }
 
 void BMONavigationController::handleButtonB() {
-    uint8_t totalProviders = mqttClient.getUniqueQuotaProviderCount();
+    uint8_t totalPages = mqttClient.getTotalQuotaPages();
 
     if (_mode == UIMode::PET_FACE) {
         // Switched from Face mode to Quota mode
-        if (totalProviders == 0) {
+        if (totalPages == 0) {
             _mode = UIMode::QUOTA_VIEW;
             _quotaIndex = 0;
             Serial.println("[NAV] Button B pressed: Entering Quota mode (no quota configured).");
         } else {
             _mode = UIMode::QUOTA_VIEW;
             _quotaIndex = 0;
-            Serial.printf("[NAV] Button B pressed: Showing Quota screen [1/%d]\n", totalProviders);
+            Serial.printf("[NAV] Button B pressed: Showing Quota screen [1/%d]\n", totalPages);
         }
     } else if (_mode == UIMode::QUOTA_VIEW) {
-        if (totalProviders <= 1) {
+        if (totalPages <= 1) {
             // Only 1 or 0 screens: immediate transition to End of List
             _mode = UIMode::END_OF_LIST;
             _endOfListEnteredAt = millis();
@@ -81,7 +81,7 @@ void BMONavigationController::handleButtonB() {
             Serial.println("[NAV] Button B pressed: Reached end of quota screens. Showing END_OF_LIST screen.");
         } else {
             _quotaIndex++;
-            if (_quotaIndex >= totalProviders) {
+            if (_quotaIndex >= totalPages) {
                 // Reached the end of quota list!
                 _mode = UIMode::END_OF_LIST;
                 _endOfListEnteredAt = millis();
@@ -89,7 +89,7 @@ void BMONavigationController::handleButtonB() {
                 Serial.println("[NAV] Button B pressed: Reached end of quota screens. Showing END_OF_LIST screen.");
             } else {
                 Serial.printf("[NAV] Button B pressed: Showing Quota screen [%d/%d]\n",
-                              _quotaIndex + 1, totalProviders);
+                              _quotaIndex + 1, totalPages);
             }
         }
     } else if (_mode == UIMode::END_OF_LIST) {
@@ -112,7 +112,7 @@ void BMONavigationController::render() {
             break;
 
         case UIMode::END_OF_LIST:
-            if (mqttClient.getUniqueQuotaProviderCount() == 0) display.showEmptyQuotaScreen();
+            if (mqttClient.getTotalQuotaPages() == 0) display.showEmptyQuotaScreen();
             else display.showEndOfListScreen();
             break;
     }
