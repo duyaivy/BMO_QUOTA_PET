@@ -468,11 +468,12 @@ uint8_t BMOMqttClient::getProviderWindows(const char* providerId, const Snapshot
 }
 
 uint8_t BMOMqttClient::getTotalQuotaPages() const {
-    uint8_t totalProviders = getUniqueQuotaProviderCount();
+    const char* providers[MAX_CONFIG_SCREENS];
+    uint8_t totalProviders = collectUniqueProviders(providers);
     if (totalProviders == 0) return 0;
     uint8_t pageCount = 0;
     for (uint8_t p = 0; p < totalProviders; p++) {
-        const char* pid = getUniqueQuotaProviderAt(p);
+        const char* pid = providers[p];
         const SnapshotWindow* windows[2] = {nullptr, nullptr};
         uint8_t winCount = getProviderWindows(pid, windows);
         if (winCount == 0) {
@@ -485,12 +486,13 @@ uint8_t BMOMqttClient::getTotalQuotaPages() const {
 }
 
 bool BMOMqttClient::getQuotaPage(uint8_t pageIndex, const char** outProviderId, const SnapshotWindow** outWindow, const char** outDefaultBadge) const {
-    uint8_t totalProviders = getUniqueQuotaProviderCount();
+    const char* providers[MAX_CONFIG_SCREENS];
+    uint8_t totalProviders = collectUniqueProviders(providers);
     if (totalProviders == 0) return false;
 
     uint8_t curPage = 0;
     for (uint8_t p = 0; p < totalProviders; p++) {
-        const char* pid = getUniqueQuotaProviderAt(p);
+        const char* pid = providers[p];
         const SnapshotWindow* windows[2] = {nullptr, nullptr};
         uint8_t winCount = getProviderWindows(pid, windows);
 

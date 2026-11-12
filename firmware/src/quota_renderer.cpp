@@ -141,58 +141,6 @@ void BMOQuotaRenderer::formatResetCountdown(const char* resetAtStr, int32_t fall
     }
 }
 
-void BMOQuotaRenderer::renderQuotaCard(int16_t y, int16_t h, const SnapshotWindow* sw, const char* defaultBadge) {
-    if (!sw) return;
-
-    auto& oled = display.getDriver();
-    oled.drawRoundRect(0, y, 128, h, 3, SSD1306_WHITE);
-
-    // Calculate remaining %
-    float rem = -1.0f;
-    if (sw->remainingPercent >= 0.0f) {
-        rem = sw->remainingPercent;
-    } else if (sw->usedPercent >= 0.0f) {
-        rem = 100.0f - sw->usedPercent;
-    }
-    if (rem >= 0.0f) {
-        if (rem < 0.0f) rem = 0.0f;
-        if (rem > 100.0f) rem = 100.0f;
-    }
-
-    // Row 1: Left: % remaining
-    char pctStr[16];
-    if (rem >= 0.0f) {
-        snprintf(pctStr, sizeof(pctStr), "%.0f%%", rem);
-    } else {
-        snprintf(pctStr, sizeof(pctStr), "---%%");
-    }
-
-    oled.setTextSize(1);
-    oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(4, y + 2);
-    oled.print(pctStr);
-
-    // Row 1: Right: Pill badge
-    const char* badgeText = defaultBadge ? defaultBadge : "Quota";
-    int16_t badgeTextW = (int16_t)(strlen(badgeText) * 6);
-    int16_t badgeW = badgeTextW + 6;
-    int16_t badgeX = 124 - badgeW;
-    if (badgeX < 40) badgeX = 40;
-
-    oled.drawRoundRect(badgeX, y + 1, badgeW, 8, 2, SSD1306_WHITE);
-    oled.setCursor(badgeX + 3, y + 2);
-    oled.print(badgeText);
-
-    // Row 2: Progress bar
-    display.drawProgressBar(4, y + 11, 120, 4, rem >= 0.0f ? rem : 0.0f);
-
-    // Row 3: Countdown text
-    char countdownBuf[32];
-    formatResetCountdown(sw->resetAt, sw->windowDurationSeconds, countdownBuf, sizeof(countdownBuf));
-    oled.setCursor(4, y + 17);
-    oled.print(countdownBuf);
-}
-
 void BMOQuotaRenderer::renderQuotaScreen(uint8_t pageIndex, bool wifiConnected, bool mqttConnected) {
     display.clear();
 

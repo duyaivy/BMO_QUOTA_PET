@@ -16,7 +16,7 @@ struct Renderer {void renderQuotaScreen(int,bool,bool){} } quotaRenderer;
 enum class UIMode {PET_FACE,QUOTA_VIEW,END_OF_LIST};
 class BMONavigationController {public: BMONavigationController();void begin();void update();void render();UIMode mode(){return _mode;}private:void handleButtonA();void handleButtonB();UIMode _mode;uint8_t _quotaIndex;unsigned long _endOfListEnteredAt;};
 ''')
-    (p/'mqtt_client.h').write_text('struct Mqtt {int count=3;int getQuotaScreenCount(){return count;}bool isConnected(){return true;}} mqttClient;')
+    (p/'mqtt_client.h').write_text('struct Mqtt {int count=3;int getTotalQuotaPages(){return count;}int getQuotaScreenCount(){return count;}bool isConnected(){return true;}} mqttClient;')
     (p/'wifi_manager.h').write_text('struct Wifi {bool isWifiConnected(){return true;}} connManager;')
     (p/'power_manager.h').write_text('struct Power {int activity=0;void resetActivityTimer(){activity++;}} powerManager;')
     source=(root/'firmware/src/navigation.cpp').read_text()
