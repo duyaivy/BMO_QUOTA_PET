@@ -193,7 +193,7 @@ void BMOQuotaRenderer::renderQuotaCard(int16_t y, int16_t h, const SnapshotWindo
     oled.print(countdownBuf);
 }
 
-void BMOQuotaRenderer::renderQuotaScreen(uint8_t providerIndex, bool wifiConnected, bool mqttConnected) {
+void BMOQuotaRenderer::renderQuotaScreen(uint8_t pageIndex, bool wifiConnected, bool mqttConnected) {
     display.clear();
 
     if (mqttClient.isRetired()) {
@@ -201,18 +201,20 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t providerIndex, bool wifiConnect
         return;
     }
 
-    uint8_t totalProviders = mqttClient.getUniqueQuotaProviderCount();
-    if (totalProviders == 0) {
+    uint8_t totalPages = mqttClient.getTotalQuotaPages();
+    if (totalPages == 0) {
         display.showEmptyQuotaScreen();
         return;
     }
 
-    if (providerIndex >= totalProviders) {
-        providerIndex = 0;
+    if (pageIndex >= totalPages) {
+        pageIndex = 0;
     }
 
-    const char* providerId = mqttClient.getUniqueQuotaProviderAt(providerIndex);
-    if (!providerId) {
+    const char* providerId = nullptr;
+    const SnapshotWindow* sw = nullptr;
+    const char* defaultBadge = "Quota";
+    if (!mqttClient.getQuotaPage(pageIndex, &providerId, &sw, &defaultBadge) || !providerId) {
         display.showEmptyQuotaScreen();
         return;
     }
@@ -248,11 +250,8 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t providerIndex, bool wifiConnect
 
     oled.drawFastHLine(0, 10, 128, SSD1306_WHITE);
 
-    // Look up windows for this provider
-    const SnapshotWindow* windows[2] = {nullptr, nullptr};
-    uint8_t winCount = mqttClient.getProviderWindows(providerId, windows);
-
-    if (winCount == 0) {
+    // If no window data for this provider, show awaiting card
+    if (!sw) {
         oled.drawRoundRect(0, 14, 128, 48, 3, SSD1306_WHITE);
         display.drawCenteredText("Awaiting quota", 26, 1);
         display.drawCenteredText("data...", 38, 1);
@@ -260,31 +259,7 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t providerIndex, bool wifiConnect
         return;
     }
 
-    if (winCount >= 2) {
-        // Badge text for Card 1
-        const char* badge1 = "Current";
-        if (containsIgnoreCase(windows[0]->windowId, "5h") || containsIgnoreCase(windows[0]->windowId, "five")) {
-            badge1 = "5h";
-        } else if (windows[0]->label[0] != '\0' && strlen(windows[0]->label) <= 7) {
-            badge1 = windows[0]->label;
-        }
-        renderQuotaCard(12, 25, windows[0], badge1);
-
-        // Badge text for Card 2
-        const char* badge2 = "Weekly";
-        if (containsIgnoreCase(windows[1]->windowId, "week") || containsIgnoreCase(windows[1]->windowId, "7d") || containsIgnoreCase(windows[1]->windowId, "seven")) {
-            badge2 = "Weekly";
-        } else if (windows[1]->label[0] != '\0' && strlen(windows[1]->label) <= 7) {
-            badge2 = windows[1]->label;
-        }
-        renderQuotaCard(38, 25, windows[1], badge2);
-
-        display.update();
-        return;
-    }
-
-    // winCount == 1: Single large card at y = 14, h = 48
-    const SnapshotWindow* sw = windows[0];
+    // Full-height single card layout (y = 14, h = 48)
     oled.drawRoundRect(0, 14, 128, 48, 3, SSD1306_WHITE);
 
     // Calculate remaining %
@@ -306,31 +281,20 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t providerIndex, bool wifiConnect
         snprintf(pctStr, sizeof(pctStr), "---%%");
     }
 
-    // Row 1: Left: Large % text
+    // Row 1: Left: Large % text (TextSize 2)
     oled.setTextSize(2);
     oled.setCursor(6, 18);
     oled.print(pctStr);
 
-    // Row 1: Right: Pill badge with label at x=68, y=20
-    char badgeText[16];
-    if (sw->label[0] != '\0' && strlen(sw->label) <= 8) {
-        strncpy(badgeText, sw->label, sizeof(badgeText) - 1);
-        badgeText[sizeof(badgeText) - 1] = '\0';
-    } else if (containsIgnoreCase(sw->windowId, "5h")) {
-        strcpy(badgeText, "5h");
-    } else if (containsIgnoreCase(sw->windowId, "week") || containsIgnoreCase(sw->windowId, "7d")) {
-        strcpy(badgeText, "Weekly");
-    } else if (sw->label[0] != '\0') {
-        strncpy(badgeText, sw->label, 8);
-        badgeText[8] = '\0';
-    } else {
-        strcpy(badgeText, "Current");
-    }
-
+    // Row 1: Right: Pill badge with label
+    const char* badgeText = defaultBadge ? defaultBadge : "Quota";
     oled.setTextSize(1);
     int16_t badgeW = (int16_t)(strlen(badgeText) * 6 + 6);
-    oled.drawRoundRect(68, 20, badgeW, 10, 2, SSD1306_WHITE);
-    oled.setCursor(71, 21);
+    int16_t badgeX = 122 - badgeW;
+    if (badgeX < 64) badgeX = 64;
+
+    oled.drawRoundRect(badgeX, 20, badgeW, 10, 2, SSD1306_WHITE);
+    oled.setCursor(badgeX + 3, 21);
     oled.print(badgeText);
 
     // Row 2: Progress bar at (6, 38, 116, 6)
