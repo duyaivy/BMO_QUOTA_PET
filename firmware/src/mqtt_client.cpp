@@ -23,9 +23,14 @@ BMOMqttClient::BMOMqttClient()
 
 void BMOMqttClient::begin() {
     #if BMO_MQTT_TLS
-    _wifiClient.setCACert(BMO_MQTT_CA_CERT);
+    if (strlen(BMO_MQTT_CA_CERT) > 0) {
+        _wifiClient.setCACert(BMO_MQTT_CA_CERT);
+    } else {
+        _wifiClient.setInsecure();
+        Serial.println("[MQTT] TLS enabled without CA certificate (using setInsecure)");
+    }
     #endif
-    _mqtt.setSocketTimeout(1);
+    _mqtt.setSocketTimeout(3);
     _mqtt.setServer(BMO_MQTT_BROKER, BMO_MQTT_PORT);
     _mqtt.setBufferSize(BMO_MQTT_BUFFER_SIZE + 256); // Support up to 8 KiB MQTT payloads
 
@@ -59,7 +64,9 @@ bool BMOMqttClient::isConnected() {
 void BMOMqttClient::reconnect() {
     if (_mqtt.connected()) return;
     #if BMO_MQTT_TLS
-    if (strlen(BMO_MQTT_CA_CERT) == 0 || time(nullptr) < 1700000000) return;
+    if (strlen(BMO_MQTT_CA_CERT) == 0) {
+        _wifiClient.setInsecure();
+    }
     #endif
 
     Serial.printf("[MQTT] Attempting connection to %s:%d as %s...\n",

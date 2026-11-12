@@ -24,8 +24,23 @@ void BMOButtonManager::begin() {
     // Buttons are wired between GPIO and GND (Active LOW)
     pinMode(_btnA.pin, INPUT_PULLUP);
     pinMode(_btnB.pin, INPUT_PULLUP);
-    Serial.printf("[BUTTONS] Configured Button A on GPIO %d, Button B on GPIO %d (INPUT_PULLUP)\n",
-                  _btnA.pin, _btnB.pin);
+
+    #if defined(ESP32)
+    gpio_pulldown_dis((gpio_num_t)_btnA.pin);
+    gpio_pullup_en((gpio_num_t)_btnA.pin);
+    gpio_pulldown_dis((gpio_num_t)_btnB.pin);
+    gpio_pullup_en((gpio_num_t)_btnB.pin);
+    #endif
+
+    delay(10);
+    int rawA = digitalRead(_btnA.pin);
+    int rawB = digitalRead(_btnB.pin);
+
+    Serial.printf("[BUTTONS] Button A on GPIO %d (initial val=%d), Button B on GPIO %d (initial val=%d)\n",
+                  _btnA.pin, rawA, _btnB.pin, rawB);
+    if (rawB == LOW) {
+        Serial.println("[BUTTONS] NOTE: Button B (GPIO 12) reads LOW at boot. If button is not pressed, check wiring.");
+    }
 }
 
 void BMOButtonManager::update() {
@@ -51,11 +66,13 @@ void BMOButtonManager::updateButton(ButtonState& btn) {
                 // Button just pressed down
                 btn.pressStartTime = now;
                 btn.heldEvent = false;
+                Serial.printf("[BUTTONS] GPIO %d PRESSED\n", btn.pin);
             } else {
                 // Button released
                 unsigned long duration = now - btn.pressStartTime;
                 if (duration < BUTTON_HOLD_MS) {
                     btn.clickedEvent = true;
+                    Serial.printf("[BUTTONS] GPIO %d CLICKED (held %lums)\n", btn.pin, duration);
                 }
             }
         } else if (btn.debouncedState == LOW) {
