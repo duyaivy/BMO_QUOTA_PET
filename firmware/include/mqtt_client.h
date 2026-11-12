@@ -23,11 +23,16 @@ public:
     const ConfigScreen* getQuotaScreenAt(uint8_t index) const;
     const SnapshotWindow* findSnapshotWindow(const char* providerId, const char* windowId) const;
 
+    uint8_t getUniqueQuotaProviderCount() const;
+    const char* getUniqueQuotaProviderAt(uint8_t index) const;
+    uint8_t getProviderWindows(const char* providerId, const SnapshotWindow* outWindows[2]) const;
+
 private:
     void reconnect();
     void onMessage(char* topic, uint8_t* payload, unsigned int length);
     void handleConfigPayload(const uint8_t* payload, unsigned int length);
     void handleSnapshotPayload(const uint8_t* payload, unsigned int length);
+    uint8_t collectUniqueProviders(const char* outProviders[MAX_CONFIG_SCREENS]) const;
 
     #if BMO_MQTT_TLS
     WiFiClientSecure _wifiClient;

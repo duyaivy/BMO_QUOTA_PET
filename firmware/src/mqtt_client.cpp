@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 #include <time.h>
 #include <initializer_list>
+#include <ctype.h>
+#include <strings.h>
 
 BMOMqttClient mqttClient;
 
@@ -292,4 +294,175 @@ const SnapshotWindow* BMOMqttClient::findSnapshotWindow(const char* providerId, 
         }
     }
     return nullptr;
+}
+
+static bool isSameProvider(const char* a, const char* b) {
+    if (!a || !b) return false;
+    if (strcasecmp(a, b) == 0) return true;
+    if ((strcasecmp(a, "antigravity") == 0 && strcasecmp(b, "gemini") == 0) ||
+        (strcasecmp(a, "gemini") == 0 && strcasecmp(b, "antigravity") == 0)) {
+        return true;
+    }
+    return false;
+}
+
+static bool containsIgnoreCase(const char* str, const char* sub) {
+    if (!str || !sub) return false;
+    size_t strLen = strlen(str);
+    size_t subLen = strlen(sub);
+    if (subLen == 0) return true;
+    if (strLen < subLen) return false;
+    for (size_t i = 0; i <= strLen - subLen; i++) {
+        bool match = true;
+        for (size_t j = 0; j < subLen; j++) {
+            if (tolower((unsigned char)str[i + j]) != tolower((unsigned char)sub[j])) {
+                match = false;
+                break;
+            }
+        }
+        if (match) return true;
+    }
+    return false;
+}
+
+static int getWindowTier(const SnapshotWindow* w) {
+    if (!w) return 0;
+    const char* id = w->windowId;
+    if (containsIgnoreCase(id, "primary") ||
+        containsIgnoreCase(id, "five_hour") ||
+        containsIgnoreCase(id, "five-hour") ||
+        containsIgnoreCase(id, "5h")) {
+        return -1;
+    }
+    if (containsIgnoreCase(id, "secondary") ||
+        containsIgnoreCase(id, "seven_day") ||
+        containsIgnoreCase(id, "seven-day") ||
+        containsIgnoreCase(id, "7d") ||
+        containsIgnoreCase(id, "week")) {
+        return 1;
+    }
+    return 0;
+}
+
+static bool isMorePrimary(const SnapshotWindow* a, const SnapshotWindow* b) {
+    if (!a && !b) return false;
+    if (!a) return false;
+    if (!b) return true;
+
+    int tierA = getWindowTier(a);
+    int tierB = getWindowTier(b);
+    if (tierA != tierB) {
+        return tierA < tierB;
+    }
+
+    if (a->windowDurationSeconds > 0 && b->windowDurationSeconds > 0) {
+        if (a->windowDurationSeconds != b->windowDurationSeconds) {
+            return a->windowDurationSeconds < b->windowDurationSeconds;
+        }
+    }
+
+    return false;
+}
+
+uint8_t BMOMqttClient::collectUniqueProviders(const char* outProviders[MAX_CONFIG_SCREENS]) const {
+    if (!outProviders) return 0;
+    uint8_t count = 0;
+
+    if (_config.valid) {
+        for (uint8_t i = 0; i < _config.screenCount; i++) {
+            if (_config.screens[i].kind == ScreenKind::QUOTA && _config.screens[i].providerId[0] != '\0') {
+                const char* pid = _config.screens[i].providerId;
+                bool duplicate = false;
+                for (uint8_t j = 0; j < count; j++) {
+                    if (isSameProvider(outProviders[j], pid)) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate && count < MAX_CONFIG_SCREENS) {
+                    outProviders[count++] = pid;
+                }
+            }
+        }
+    }
+
+    // Fallback: If _config has no quota screens (or is invalid), check _snapshot.windows
+    if (count == 0 && _snapshot.valid) {
+        for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
+            if (_snapshot.windows[i].providerId[0] != '\0') {
+                const char* pid = _snapshot.windows[i].providerId;
+                bool duplicate = false;
+                for (uint8_t j = 0; j < count; j++) {
+                    if (isSameProvider(outProviders[j], pid)) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate && count < MAX_CONFIG_SCREENS) {
+                    outProviders[count++] = pid;
+                }
+            }
+        }
+    }
+
+    return count;
+}
+
+uint8_t BMOMqttClient::getUniqueQuotaProviderCount() const {
+    const char* providers[MAX_CONFIG_SCREENS];
+    return collectUniqueProviders(providers);
+}
+
+const char* BMOMqttClient::getUniqueQuotaProviderAt(uint8_t index) const {
+    const char* providers[MAX_CONFIG_SCREENS];
+    uint8_t total = collectUniqueProviders(providers);
+    if (index >= total) {
+        return nullptr;
+    }
+    return providers[index];
+}
+
+uint8_t BMOMqttClient::getProviderWindows(const char* providerId, const SnapshotWindow* outWindows[2]) const {
+    if (!outWindows) return 0;
+    outWindows[0] = nullptr;
+    outWindows[1] = nullptr;
+
+    if (!providerId || providerId[0] == '\0' || !_snapshot.valid) {
+        return 0;
+    }
+
+    const SnapshotWindow* matched[MAX_SNAPSHOT_WINDOWS];
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < _snapshot.windowCount; i++) {
+        if (isSameProvider(_snapshot.windows[i].providerId, providerId)) {
+            if (count < MAX_SNAPSHOT_WINDOWS) {
+                matched[count++] = &_snapshot.windows[i];
+            }
+        }
+    }
+
+    if (count == 0) {
+        return 0;
+    }
+
+    if (count == 1) {
+        outWindows[0] = matched[0];
+        outWindows[1] = nullptr;
+        return 1;
+    }
+
+    // Sort matched windows so primary is first
+    for (uint8_t i = 0; i < count - 1; i++) {
+        for (uint8_t j = i + 1; j < count; j++) {
+            if (isMorePrimary(matched[j], matched[i])) {
+                const SnapshotWindow* tmp = matched[i];
+                matched[i] = matched[j];
+                matched[j] = tmp;
+            }
+        }
+    }
+
+    outWindows[0] = matched[0];
+    outWindows[1] = matched[1];
+    return 2;
 }
