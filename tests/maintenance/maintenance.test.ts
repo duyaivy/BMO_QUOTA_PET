@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { closeDbForTests, getDb, writeTransaction } from "@/server/db";
 import { verifyMaintenanceSecret } from "@/server/maintenance";
-import { POST } from "@/app/api/internal/maintenance/route";
+import { GET, POST } from "@/app/api/internal/maintenance/route";
 
 describe("Maintenance Route & Logic", () => {
   let directory: string;
@@ -53,6 +53,22 @@ describe("Maintenance Route & Logic", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.error.code).toBe("UNAUTHORIZED");
+  });
+
+  it("authorizes GET request for Vercel Cron invocation", async () => {
+    const request = new Request(
+      "http://127.0.0.1:3000/api/internal/maintenance",
+      {
+        method: "GET",
+        headers: { authorization: `Bearer ${SECRET}` },
+      },
+    );
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body.data).toBeDefined();
   });
 
   it("prunes expired nonces, receipts, sessions and marks expired reset windows unavailable", async () => {

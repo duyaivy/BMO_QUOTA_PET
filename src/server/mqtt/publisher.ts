@@ -144,6 +144,63 @@ export class MqttClient {
     }
   }
 
+  /**
+   * Connects once, publishes multiple messages within a single MQTT session,
+   * sends DISCONNECT, and closes the connection.
+   */
+  async publishBatch(
+    messages: MqttPublishOptions[],
+  ): Promise<MqttPublishResult[]> {
+    if (messages.length === 0) return [];
+    if (messages.length === 1) {
+      return [await this.publish(messages[0])];
+    }
+
+    const socket = await this.connect();
+    const results: MqttPublishResult[] = [];
+
+    try {
+      for (const options of messages) {
+        const itemStart = Date.now();
+        const qos = options.qos ?? 1;
+        const retain = options.retain ?? true;
+        const payloadBuffer =
+          typeof options.payload === "string"
+            ? Buffer.from(options.payload, "utf8")
+            : options.payload;
+
+        assertMqttPayloadSize(payloadBuffer);
+
+        const packetId = qos === 1 ? nextPacketId() : 0;
+        await this.sendPublish(
+          socket,
+          options.topic,
+          payloadBuffer,
+          qos,
+          retain,
+          packetId,
+        );
+
+        if (qos === 1) {
+          await this.waitForPuback(socket, packetId);
+        }
+
+        results.push({
+          topic: options.topic,
+          bytesWritten: payloadBuffer.length,
+          qos,
+          retained: retain,
+          durationMs: Date.now() - itemStart,
+        });
+      }
+
+      await this.sendDisconnect(socket);
+      return results;
+    } finally {
+      socket.destroy();
+    }
+  }
+
   private async connect(): Promise<net.Socket> {
     return new Promise((resolve, reject) => {
       let isSettled = false;

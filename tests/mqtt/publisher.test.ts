@@ -56,6 +56,33 @@ describe("MQTT Publisher Adapter", () => {
     expect(broker.retainedMessages.has(topic)).toBe(true);
   });
 
+  it("publishes multiple messages in a single session with publishBatch", async () => {
+    const client = new MqttClient({
+      host: "127.0.0.1",
+      port: brokerPort,
+      useTls: false,
+      clientId: "test-publisher-batch",
+    });
+
+    const topic1 = "bmo/v1/devices/bmo-local/config";
+    const topic2 = "bmo/v1/devices/bmo-local/snapshot";
+    const payload1 = JSON.stringify({ config: 1 });
+    const payload2 = JSON.stringify({ snapshot: 1 });
+
+    const results = await client.publishBatch([
+      { topic: topic1, payload: payload1, qos: 1, retain: true },
+      { topic: topic2, payload: payload2, qos: 1, retain: true },
+    ]);
+
+    expect(results).toHaveLength(2);
+    expect(results[0].topic).toBe(topic1);
+    expect(results[1].topic).toBe(topic2);
+
+    expect(broker.publishedMessages).toHaveLength(2);
+    expect(broker.retainedMessages.has(topic1)).toBe(true);
+    expect(broker.retainedMessages.has(topic2)).toBe(true);
+  });
+
   it("fails cleanly when broker refuses connection", async () => {
     await broker.stop();
     // Restart broker that refuses connection with return code 4 (bad credentials)

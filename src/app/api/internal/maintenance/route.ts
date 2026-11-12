@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { runMaintenance, verifyMaintenanceSecret } from "@/server/maintenance";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
+async function handleMaintenance(request: Request) {
   const authHeader =
     request.headers.get("authorization") ||
     request.headers.get("x-bmo-maintenance-secret");
@@ -33,3 +34,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const GET = handleMaintenance;
+export const POST = handleMaintenance;

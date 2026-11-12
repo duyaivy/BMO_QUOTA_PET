@@ -26,7 +26,8 @@
     "collector:enroll": "node --conditions=react-server --import tsx scripts/enroll-native.ts",
     "enroll:native": "BMO_ALLOW_NATIVE_SETUP=true node --conditions=react-server --import tsx scripts/enroll-native.ts native-collector-agy native-key-agy antigravity",
     "drain:outbox": "node --conditions=react-server --import tsx scripts/drain-outbox.ts",
-    "drain:watch": "node --conditions=react-server --import tsx scripts/auto-drain.ts"
+    "drain:watch": "node --conditions=react-server --import tsx scripts/auto-drain.ts",
+    "mqtt:check": "node --conditions=react-server --import tsx scripts/check-mqtt.ts"
   },
   "dependencies": {
     "@libsql/client": "0.18.0",

@@ -8,8 +8,8 @@ export const mqttConfigSchema = z.object({
   password: z.string().optional(),
   clientId: z.string().min(1).max(128).default("bmo-backend-publisher"),
   useTls: z.boolean().default(true),
-  connectTimeoutMs: z.number().int().positive().default(5000),
-  publishTimeoutMs: z.number().int().positive().default(5000),
+  connectTimeoutMs: z.number().int().positive().default(10000),
+  publishTimeoutMs: z.number().int().positive().default(10000),
 });
 
 export type MqttConfig = z.infer<typeof mqttConfigSchema>;

@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { after } from "next/server";
 import { writeTransaction } from "@/server/db";
 import { MqttClient } from "./publisher";
 
@@ -99,7 +100,46 @@ export async function drainOutbox(
       return rows;
     });
 
-    // Step 4: Publish each message
+    // Step 4: Publish candidate messages
+    // If publisher supports batching and we have multiple messages, try single-connection batch first
+    if (
+      typeof publisher.publishBatch === "function" &&
+      candidateRows.length > 1
+    ) {
+      try {
+        const batchOptions = candidateRows.map((row) => ({
+          topic: String(row.topic),
+          payload: Boolean(row.is_tombstone)
+            ? Buffer.alloc(0)
+            : String(row.payload),
+          qos: 1 as const,
+          retain: true,
+        }));
+
+        await publisher.publishBatch(batchOptions);
+
+        const nowAck = Date.now();
+        await writeTransaction(async (tx) => {
+          for (const row of candidateRows) {
+            await tx.execute({
+              sql: "UPDATE mqtt_outbox SET state='published', acknowledged_at=?, updated_at=? WHERE id=?",
+              args: [nowAck, nowAck, String(row.id)],
+            });
+          }
+        });
+
+        return {
+          drained: candidateRows.length,
+          published: candidateRows.length,
+          failed: 0,
+          leaseAcquired: true,
+          errors: [],
+        };
+      } catch {
+        // Fall back to individual message processing below on batch failure
+      }
+    }
+
     for (const row of candidateRows) {
       const id = String(row.id);
       const topic = String(row.topic);
@@ -159,6 +199,35 @@ export async function drainOutbox(
         sql: "UPDATE operational_state SET lease_owner=NULL, lease_expires_at=0, updated_at=? WHERE resource='mqtt_outbox_drain' AND lease_owner=?",
         args: [Date.now(), workerToken],
       });
+    });
+  }
+}
+
+/**
+ * Automatically triggers outbox draining.
+ * Inside a Next.js serverless request, `after()` keeps the function execution
+ * alive until publishing to MQTT finishes while letting the HTTP response return immediately.
+ * Outside a request scope (tests/scripts), it fires asynchronously with error catching.
+ */
+export function triggerDrainOutbox(): void {
+  try {
+    after(async () => {
+      try {
+        await drainOutbox();
+      } catch (err: unknown) {
+        console.error(
+          "[MqttDrain] Background drain failed:",
+          err instanceof Error ? err.message : String(err),
+        );
+      }
+    });
+  } catch {
+    // Outside request scope
+    void drainOutbox().catch((err: unknown) => {
+      console.error(
+        "[MqttDrain] Asynchronous drain failed:",
+        err instanceof Error ? err.message : String(err),
+      );
     });
   }
 }
