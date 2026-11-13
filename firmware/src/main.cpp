@@ -38,6 +38,25 @@ void setup() {
 #if defined(BMO_BENCH_OFFLINE) && BMO_BENCH_OFFLINE
     Serial.println("[BENCH] Offline OLED/buttons test; Wi-Fi and MQTT disabled.");
 #else
+    // Check if Button A is held during boot to trigger Wi-Fi reset & config portal
+    if (digitalRead(PIN_BUTTON_A) == LOW) {
+        display.showMessageScreen("WI-FI SETUP", "Hold 3s to reset...", "Release to cancel");
+        unsigned long pressStart = millis();
+        bool resetTriggered = false;
+        while (digitalRead(PIN_BUTTON_A) == LOW) {
+            if (millis() - pressStart >= 3000) {
+                resetTriggered = true;
+                display.showMessageScreen("WI-FI RESET", "Settings Cleared!", "Opening Setup AP...");
+                delay(1200);
+                break;
+            }
+            delay(50);
+        }
+        if (resetTriggered) {
+            connManager.resetWifiSettings();
+        }
+    }
+
     // 5. Initialize Wi-Fi Connection Manager & SNTP Time
     display.showConnectingScreen("Connecting Wi-Fi...");
     connManager.begin();

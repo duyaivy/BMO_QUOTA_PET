@@ -126,7 +126,7 @@ int main() {
         sideMotion.insert(sides);
     }
     assert(sideMotion.size()>8 && logoMaxY-logoMinY>=57);
-    for(int f : {11,12,13}) {
+    for(int f : {11,12}) {
         faces.setFace(BMOFaceType(f));
         assert(int(faces.getCurrentFace())==f && "New faces must be selectable");
     }
@@ -145,7 +145,7 @@ int main() {
         }
     }
     // Restart and timer rollover must preserve the same visible choreography.
-    for(int f : {0, 2, 5, 6, 7, 8, 9, 10, 11, 12, 13}) {
+    for(int f : {0, 2, 5, 6, 7, 8, 9, 10, 11, 12}) {
         std::string reference[6];
         const uint32_t offsets[] = {0, 60, 960, 1500, 2300, 3540};
         tick=10000; faces.setFace(BMOFaceType(f));

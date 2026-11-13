@@ -102,9 +102,9 @@ describe("Phase 4 ESP32-CAM Firmware Contracts & Navigation Verification", () =>
 
     class NavigationSimulator {
       public mode: UIMode = UIMode.PET_FACE;
-      public faceIndex: number = 0; // 0 to 13 (14 scenes)
+      public faceIndex: number = 0; // 0 to 12 (13 scenes)
       public quotaIndex: number = 0;
-      public totalFaces: number = 14;
+      public totalFaces: number = 13;
       public totalQuotaScreens: number = 3;
 
       pressButtonA(): void {
@@ -135,7 +135,7 @@ describe("Phase 4 ESP32-CAM Firmware Contracts & Navigation Verification", () =>
       }
     }
 
-    it("verifies Button A cycles all 14 BMO scenes", () => {
+    it("verifies Button A cycles all 13 BMO scenes", () => {
       const nav = new NavigationSimulator();
       expect(nav.mode).toBe(UIMode.PET_FACE);
       expect(nav.faceIndex).toBe(0); // Happy
@@ -155,7 +155,7 @@ describe("Phase 4 ESP32-CAM Firmware Contracts & Navigation Verification", () =>
       nav.pressButtonA();
       expect(nav.faceIndex).toBe(5); // Surprised
 
-      for (const index of [6, 7, 8, 9, 10, 11, 12, 13]) {
+      for (const index of [6, 7, 8, 9, 10, 11, 12]) {
         nav.pressButtonA();
         expect(nav.faceIndex).toBe(index); // Additional animated scenes, keeping the original IDs stable
       }

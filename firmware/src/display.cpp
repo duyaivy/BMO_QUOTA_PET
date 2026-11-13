@@ -223,6 +223,35 @@ void BMODisplay::showConnectingScreen(const char* stepName) {
     _oled.display();
 }
 
+void BMODisplay::showWifiSetupScreen(const char* apSsid, const char* apPass, const char* ip) {
+    if (!_initialized) return;
+    _oled.clearDisplay();
+
+    // Top banner
+    _oled.fillRect(0, 0, OLED_SCREEN_WIDTH, 12, SSD1306_WHITE);
+    _oled.setTextColor(SSD1306_BLACK);
+    _oled.setTextSize(1);
+    drawCenteredText("WI-FI SETUP (AP)", 2, 1, false);
+    _oled.setTextColor(SSD1306_WHITE);
+
+    // AP SSID
+    _oled.setCursor(4, 18);
+    _oled.print("AP: ");
+    _oled.print(apSsid ? apSsid : "duyaivy's pet");
+
+    // Pass
+    _oled.setCursor(4, 32);
+    _oled.print("Pass: ");
+    _oled.print(apPass ? apPass : "12345678");
+
+    // IP URL
+    _oled.setCursor(4, 46);
+    _oled.print("Web: ");
+    _oled.print(ip ? ip : "192.168.4.1");
+
+    _oled.display();
+}
+
 void BMODisplay::showEndOfListScreen() {
     if (!_initialized) return;
     _oled.clearDisplay();

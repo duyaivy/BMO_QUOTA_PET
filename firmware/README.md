@@ -6,7 +6,7 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
 
 ## Features
 
-- **14 Animated BMO Scenes:**
+- **13 Animated BMO Scenes:**
   1. `HAPPY`: Airy crescent eyes, a gentle swaying smile and blush cheeks.
   2. `NEUTRAL / BLINK`: Classic round eyes (`• •`) with a continuous left–right eye sweep.
   3. `WINK / PLAYFUL`: Asymmetric winking eye, tilted smile and moving sparkle.
@@ -19,12 +19,11 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
   10. `MANCHESTER UNITED`: The owner-supplied Red Devil and trident silhouette, converted to monochrome, with a gentle float and four moving stars drawn in the side margins without shrinking the logo.
   11. `SIUUU FACE`: Eyes and mouth only; inhales, bounces with squeezed happy eyes and a pulsing mouth while displaying "SIUUU!", then smiles. This is a silent OLED animation.
   12. `COOL`: Oversized sunglasses with traveling reflections, a grin and head bob.
-  13. `LAUGH`: Bouncing squeezed eyes, a laughing mouth and falling happy tears.
-  14. `STARRY`: Pulsing five-pointed star eyes and an excited mouth.
+  13. `STARRY`: Pulsing five-pointed star eyes and an excited mouth.
 - **Interactive 2-Button Navigation:**
   - **Button A (Face Mode):**
     - Switches from Quota view back to BMO Face mode.
-    - While in Face mode, pressing Button A cycles through all 14 scenes; the first six positions are preserved.
+    - While in Face mode, pressing Button A cycles through all 13 scenes; the first six positions are preserved.
   - **Button B (Quota Provider Mode):**
     - Switches from Face mode to Quota mode (showing Quota screen #1).
     - While in Quota mode, pressing Button B cycles through configured provider quotas (Claude, Codex, Antigravity).
@@ -134,7 +133,7 @@ Edit `include/config.local.h` and update:
 
 | Button | Current Screen | Action | Result |
 |---|---|---|---|
-| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Laugh -> Starry) |
+| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Starry) |
 | **Button A** | Quota View | Press | Immediately returns to Face Mode |
 | **Button A** | End of List | Press | Returns to Face Mode |
 | **Button B** | Face Mode | Press | Enters Quota Mode at first provider screen |

@@ -26,6 +26,7 @@ public:
     // Standard notification & status screens
     void showSplashScreen(const char* version = "v1.0-ESP32CAM");
     void showConnectingScreen(const char* stepName);
+    void showWifiSetupScreen(const char* apSsid, const char* apPass, const char* ip);
     void showEndOfListScreen();
     void showEmptyQuotaScreen();
     void showMessageScreen(const char* title, const char* line1, const char* line2 = nullptr);

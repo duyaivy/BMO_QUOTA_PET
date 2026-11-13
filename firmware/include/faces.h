@@ -16,9 +16,8 @@ enum BMOFaceType {
     FACE_MAN_UNITED = 9,
     FACE_SIUUU_CHEER = 10,  // Face-only celebration, alongside the full-body scene
     FACE_COOL = 11,
-    FACE_LAUGH = 12,
-    FACE_STARRY = 13,
-    FACE_COUNT = 14
+    FACE_STARRY = 12,
+    FACE_COUNT = 13
 };
 
 class BMOFaceRenderer {
@@ -52,7 +51,6 @@ private:
     void renderManUnited(Adafruit_SSD1306& oled);
     void renderSiuuuCheer(Adafruit_SSD1306& oled);
     void renderCool(Adafruit_SSD1306& oled);
-    void renderLaugh(Adafruit_SSD1306& oled);
     void renderStarry(Adafruit_SSD1306& oled);
     void renderManUnitedStars(Adafruit_SSD1306& oled);
 

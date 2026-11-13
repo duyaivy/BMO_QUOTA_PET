@@ -17,7 +17,6 @@ void BMOFaceRenderer::maximizeScene(Adafruit_SSD1306& oled) {
         {43, 1, 41, 58, true},    // MU devil silhouette + vertical float
         {27, 1, 76, 55, false},   // Face-only SIUUU
         {12, 9, 105, 49, false},  // Sunglasses + head bob
-        {17, 10, 95, 53, false}, // Laughter + tears
         {13, 2, 103, 56, false},  // Pulsing star eyes
     };
     static_assert(sizeof(bounds) / sizeof(bounds[0]) == FACE_COUNT,

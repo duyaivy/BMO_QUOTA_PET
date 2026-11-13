@@ -8,7 +8,8 @@
 enum class WifiState {
     DISCONNECTED,
     CONNECTING,
-    CONNECTED
+    CONNECTED,
+    CONFIG_PORTAL
 };
 
 class BMOConnectionManager {
@@ -21,6 +22,8 @@ public:
     bool isTimeSynced() const;
     time_t getCurrentEpoch() const;
     String getFormattedTime() const;
+
+    void resetWifiSettings();
 
 private:
     void startConnecting();

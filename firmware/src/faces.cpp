@@ -101,7 +101,6 @@ const char* BMOFaceRenderer::getFaceName(BMOFaceType face) const {
         case FACE_MAN_UNITED: return "Manchester United";
         case FACE_SIUUU_CHEER: return "SIUUU / Cheering Face";
         case FACE_COOL: return "Cool / Shades";
-        case FACE_LAUGH: return "Laugh / Happy Tears";
         case FACE_STARRY: return "Starry / Wow";
         default: return "BMO";
     }
@@ -551,7 +550,6 @@ void BMOFaceRenderer::render(Adafruit_SSD1306& oled) {
         case FACE_MAN_UNITED: renderManUnited(oled); break;
         case FACE_SIUUU_CHEER: renderSiuuuCheer(oled); break;
         case FACE_COOL: renderCool(oled); break;
-        case FACE_LAUGH: renderLaugh(oled); break;
         case FACE_STARRY: renderStarry(oled); break;
         default: break;
     }

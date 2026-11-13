@@ -13,6 +13,11 @@
 #define BMO_WIFI_TIMEOUT_MS     15000
 #define BMO_WIFI_RETRY_DELAY_MS 5000
 
+// --- Wi-Fi Captive Portal (SoftAP) Settings ---
+#define BMO_WIFI_AP_SSID        "duyaivy's pet"
+#define BMO_WIFI_AP_PASSWORD    "12345678"
+#define BMO_WIFI_PORTAL_TIMEOUT_SEC 180
+
 // --- SNTP Time Synchronization Settings ---
 #define BMO_NTP_SERVER_1        "pool.ntp.org"
 #define BMO_NTP_SERVER_2        "time.google.com"
