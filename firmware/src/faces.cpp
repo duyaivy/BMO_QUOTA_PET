@@ -4,8 +4,8 @@ BMOFaceRenderer faceRenderer;
 
 BMOFaceRenderer::BMOFaceRenderer()
     : _currentFace(FACE_HAPPY),
-      _lastAnimationTick(0),
       _animationFrame(0),
+      _sceneStartedAt(0),
       _screenWidth(128),
       _screenHeight(64),
       _eyeLwidthDefault(34),
@@ -91,16 +91,26 @@ const char* BMOFaceRenderer::getFaceName(BMOFaceType face) const {
     switch (face) {
         case FACE_HAPPY: return "Happy";
         case FACE_NEUTRAL_BLINK: return "Neutral / Blink";
-        case FACE_WINK: return "Tongue Out / Playful";
+        case FACE_WINK: return "Wink / Sparkle";
         case FACE_WORRIED: return "Worried / Sad";
         case FACE_SLEEPING: return "Sleeping";
         case FACE_SURPRISED: return "Surprised / Excited";
+        case FACE_LOVE: return "Love / Hearts";
+        case FACE_DANCE: return "BMO Dance";
+        case FACE_SIUUU: return "Ronaldo / SIUUU";
+        case FACE_MAN_UNITED: return "Manchester United";
+        case FACE_SIUUU_CHEER: return "SIUUU / Cheering Face";
+        case FACE_COOL: return "Cool / Shades";
+        case FACE_LAUGH: return "Laugh / Happy Tears";
+        case FACE_STARRY: return "Starry / Wow";
         default: return "BMO";
     }
 }
 
 void BMOFaceRenderer::resetMood() {
     unsigned long now = millis();
+    _sceneStartedAt = uint32_t(now);
+    _animationFrame = 0;
     _eyeLOpen = true;
     _eyeROpen = true;
     _hFlicker = false;
@@ -170,7 +180,7 @@ void BMOFaceRenderer::resetMood() {
             break;
 
         case FACE_WINK:
-            // 3. TONGUE OUT / PLAYFUL: Normal big cute eyes like Face 2 + playful sticking tongue
+            // Shared eye defaults for transitions; scene drawing is in face_scenes.cpp.
             _eyeLwidthDefault = 34;
             _eyeRwidthDefault = 34;
             _eyeLheightDefault = 36;
@@ -256,7 +266,7 @@ void BMOFaceRenderer::resetMood() {
             break;
 
         case FACE_SURPRISED:
-            // 6. SURPRISED: Steady extra-large shocked eyes, centered pupils, calm surprise
+            // Shared eye defaults for transitions; the animated scene draws independently.
             _eyeLwidthDefault = 38;
             _eyeRwidthDefault = 38;
             _eyeLheightDefault = 40;
@@ -277,7 +287,26 @@ void BMOFaceRenderer::resetMood() {
             _blinkInterval = 5;
             _blinkVariation = 4;
             break;
+        default:
+            // Standalone scenes use their own geometry and the shared timeline.
+            break;
     }
+
+    // Start each scene inside its own layout. Carrying eased coordinates from
+    // the previous face could crop a frame after the full-screen enlargement.
+    _eyeLwidthCurrent = _eyeLwidthNext;
+    _eyeRwidthCurrent = _eyeRwidthNext;
+    _eyeLheightCurrent = _eyeLheightNext;
+    _eyeRheightCurrent = _eyeRheightNext;
+    _spaceBetweenCurrent = _spaceBetweenNext;
+    _eyeLx = _eyeLxNext;
+    _eyeLy = _eyeLyNext;
+    _eyeRx = _eyeRxNext = _eyeLx + _eyeLwidthCurrent + _spaceBetweenCurrent;
+    _eyeRy = _eyeRyNext = _eyeLy;
+    _eyeLborderRadiusCurrent = _eyeLborderRadiusNext = _eyeLborderRadiusDefault;
+    _eyeRborderRadiusCurrent = _eyeRborderRadiusNext = _eyeRborderRadiusDefault;
+    _eyelidsTiredHeight = _eyelidsTiredHeightNext;
+    _eyelidsHappyBottomOffset = _eyelidsHappyBottomOffsetNext;
 
     _blinkTimer = now + (_blinkInterval * 1000);
     _idleTimer = now + (_idleInterval * 1000);
@@ -317,8 +346,15 @@ void BMOFaceRenderer::updateAnimation() {
         }
     }
 
-    // Idle glances (smooth look left/right/center)
-    if (_idle) {
+    // These two faces continuously scan left/right instead of waiting for a
+    // random idle glance. The shared scene clock keeps the sweep nonblocking.
+    if (_currentFace == FACE_NEUTRAL_BLINK || _currentFace == FACE_WORRIED) {
+        int centerX = (128 - (_eyeLwidthDefault + _spaceBetweenDefault + _eyeRwidthDefault)) / 2;
+        int amplitude = _currentFace == FACE_WORRIED ? 9 : 12;
+        float phase = _animationFrame * (6.28318530718f / 60.0f);
+        _eyeLxNext = centerX + int(roundf(sinf(phase) * amplitude));
+        _eyeLyNext = 12;
+    } else if (_idle) {
         if (now >= _idleTimer) {
             int glance = random(5);
             int centerX = (128 - (_eyeLwidthDefault + _spaceBetweenDefault + _eyeRwidthDefault)) / 2;
@@ -483,11 +519,9 @@ void BMOFaceRenderer::drawSweatDrops(Adafruit_SSD1306& oled) {
 void BMOFaceRenderer::render(Adafruit_SSD1306& oled) {
     unsigned long now = millis();
 
-    // Advance frame tick every 60ms for smooth animations
-    if (now - _lastAnimationTick >= 60) {
-        _lastAnimationTick = now;
-        _animationFrame = (_animationFrame + 1) % 60;
-    }
+    // Unsigned elapsed time handles millis() wrap and long display sleeps.
+    // No catch-up loop: each frame costs a bounded amount of drawing work.
+    _animationFrame = (uint32_t(now - _sceneStartedAt) / 60) % 60;
 
     // Run RoboEyes easing update
     updateAnimation();
@@ -510,38 +544,21 @@ void BMOFaceRenderer::render(Adafruit_SSD1306& oled) {
         case FACE_SLEEPING:
             renderSleeping(oled);
             break;
-        case FACE_SURPRISED:
-            renderSurprised(oled);
-            break;
+        case FACE_SURPRISED: renderSurprised(oled); break;
+        case FACE_LOVE: renderLove(oled); break;
+        case FACE_DANCE: renderDance(oled); break;
+        case FACE_SIUUU: renderSiuuu(oled); break;
+        case FACE_MAN_UNITED: renderManUnited(oled); break;
+        case FACE_SIUUU_CHEER: renderSiuuuCheer(oled); break;
+        case FACE_COOL: renderCool(oled); break;
+        case FACE_LAUGH: renderLaugh(oled); break;
+        case FACE_STARRY: renderStarry(oled); break;
+        default: break;
     }
 
-    // Page indicator at bottom right
-    char pageBuf[8];
-    snprintf(pageBuf, sizeof(pageBuf), "%d/%d", (int)_currentFace + 1, FACE_COUNT);
-    oled.setTextSize(1);
-    oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor(106, 56);
-    oled.print(pageBuf);
-}
-
-// 1. HAPPY: Large cheerful curved eyes, blush cheeks, steady happy smile, gentle glances
-void BMOFaceRenderer::renderHappy(Adafruit_SSD1306& oled) {
-    drawBaseEyes(oled);
-    drawHappyEyelids(oled);
-
-    // Cheerful blush lines on both cheeks
-    oled.drawFastHLine(max(2, _eyeLx - 10), _eyeLy + 20, 7, SSD1306_WHITE);
-    oled.drawFastHLine(max(3, _eyeLx - 9), _eyeLy + 23, 5, SSD1306_WHITE);
-
-    oled.drawFastHLine(min(125, _eyeRx + _eyeRwidthCurrent + 3), _eyeRy + 20, 7, SSD1306_WHITE);
-    oled.drawFastHLine(min(125, _eyeRx + _eyeRwidthCurrent + 4), _eyeRy + 23, 5, SSD1306_WHITE);
-
-    // Big happy open mouth with rounded bottom (steady, no vibration!)
-    int mouthY = 48;
-    oled.fillCircle(64, mouthY, 9, SSD1306_WHITE);
-    oled.fillRect(52, mouthY - 10, 24, 10, SSD1306_BLACK); // Flat top lip
-    oled.drawFastHLine(54, mouthY, 20, SSD1306_WHITE);
-    oled.fillCircle(64, mouthY + 4, 3, SSD1306_BLACK);     // Cute tongue cutout
+    maximizeScene(oled);
+    // Decorate after fitting so stars cannot reduce the portrait logo's size.
+    if (_currentFace == FACE_MAN_UNITED) renderManUnitedStars(oled);
 }
 
 // 2. NEUTRAL_BLINK: Large round-rect eyes with reflection highlight, auto-blink, idle glance (User favorite!)
@@ -560,32 +577,6 @@ void BMOFaceRenderer::renderNeutralBlink(Adafruit_SSD1306& oled) {
     oled.drawFastHLine(56, 52, 16, SSD1306_WHITE);
     oled.drawPixel(55, 51, SSD1306_WHITE);
     oled.drawPixel(72, 51, SSD1306_WHITE);
-}
-
-// 3. TONGUE OUT / PLAYFUL: Normal large cute eyes with reflection, smiling mouth with tongue sticking out
-void BMOFaceRenderer::renderWink(Adafruit_SSD1306& oled) {
-    drawBaseEyes(oled);
-
-    // Cute pupil reflection sparkle in both eyes (like Screen #2)
-    if (_eyeLheightCurrent > 16) {
-        oled.fillCircle(_eyeLx + 8, _eyeLy + 10, 2, SSD1306_BLACK);
-    }
-    if (_eyeRheightCurrent > 16) {
-        oled.fillCircle(_eyeRx + 8, _eyeRy + 10, 2, SSD1306_BLACK);
-    }
-
-    // Cheerful blush lines on cheeks
-    oled.drawFastHLine(max(2, _eyeLx - 8), _eyeLy + 22, 6, SSD1306_WHITE);
-    oled.drawFastHLine(min(125, _eyeRx + _eyeRwidthCurrent + 2), _eyeRy + 22, 6, SSD1306_WHITE);
-
-    // Cheerful curved smile
-    oled.drawFastHLine(52, 48, 24, SSD1306_WHITE);
-    oled.drawPixel(51, 47, SSD1306_WHITE);
-    oled.drawPixel(76, 47, SSD1306_WHITE);
-
-    // Cute rounded tongue sticking out :P
-    oled.fillRoundRect(59, 49, 10, 9, 4, SSD1306_WHITE);
-    oled.drawFastVLine(64, 49, 5, SSD1306_BLACK); // Tongue crease
 }
 
 // 4. WORRIED: Drooping sad eyelids, sad slanted eyebrows, gentle blinking, slow single sweat drop
@@ -645,23 +636,4 @@ void BMOFaceRenderer::renderSleeping(Adafruit_SSD1306& oled) {
         oled.setCursor(114, zY3);
         oled.print(".");
     }
-}
-
-// 6. SURPRISED: Extra-large 38x40 eyes, raised arched eyebrows, centered steady pupils, open round mouth
-void BMOFaceRenderer::renderSurprised(Adafruit_SSD1306& oled) {
-    drawBaseEyes(oled);
-
-    // Steady centered shock pupils
-    if (_eyeLheightCurrent > 20) {
-        oled.fillCircle(_eyeLx + _eyeLwidthCurrent / 2, _eyeLy + _eyeLheightCurrent / 2, 5, SSD1306_BLACK);
-        oled.fillCircle(_eyeRx + _eyeRwidthCurrent / 2, _eyeRy + _eyeRheightCurrent / 2, 5, SSD1306_BLACK);
-    }
-
-    // Raised arched eyebrows
-    oled.drawFastHLine(_eyeLx + 4, _eyeLy - 4, _eyeLwidthCurrent - 8, SSD1306_WHITE);
-    oled.drawFastHLine(_eyeRx + 4, _eyeRy - 4, _eyeRwidthCurrent - 8, SSD1306_WHITE);
-
-    // Big open round mouth :O (steady and crisp)
-    oled.fillCircle(64, 52, 7, SSD1306_WHITE);
-    oled.fillCircle(64, 52, 4, SSD1306_BLACK);
 }

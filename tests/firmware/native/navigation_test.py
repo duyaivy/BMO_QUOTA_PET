@@ -9,8 +9,8 @@ unsigned long tick=0; unsigned long millis(){return tick;}
 struct Log {void println(const char*){} template<class... T> void printf(const char*, T...){} } Serial;
 enum class ButtonId {BUTTON_A,BUTTON_B};
 struct Buttons {bool a=false,b=false; void update(){} bool wasClicked(ButtonId id){bool &v=id==ButtonId::BUTTON_A?a:b;bool old=v;v=false;return old;}} buttonManager;
-struct Faces {int face=0;void nextFace(){face=(face+1)%6;} int getCurrentFace(){return face;} const char* getFaceName(int){return "";} void render(int){} } faceRenderer;
-constexpr int FACE_COUNT=6, END_OF_LIST_AUTO_WRAP_MS=3000;
+struct Faces {int face=0;void nextFace(){face=(face+1)%14;} int getCurrentFace(){return face;} const char* getFaceName(int){return "";} void render(int){} } faceRenderer;
+constexpr int FACE_COUNT=14, END_OF_LIST_AUTO_WRAP_MS=3000;
 struct Display {int getDriver(){return 0;}void update(){} void showEmptyQuotaScreen(){} void showEndOfListScreen(){} } display;
 struct Renderer {void renderQuotaScreen(int,bool,bool){} } quotaRenderer;
 enum class UIMode {PET_FACE,QUOTA_VIEW,END_OF_LIST};
@@ -24,15 +24,15 @@ class BMONavigationController {public: BMONavigationController();void begin();vo
 #include <cassert>
 int main(){
  navigation.begin();
- for(int i=0;i<6;i++){buttonManager.a=true;navigation.update();}
- assert(faceRenderer.face==0 && powerManager.activity==6);
+ for(int i=0;i<FACE_COUNT;i++){buttonManager.a=true;navigation.update();}
+ assert(faceRenderer.face==0 && powerManager.activity==FACE_COUNT);
  for(int i=0;i<4;i++){buttonManager.b=true;navigation.update();}
  assert(navigation.mode()==UIMode::END_OF_LIST);
  tick=3001;navigation.update();assert(navigation.mode()==UIMode::PET_FACE);
  mqttClient.count=0;buttonManager.b=true;navigation.update();
  assert(navigation.mode()==UIMode::END_OF_LIST);
  tick=6002;navigation.update();assert(navigation.mode()==UIMode::PET_FACE);
- assert(powerManager.activity==11);
+ assert(powerManager.activity==FACE_COUNT+5);
 }
 '''
     (p/'test.cpp').write_text(source)

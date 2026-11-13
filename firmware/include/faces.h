@@ -4,20 +4,28 @@
 #include <Adafruit_SSD1306.h>
 
 enum BMOFaceType {
-    FACE_HAPPY = 0,         // Broad happy curved smile with large ^ ^ happy eyelids & gentle glances
+    FACE_HAPPY = 0,         // Airy crescent eyes, small smile and gentle sway
     FACE_NEUTRAL_BLINK = 1, // Large round-rect eyes with auto-blink & idle glances
-    FACE_WINK = 2,          // Playful winking eye with tongue
+    FACE_WINK = 2,          // Asymmetric wink, cheeky smile and a moving sparkle
     FACE_WORRIED = 3,       // Drooping sad eyelids with gentle sweat drop & calm look
     FACE_SLEEPING = 4,      // Closed eyes with animated floating Z z z and breathing mouth
-    FACE_SURPRISED = 5,     // Extra-large round-rect eyes with wide shock look & open mouth
-    FACE_COUNT = 6
+    FACE_SURPRISED = 5,     // Bobbing wide eyes, moving pupils and a pulsing mouth
+    FACE_LOVE = 6,
+    FACE_DANCE = 7,
+    FACE_SIUUU = 8,
+    FACE_MAN_UNITED = 9,
+    FACE_SIUUU_CHEER = 10,  // Face-only celebration, alongside the full-body scene
+    FACE_COOL = 11,
+    FACE_LAUGH = 12,
+    FACE_STARRY = 13,
+    FACE_COUNT = 14
 };
 
 class BMOFaceRenderer {
 public:
     BMOFaceRenderer();
 
-    // Set active facial expression (0 to 5)
+    // Set active scene; existing face IDs remain stable.
     void setFace(BMOFaceType face);
     void nextFace();
     BMOFaceType getCurrentFace() const { return _currentFace; }
@@ -31,12 +39,22 @@ public:
 
 private:
     void updateAnimation();
+    void maximizeScene(Adafruit_SSD1306& oled);
     void renderHappy(Adafruit_SSD1306& oled);
     void renderNeutralBlink(Adafruit_SSD1306& oled);
     void renderWink(Adafruit_SSD1306& oled);
     void renderWorried(Adafruit_SSD1306& oled);
     void renderSleeping(Adafruit_SSD1306& oled);
     void renderSurprised(Adafruit_SSD1306& oled);
+    void renderLove(Adafruit_SSD1306& oled);
+    void renderDance(Adafruit_SSD1306& oled);
+    void renderSiuuu(Adafruit_SSD1306& oled);
+    void renderManUnited(Adafruit_SSD1306& oled);
+    void renderSiuuuCheer(Adafruit_SSD1306& oled);
+    void renderCool(Adafruit_SSD1306& oled);
+    void renderLaugh(Adafruit_SSD1306& oled);
+    void renderStarry(Adafruit_SSD1306& oled);
+    void renderManUnitedStars(Adafruit_SSD1306& oled);
 
     void drawBaseEyes(Adafruit_SSD1306& oled);
     void drawHappyEyelids(Adafruit_SSD1306& oled);
@@ -51,8 +69,8 @@ private:
     int getScreenConstraintY() const;
 
     BMOFaceType _currentFace;
-    unsigned long _lastAnimationTick;
     uint8_t _animationFrame;
+    uint32_t _sceneStartedAt;
 
     // --- RoboEyes Geometry (Enlarged 36x36 for 128x64 display) ---
     int _screenWidth;

@@ -6,17 +6,25 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
 
 ## Features
 
-- **6 Animated BMO Expressions:**
-  1. `HAPPY`: Radiant curved eyes (`^ ^`) and cheerful open smile with blush cheeks.
-  2. `NEUTRAL / BLINK`: Classic round eyes (`• •`) with natural periodic blinking animation.
-  3. `WINK / PLAYFUL`: Playful winking eye with open smile and sticking tongue.
-  4. `WORRIED / SAD`: Slanted eyebrows with watery eyes and quivering mouth.
+- **14 Animated BMO Scenes:**
+  1. `HAPPY`: Airy crescent eyes, a gentle swaying smile and blush cheeks.
+  2. `NEUTRAL / BLINK`: Classic round eyes (`• •`) with a continuous left–right eye sweep.
+  3. `WINK / PLAYFUL`: Asymmetric winking eye, tilted smile and moving sparkle.
+  4. `WORRIED / SAD`: Slanted eyebrows, a gentle left–right eye sweep and a falling sweat drop.
   5. `SLEEPING`: Relaxed closed eyes (`- -`) with animated drifting "Z z z" bubbles.
-  6. `SURPRISED / EXCITED`: Wide eyes (`O O`) and big open mouth (`:O`).
+  6. `SURPRISED / EXCITED`: Bobbing eyes, moving pupils, pulsing mouth and bouncing exclamation mark.
+  7. `LOVE`: Pulsing heart eyes with hearts drifting upward.
+  8. `DANCE`: Full-body BMO stepping sideways and swinging arms.
+  9. `SIUUU`: Number 7 runs, jumps, turns and lands in the Ronaldo celebration.
+  10. `MANCHESTER UNITED`: The owner-supplied Red Devil and trident silhouette, converted to monochrome, with a gentle float and four moving stars drawn in the side margins without shrinking the logo.
+  11. `SIUUU FACE`: Eyes and mouth only; inhales, bounces with squeezed happy eyes and a pulsing mouth while displaying "SIUUU!", then smiles. This is a silent OLED animation.
+  12. `COOL`: Oversized sunglasses with traveling reflections, a grin and head bob.
+  13. `LAUGH`: Bouncing squeezed eyes, a laughing mouth and falling happy tears.
+  14. `STARRY`: Pulsing five-pointed star eyes and an excited mouth.
 - **Interactive 2-Button Navigation:**
   - **Button A (Face Mode):**
     - Switches from Quota view back to BMO Face mode.
-    - While in Face mode, pressing Button A cycles through all 6 facial expressions (`1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 1`).
+    - While in Face mode, pressing Button A cycles through all 14 scenes; the first six positions are preserved.
   - **Button B (Quota Provider Mode):**
     - Switches from Face mode to Quota mode (showing Quota screen #1).
     - While in Quota mode, pressing Button B cycles through configured provider quotas (Claude, Codex, Antigravity).
@@ -50,7 +58,7 @@ firmware/
 │   ├── wifi_manager.h          # Non-blocking Wi-Fi manager & SNTP clock client
 │   ├── mqtt_client.h           # PubSubClient MQTT manager with revision arbitration
 │   ├── quota_renderer.h        # Quota screen formatting & progress bar renderer
-│   ├── faces.h                 # 6 BMO facial expressions & animation controllers
+│   ├── faces.h                 # 14 scene IDs & animation controllers
 │   ├── buttons.h               # 2-button debouncer and event generator
 │   ├── navigation.h            # State machine coordinating modes and transitions
 │   └── power_manager.h         # CPU scaling, flash LED safety, & display sleep
@@ -60,7 +68,9 @@ firmware/
     ├── wifi_manager.cpp        # Reconnect state machine & SNTP synchronization
     ├── mqtt_client.cpp         # ArduinoJson MQTT parsing & tombstone detection
     ├── quota_renderer.cpp      # Quota UI layout & duration formatting
-    ├── faces.cpp               # Procedural vector rendering for 6 BMO expressions
+    ├── faces.cpp               # Existing eye rendering & shared scene timeline
+    ├── face_layout.cpp         # Full-screen scene fitting with a one-pixel margin
+    ├── face_scenes.cpp         # Refreshed home, wink, surprise & four new scenes
     ├── buttons.cpp             # Hardware pin reading & debouncing
     ├── navigation.cpp          # Button A & B event handler & screen router
     └── power_manager.cpp       # Flash LED cutoff & OLED sleep control
@@ -124,7 +134,7 @@ Edit `include/config.local.h` and update:
 
 | Button | Current Screen | Action | Result |
 |---|---|---|---|
-| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised) |
+| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Laugh -> Starry) |
 | **Button A** | Quota View | Press | Immediately returns to Face Mode |
 | **Button A** | End of List | Press | Returns to Face Mode |
 | **Button B** | Face Mode | Press | Enters Quota Mode at first provider screen |
@@ -150,3 +160,24 @@ simulator alone is not firmware validation. Both `esp32cam` and `esp32cam_bench`
 compiled successfully on 2026-11-03. TLS integration, OLED output, electrical
 design, runtime and charging require physical validation.
 Arduino IDE compatibility has not been validated; use the PlatformIO project.
+
+## Pet animation preview
+
+All pet scenes maximize a 126×62 viewport with a one-pixel outer margin.
+Navigation dots are removed to free the full display height. Face scenes fill
+the wide frame; full-body scenes and the MU mark preserve aspect ratio.
+Fixed per-scene bounds include the full movement, avoiding scale changes while
+an eye moves. Rendering uses one reusable 1 KiB scratch buffer.
+New scenes repeat on a nonblocking 3.6-second cycle; Button A restarts the selected scene. The existing five-minute OLED
+sleep policy is unchanged.
+
+After a PlatformIO build installs the Adafruit GFX dependency, run:
+
+```bash
+python3 tests/firmware/native/render_faces.py --preview /tmp/bmo-motion-preview/index.html
+python3 tests/firmware/native/navigation_test.py
+```
+
+Open the generated HTML locally to view all fourteen animated scenes. Its pixels
+come from production C++ rendering with the actual Adafruit GFX library; only
+Arduino time and OLED transport are replaced. It is not a physical OLED test.

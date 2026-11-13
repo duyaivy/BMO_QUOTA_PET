@@ -45,7 +45,7 @@ void BMONavigationController::update() {
 
 void BMONavigationController::handleButtonA() {
     if (_mode == UIMode::PET_FACE) {
-        // Already on Face screen: cycle to next face expression (1 to 6)
+        // Already on Face screen: cycle through all registered pet scenes
         faceRenderer.nextFace();
         Serial.printf("[NAV] Button A pressed: Cycled face to '%s' (%d/%d)\n",
                       faceRenderer.getFaceName(faceRenderer.getCurrentFace()),
