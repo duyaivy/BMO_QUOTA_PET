@@ -263,21 +263,38 @@ void BMOFaceRenderer::renderCool(Adafruit_SSD1306& oled) {
 }
 
 void BMOFaceRenderer::renderLaugh(Adafruit_SSD1306& oled) {
-    int bob = wave(_animationFrame, 2, 12);
+    int bob = wave(_animationFrame, 2, 10);
+    // 1. Crescent laughing eyes (thick, joyful arches)
     for (int x : {38, 90}) {
-        stroke(oled, x - 14, 28 + bob, x, 16 + bob);
-        stroke(oled, x, 16 + bob, x + 14, 28 + bob);
+        oled.fillCircle(x, 26 + bob, 14, SSD1306_WHITE);
+        oled.fillCircle(x, 30 + bob, 13, SSD1306_BLACK);
+        oled.fillRect(x - 15, 29 + bob, 31, 15, SSD1306_BLACK);
     }
-    int mouthHeight = 19 + wave(_animationFrame, 2, 12);
-    oled.fillRoundRect(43, 34 + bob, 42, mouthHeight, 10, SSD1306_WHITE);
-    oled.fillRoundRect(46, 37 + bob, 36, mouthHeight - 6, 7, SSD1306_BLACK);
-    oled.fillRect(47, 36 + bob, 34, 4, SSD1306_WHITE); // Bright smiling teeth
-    for (int i = 0; i < 2; ++i) {
-        int t = (_animationFrame + i * 15) % 30;
-        int x = i ? 112 : 16;
-        int y = 29 + t * 18 / 30;
-        oled.fillTriangle(x, y - 4, x - 3, y + 1, x + 3, y + 1, SSD1306_WHITE);
-        oled.fillCircle(x, y + 2, 3, SSD1306_WHITE);
+
+    // 2. Wide open laughing mouth with rounded bottom and cute tongue
+    int mouthH = 17 + wave(_animationFrame, 2, 10);
+    oled.fillRoundRect(44, 35 + bob, 40, mouthH, 11, SSD1306_WHITE);
+    oled.fillRoundRect(46, 37 + bob, 36, mouthH - 4, 9, SSD1306_BLACK);
+    // Cute curved tongue at the bottom of the mouth
+    oled.fillCircle(64, 35 + bob + mouthH - 2, 8, SSD1306_WHITE);
+
+    // 3. Cheeks: cute blush marks
+    for (int x : {23, 99}) {
+        oled.drawLine(x, 40 + bob, x - 2, 44 + bob, SSD1306_WHITE);
+        oled.drawLine(x + 4, 40 + bob, x + 2, 44 + bob, SSD1306_WHITE);
+    }
+
+    // 4. Teardrops falling naturally from the outer eye corners
+    for (int side : {0, 1}) {
+        int x = side ? 109 : 19;
+        int t = (_animationFrame + side * 15) % 30;
+        int y = 26 + t * 24 / 30;
+        // Little teardrop shape: small triangle top, round bottom
+        oled.fillTriangle(x, y - 3, x - 2, y + 1, x + 2, y + 1, SSD1306_WHITE);
+        oled.fillCircle(x, y + 2, 2, SSD1306_WHITE);
+        // Small glint / tear pool at eye corner
+        int glintR = (t < 15) ? 1 : 2;
+        oled.fillCircle(side ? 105 : 23, 28 + bob, glintR, SSD1306_WHITE);
     }
 }
 
