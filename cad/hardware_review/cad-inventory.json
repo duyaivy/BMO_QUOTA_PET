@@ -1,0 +1,50 @@
+[
+  {
+    "path": "BMO_QUOTA_PET.FCStd",
+    "bytes": 141846,
+    "archive_error": null,
+    "xml_object_count": 58
+  },
+  {
+    "path": "BMO_TEST.FCStd",
+    "bytes": 6175,
+    "archive_error": null,
+    "xml_object_count": 2
+  },
+  {
+    "path": "cad/BMO_SOFT_LIMBS_COLOR_CONCEPT.FCStd",
+    "bytes": 598008,
+    "archive_error": null,
+    "xml_object_count": 54
+  },
+  {
+    "path": "cad/BMO_DUT_CAT_EARS_CONCEPT.FCStd",
+    "bytes": 349707,
+    "archive_error": null,
+    "xml_object_count": 46
+  },
+  {
+    "path": "cad/BMO_VERTICAL_LETTERS_SIMPLE_ARMS.FCStd",
+    "bytes": 423939,
+    "archive_error": null,
+    "xml_object_count": 68
+  },
+  {
+    "path": "cad/BMO_FINGERS_FILLED_LEGS_CONCEPT.FCStd",
+    "bytes": 657295,
+    "archive_error": null,
+    "xml_object_count": 68
+  },
+  {
+    "path": "cad/BMO_REVISED_CONCEPT.FCStd",
+    "bytes": 214919,
+    "archive_error": null,
+    "xml_object_count": 46
+  },
+  {
+    "path": "cad/BMO_SEATED_DUYAIVY_CONCEPT.FCStd",
+    "bytes": 537539,
+    "archive_error": null,
+    "xml_object_count": 46
+  }
+]

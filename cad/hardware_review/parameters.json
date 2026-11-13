@@ -1,0 +1,19 @@
+{
+  "source": "cad/BMO_FINGERS_FILLED_LEGS_CONCEPT.FCStd",
+  "body_width": 48, "body_height": 68, "body_bottom": 7,
+  "old_depth": 30, "side_wall": 2.5, "rear_wall": 2.75,
+  "battery_cell_thickness": 5, "battery_cell_width": 30,
+  "battery_cell_length": 48, "battery_pack_length": 50,
+  "battery_pack_envelope_width": 32, "battery_pack_envelope_thickness": 7,
+  "boost_length": 37.2, "boost_width": 17.2, "boost_height": 14,
+  "capacitor_diameter": 12.5, "capacitor_body_length": 25,
+  "capacitor_lead_spacing": 5, "capacitor_wire_clearance": 5,
+  "esp_pcb_width": 27, "esp_pcb_length": 40.5,
+  "esp_header_projection": 10, "antenna_clearance": 5,
+  "charger_length": 26, "charger_width": 19, "charger_height": 5.8,
+  "switch_width": 8, "switch_height": 6, "switch_depth": 5,
+  "wire_diameter": 1.4, "wire_route_radius": 2,
+  "mount_clearance": 0.3, "button_travel": 0.25,
+  "depth_candidates": [30, 34, 38, 42, 46, 50, 54, 58, 62, 66],
+  "status": "UNVERIFIED_DIMENSIONS — all module/connector heights require measurement"
+}

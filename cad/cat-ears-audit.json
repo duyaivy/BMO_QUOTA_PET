@@ -1,0 +1,44 @@
+{
+  "status": "CONCEPT ONLY; keyring fit and strength unverified",
+  "labels": [
+    {
+      "side": "left",
+      "text": "BMO",
+      "height_mm": 6.5,
+      "projection_mm": 0.7
+    },
+    {
+      "side": "right",
+      "text": "DUT",
+      "height_mm": 6.5,
+      "projection_mm": 0.7
+    }
+  ],
+  "ears": [
+    {
+      "center_x_mm": -15,
+      "width_mm": 14,
+      "depth_mm": 5,
+      "tip_z_nominal_mm": 80,
+      "through_gauge_mm": 3
+    },
+    {
+      "center_x_mm": 15,
+      "width_mm": 14,
+      "depth_mm": 5,
+      "tip_z_nominal_mm": 80,
+      "through_gauge_mm": 3
+    }
+  ],
+  "parts": 17,
+  "pairs_checked": 136,
+  "overlaps": [
+    {
+      "a": "OLED_096_Glass",
+      "b": "OLED_096_ActiveArea",
+      "volume_mm3": 11.804819999999806,
+      "display_overlay": true
+    }
+  ],
+  "shell_single_solid": true
+}

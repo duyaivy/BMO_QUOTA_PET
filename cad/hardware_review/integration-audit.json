@@ -1,0 +1,737 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "selected_layout": {
+    "depth": 54,
+    "esp_y": 3,
+    "boost_y": 9,
+    "cap_y": 1,
+    "failures": [],
+    "wire_proxy_mm": 114.3187652796867,
+    "envelopes": {
+      "ESP32": [
+        -14.5,
+        3,
+        28,
+        14.5,
+        19,
+        70
+      ],
+      "MT3608": [
+        -20.1,
+        9,
+        10,
+        20.1,
+        28.2,
+        27
+      ],
+      "Capacitor": [
+        -18.0,
+        -6.25,
+        9.75,
+        18.0,
+        8.25,
+        24.25
+      ],
+      "Charger": [
+        -21,
+        5,
+        32,
+        -15.2,
+        33,
+        53
+      ],
+      "USBPort": [
+        -20.5,
+        31,
+        38,
+        -17.3,
+        39.5,
+        47
+      ],
+      "USBCable": [
+        -21.8,
+        34,
+        37,
+        -15.8,
+        50,
+        48
+      ],
+      "Battery": [
+        -15,
+        28.5,
+        11,
+        17,
+        35.5,
+        71
+      ]
+    }
+  },
+  "old_body_mm": [
+    48,
+    30,
+    68
+  ],
+  "new_body_mm": [
+    48,
+    54,
+    68
+  ],
+  "cavity_nominal_mm": [
+    43,
+    48.5,
+    63
+  ],
+  "parts": {
+    "OLED_096_PCB": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -10.6,
+        44.5,
+        13.5,
+        -9.0,
+        71.5
+      ],
+      "volume_mm3": 1146.2938070170253
+    },
+    "OLED_096_Glass": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -12.0,
+        -11.9,
+        50.5,
+        12.0,
+        -10.6,
+        65.0
+      ],
+      "volume_mm3": 452.40000000000026
+    },
+    "OLED_096_ActiveArea": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -10.87,
+        -11.950000000000001,
+        52.32,
+        10.87,
+        -11.850000000000001,
+        63.18
+      ],
+      "volume_mm3": 23.60963999999997
+    },
+    "OLED_096_Header": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -5.08,
+        -9.0,
+        69.0,
+        5.08,
+        -5.0,
+        71.5
+      ],
+      "volume_mm3": 66.90806399999998
+    },
+    "Tactile_Switch_A_DPad": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -11.7,
+        16.0,
+        -7.5,
+        -7.0,
+        30.0
+      ],
+      "volume_mm3": 149.46141393700853
+    },
+    "Tactile_Switch_B_Red": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        6.5,
+        -11.7,
+        9.5,
+        12.5,
+        -7.0,
+        23.5
+      ],
+      "volume_mm3": 149.46141393700856
+    },
+    "BMO_Front_Shell": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.0,
+        -15.8,
+        7.0,
+        24.000000000000004,
+        36.000000000000014,
+        85.94835795375674
+      ],
+      "volume_mm3": 35249.87163038821
+    },
+    "BMO_Back_Cover": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.0,
+        36.25,
+        7.0,
+        24.0,
+        39.00000000000001,
+        75.0
+      ],
+      "volume_mm3": 8666.921605431184
+    },
+    "BMO_DPad_Yellow": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -17.0,
+        -16.5,
+        20.5,
+        -4.0,
+        -11.799999999999999,
+        33.5
+      ],
+      "volume_mm3": 381.83600000000024
+    },
+    "BMO_Action_Button_Red": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        5.0,
+        -16.5,
+        16.0,
+        14.0,
+        -11.799999999999999,
+        25.0
+      ],
+      "volume_mm3": 192.5293641825969
+    },
+    "BMO_Sitting_Leg_Left": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.500000000000002,
+        -25.6,
+        -1e-15,
+        -6.499999999999998,
+        -4.000499410088494,
+        11.000000000000002
+      ],
+      "volume_mm3": 873.0460265018257
+    },
+    "BMO_Sitting_Leg_Right": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        6.499999999999998,
+        -25.6,
+        -1e-15,
+        13.500000000000002,
+        -4.00000005191678,
+        11.000000000000002
+      ],
+      "volume_mm3": 874.3915006862453
+    },
+    "BMO_Sitting_Arm_Left": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -32.00000000000001,
+        -1.5999984531841187,
+        -1e-15,
+        -21.5,
+        12.049633066603631,
+        30.6
+      ],
+      "volume_mm3": 278.6518124117189
+    },
+    "BMO_Sitting_Arm_Right": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        21.499999999999993,
+        -1.5997855684641737,
+        -1e-15,
+        31.999999999999996,
+        12.049633066603631,
+        30.6
+      ],
+      "volume_mm3": 278.9116466206165
+    },
+    "Triangle_Cyan": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -3.5,
+        -16.0,
+        23.5,
+        3.5,
+        -13.2,
+        30.5
+      ],
+      "volume_mm3": 45.867145867644254
+    },
+    "Upper_Button_Blue": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        7.00043797887971,
+        -16.0,
+        42.9,
+        9.999562021120289,
+        -13.2,
+        45.9
+      ],
+      "volume_mm3": 13.85442360233099
+    },
+    "Small_Button_Green": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        9.900099435195578,
+        -16.0,
+        27.70039772557099,
+        12.49990056480442,
+        -13.2,
+        30.3
+      ],
+      "volume_mm3": 10.68769820751248
+    },
+    "BMO_Letter_B": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.65,
+        -4.183321220930234,
+        50.0,
+        -24.0,
+        4.183321220930233,
+        60.0
+      ],
+      "volume_mm3": 37.161882463093804
+    },
+    "BMO_Letter_M": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.65,
+        -4.823764534883721,
+        37.0,
+        -24.0,
+        4.823764534883721,
+        47.0
+      ],
+      "volume_mm3": 44.59178763637673
+    },
+    "BMO_Letter_O": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.65,
+        -4.6809164325842705,
+        24.0,
+        -24.0,
+        4.68091643258427,
+        34.0
+      ],
+      "volume_mm3": 30.598262773541144
+    },
+    "DUT_Letter_D": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        24.0,
+        -4.186727834302325,
+        59.0,
+        24.65,
+        4.186727834302326,
+        69.0
+      ],
+      "volume_mm3": 32.66631072418997
+    },
+    "DUT_Letter_U": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        24.0,
+        -3.9140625,
+        46.0,
+        24.65,
+        3.914062500000001,
+        56.0
+      ],
+      "volume_mm3": 27.685468852970846
+    },
+    "DUT_Letter_T": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        24.0,
+        -3.968704578488372,
+        33.0,
+        24.65,
+        3.9687045784883725,
+        43.0
+      ],
+      "volume_mm3": 19.59731585274133
+    },
+    "ESP32_CAM_AI_Thinker": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        1.6,
+        29.0,
+        13.5,
+        15.2,
+        69.5
+      ],
+      "volume_mm3": 2417.68288
+    },
+    "Battery_LiPo_503048": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -14.0,
+        29.5,
+        12.0,
+        16.0,
+        34.5,
+        70.0
+      ],
+      "volume_mm3": 7548.315043202071
+    },
+    "Power_Boost_MT3608": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -18.6,
+        10.0,
+        10.5,
+        18.6,
+        27.2,
+        25.0
+      ],
+      "volume_mm3": 2860.822760800519
+    },
+    "Capacitor_2200uF": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -12.5,
+        -5.204430463112837,
+        10.75,
+        17.5,
+        7.204430463112839,
+        23.25
+      ],
+      "volume_mm3": 3074.3233008948023
+    },
+    "Charger_Module_PLACEHOLDER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -21.0,
+        5.0,
+        33.0,
+        -15.2,
+        39.5,
+        52.0
+      ],
+      "volume_mm3": 1539.2000000000003
+    },
+    "Power_Switch_PLACEHOLDER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        18.0,
+        20.0,
+        35.0,
+        25.0,
+        28.0,
+        41.0
+      ],
+      "volume_mm3": 258.0
+    },
+    "Battery_Tray_Removable": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -15.5,
+        28.7,
+        10.5,
+        17.5,
+        35.7,
+        60.5
+      ],
+      "volume_mm3": 675.1250000000016
+    },
+    "Battery_Soft_Retaining_Band": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -15.0,
+        28.9,
+        40.0,
+        17.0,
+        35.1,
+        42.0
+      ],
+      "volume_mm3": 54.08000000000026
+    },
+    "Battery_Soft_Pad": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -14.0,
+        29.5,
+        11.5,
+        16.0,
+        34.5,
+        12.0
+      ],
+      "volume_mm3": 75.0
+    },
+    "Boost_Tray_Removable": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -19.5,
+        9.1,
+        9.6,
+        19.5,
+        28.1,
+        11.0
+      ],
+      "volume_mm3": 632.4217083789304
+    },
+    "Capacitor_Cradle": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -6.25,
+        9.5,
+        13.5,
+        8.25,
+        11.5
+      ],
+      "volume_mm3": 605.8349062206458
+    },
+    "Capacitor_Soft_Retaining_Strap": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -2.0,
+        -6.24346750498394,
+        9.776118208066682,
+        2.0,
+        8.24346750498394,
+        24.25
+      ],
+      "volume_mm3": 121.39114013470981
+    },
+    "ESP32_Edge_Cradle_No_PCB_Holes": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -15.0,
+        2.0,
+        27.5,
+        15.0,
+        15.5,
+        59.5
+      ],
+      "volume_mm3": 590.9999999999995
+    },
+    "Charger_Edge_Bracket": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -21.5,
+        4.5,
+        32.5,
+        -15.5,
+        31.5,
+        52.5
+      ],
+      "volume_mm3": 344.25
+    },
+    "OLED_PCB_Edge_Supports": {
+      "valid": true,
+      "solids": 2,
+      "bounds": [
+        -21.5,
+        -10.8,
+        43.5,
+        21.5,
+        -8.8,
+        44.5
+      ],
+      "volume_mm3": 32.0
+    },
+    "Battery_To_Boost": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        3.3,
+        24.304613744890208,
+        11.9,
+        17.7,
+        32.0,
+        70.7
+      ],
+      "volume_mm3": 114.61065146019442
+    },
+    "Boost_To_ESP32": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -16.7,
+        11.305103788131362,
+        12.6,
+        -9.3,
+        24.7,
+        42.7
+      ],
+      "volume_mm3": 84.60665905007076
+    },
+    "OLED_I2C_Loom": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -0.6948962118686379,
+        -5.0,
+        49.3,
+        20.2,
+        20.699894531934348,
+        70.7
+      ],
+      "volume_mm3": 108.6991522078261
+    },
+    "Charger_Battery_Lead": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -16.6999019748208,
+        25.302052404223122,
+        49.83022506247457,
+        -9.304238344764066,
+        32.697476789000305,
+        65.7
+      ],
+      "volume_mm3": 33.54743889133723
+    },
+    "Capacitor_Output_Lead": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -19.699955942784875,
+        0.6214696860805509,
+        11.9,
+        18.69571861427153,
+        25.696583957950363,
+        24.7
+      ],
+      "volume_mm3": 110.09874860783489
+    },
+    "Rear_AntiTip_Skid": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -18.0,
+        22.0,
+        0.0,
+        18.0,
+        36.0,
+        7.0
+      ],
+      "volume_mm3": 1368.0000000000002
+    }
+  },
+  "overlaps": [
+    {
+      "a": "OLED_096_Glass",
+      "b": "OLED_096_ActiveArea",
+      "volume_mm3": 11.804819999999804,
+      "classification": "display overlay"
+    },
+    {
+      "a": "Battery_LiPo_503048",
+      "b": "Battery_To_Boost",
+      "volume_mm3": 1.539380400258926,
+      "classification": "terminal connection \u2014 intended"
+    },
+    {
+      "a": "Power_Boost_MT3608",
+      "b": "Battery_To_Boost",
+      "volume_mm3": 0.7183775201208659,
+      "classification": "terminal connection \u2014 intended"
+    },
+    {
+      "a": "Power_Boost_MT3608",
+      "b": "Capacitor_Output_Lead",
+      "volume_mm3": 0.7193726904583537,
+      "classification": "terminal connection \u2014 intended"
+    },
+    {
+      "a": "Capacitor_2200uF",
+      "b": "Capacitor_Output_Lead",
+      "volume_mm3": 0.19577856046502584,
+      "classification": "terminal connection \u2014 intended"
+    }
+  ],
+  "keepout_conflicts": [],
+  "button_sweep": [
+    {
+      "cap": "BMO_DPad_Yellow",
+      "inward_travel_mm": 0,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "inward_travel_mm": 0.1,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "inward_travel_mm": 0.2,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "inward_travel_mm": 0.25,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "inward_travel_mm": 0,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "inward_travel_mm": 0.1,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "inward_travel_mm": 0.2,
+      "shell_overlap_mm3": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "inward_travel_mm": 0.25,
+      "shell_overlap_mm3": 0.0
+    }
+  ],
+  "ears_symmetric_difference_mm3": 0.0,
+  "nominal_cavity_volume_mm3": 131386.5,
+  "occupied_volume_sum_mm3": 23200.445608932067,
+  "cavity_minus_occupied_upper_estimate_mm3": 108019.52336586433
+}

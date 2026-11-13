@@ -1,0 +1,938 @@
+{
+  "freecad_version": [
+    "1",
+    "1",
+    "4",
+    "20260928 (Git shallow)",
+    "Unknown",
+    "2026/09/28 13:46:34",
+    "(HEAD detached at 4fd3bf320)",
+    "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+  ],
+  "source": "/Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/cad/BMO_FINGERS_FILLED_LEGS_CONCEPT.FCStd",
+  "files": [
+    {
+      "path": "BMO_QUOTA_PET.FCStd",
+      "bytes": 141846
+    },
+    {
+      "path": "BMO_TEST.FCStd",
+      "bytes": 6175
+    },
+    {
+      "path": "cad/BMO_DUT_CAT_EARS_CONCEPT.FCStd",
+      "bytes": 349707
+    },
+    {
+      "path": "cad/BMO_FINGERS_FILLED_LEGS_CONCEPT.FCStd",
+      "bytes": 657295
+    },
+    {
+      "path": "cad/BMO_REVISED_CONCEPT.FCStd",
+      "bytes": 214919
+    },
+    {
+      "path": "cad/BMO_SEATED_DUYAIVY_CONCEPT.FCStd",
+      "bytes": 537539
+    },
+    {
+      "path": "cad/BMO_SOFT_LIMBS_COLOR_CONCEPT.FCStd",
+      "bytes": 598008
+    },
+    {
+      "path": "cad/BMO_VERTICAL_LETTERS_SIMPLE_ARMS.FCStd",
+      "bytes": 423939
+    }
+  ],
+  "objects": [
+    {
+      "name": "Electronics_Components",
+      "label": "Electronics_Components",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -20.0,
+        -11.950000000000001,
+        9.5,
+        20.0,
+        13.6,
+        71.5
+      ],
+      "volume_mm3": 11916.676596596255,
+      "valid": true,
+      "solids": 9
+    },
+    {
+      "name": "BMO_Enclosure",
+      "label": "BMO_Enclosure",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -24.0,
+        -15.8,
+        7.0,
+        24.000000000000004,
+        15.000000000000005,
+        85.94835795375674
+      ],
+      "volume_mm3": 30836.810816611884,
+      "valid": true,
+      "solids": 2
+    },
+    {
+      "name": "BMO_Front_Controls",
+      "label": "BMO_Front_Controls",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -17.0,
+        -16.5,
+        16.0,
+        14.0,
+        -11.799999999999999,
+        33.5
+      ],
+      "volume_mm3": 574.3653641825972,
+      "valid": true,
+      "solids": 2
+    },
+    {
+      "name": "BMO_Limbs_Sitting",
+      "label": "BMO_Limbs_Sitting",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -32.00000000000001,
+        -25.6,
+        -1e-15,
+        31.999999999999996,
+        12.049633066603631,
+        30.6
+      ],
+      "volume_mm3": 2305.752309097978,
+      "valid": true,
+      "solids": 4
+    },
+    {
+      "name": "Inspection_Views",
+      "label": "Inspection_Views",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ]
+    },
+    {
+      "name": "OLED_096_PCB",
+      "label": "OLED_096_PCB",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -13.5,
+        -10.6,
+        44.5,
+        13.5,
+        -9.0,
+        71.5
+      ],
+      "volume_mm3": 1146.2938070170253,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "OLED_096_Glass",
+      "label": "OLED_096_Glass",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -12.0,
+        -11.9,
+        50.5,
+        12.0,
+        -10.6,
+        65.0
+      ],
+      "volume_mm3": 452.40000000000026,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "OLED_096_ActiveArea",
+      "label": "OLED_096_ActiveArea",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -10.87,
+        -11.950000000000001,
+        52.32,
+        10.87,
+        -11.850000000000001,
+        63.18
+      ],
+      "volume_mm3": 23.60963999999997,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "OLED_096_Header",
+      "label": "OLED_096_Header",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -5.08,
+        -9.0,
+        69.0,
+        5.08,
+        -5.0,
+        71.5
+      ],
+      "volume_mm3": 66.90806399999998,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Tactile_Switch_A_DPad",
+      "label": "Tactile_Switch_A_DPad",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -13.5,
+        -11.7,
+        16.0,
+        -7.5,
+        -7.0,
+        30.0
+      ],
+      "volume_mm3": 149.46141393700853,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Tactile_Switch_B_Red",
+      "label": "Tactile_Switch_B_Red",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        6.5,
+        -11.7,
+        9.5,
+        12.5,
+        -7.0,
+        23.5
+      ],
+      "volume_mm3": 149.46141393700856,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "LiPo_Battery_503040",
+      "label": "LiPo_Battery_503040",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -14.999733208111637,
+        -6.2,
+        15.500266791888363,
+        14.999733208111637,
+        -1.0,
+        65.0
+      ],
+      "volume_mm3": 6160.297340352326,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "ESP32_CAM_AI_Thinker",
+      "label": "ESP32_CAM_AI_Thinker",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -13.5,
+        -0.5000000000000002,
+        27.0,
+        13.5,
+        7.300000000000001,
+        67.5
+      ],
+      "volume_mm3": 2446.294917352886,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Power_Charger_Module",
+      "label": "Power_Charger_Module",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -20.0,
+        1.5,
+        10.5,
+        20.0,
+        13.6,
+        25.5
+      ],
+      "volume_mm3": 1321.9499999999998,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Front_Shell",
+      "label": "BMO_Front_Shell",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -24.0,
+        -15.8,
+        7.0,
+        24.000000000000004,
+        12.0,
+        85.94835795375674
+      ],
+      "volume_mm3": 22098.389349283705,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Back_Cover",
+      "label": "BMO_Back_Cover",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Signature",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -24.0,
+        12.25,
+        7.0,
+        24.0,
+        15.000000000000005,
+        75.0
+      ],
+      "volume_mm3": 8738.421605400712,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_DPad_Yellow",
+      "label": "BMO_DPad_Yellow",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -17.0,
+        -16.5,
+        20.5,
+        -4.0,
+        -11.799999999999999,
+        33.5
+      ],
+      "volume_mm3": 381.83600000000024,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Action_Button_Red",
+      "label": "BMO_Action_Button_Red",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        5.0,
+        -16.5,
+        16.0,
+        14.0,
+        -11.799999999999999,
+        25.0
+      ],
+      "volume_mm3": 192.5293641825969,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Sitting_Leg_Left",
+      "label": "BMO_Sitting_Leg_Left",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -13.500000000000002,
+        -25.6,
+        -1e-15,
+        -6.499999999999998,
+        -4.000499410088494,
+        11.000000000000002
+      ],
+      "volume_mm3": 873.0460265018257,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Sitting_Leg_Right",
+      "label": "BMO_Sitting_Leg_Right",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        6.499999999999998,
+        -25.6,
+        -1e-15,
+        13.500000000000002,
+        -4.00000005191678,
+        11.000000000000002
+      ],
+      "volume_mm3": 874.3915006862453,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Sitting_Arm_Left",
+      "label": "BMO_Sitting_Arm_Left",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -32.00000000000001,
+        -1.5999937176883072,
+        -1e-15,
+        -21.5,
+        12.049633066603631,
+        30.6
+      ],
+      "volume_mm3": 278.6518124117189,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Sitting_Arm_Right",
+      "label": "BMO_Sitting_Arm_Right",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        21.499999999999993,
+        -1.5999937176880437,
+        -1e-15,
+        31.999999999999996,
+        12.049633066603631,
+        30.6
+      ],
+      "volume_mm3": 278.91164662061647,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Enclosure_SectionCut",
+      "label": "BMO_Enclosure_SectionCut",
+      "type": "Part::Feature",
+      "properties": [
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "VerificationStatus",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -9.134889764542603e-16,
+        -15.8,
+        7.0,
+        25.219281409530765,
+        15.000000000000007,
+        85.94873925287737
+      ],
+      "volume_mm3": 15478.29348666522,
+      "valid": true,
+      "solids": 2
+    },
+    {
+      "name": "Separate_Color_Inserts",
+      "label": "Separate_Color_Inserts",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -3.5,
+        -16.0,
+        23.5,
+        12.49990056480442,
+        -13.2,
+        45.9
+      ],
+      "volume_mm3": 70.40926767748773,
+      "valid": true,
+      "solids": 3
+    },
+    {
+      "name": "Triangle_Cyan",
+      "label": "Triangle_Cyan",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -3.5,
+        -16.0,
+        23.5,
+        3.5,
+        -13.2,
+        30.5
+      ],
+      "volume_mm3": 45.867145867644254,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Upper_Button_Blue",
+      "label": "Upper_Button_Blue",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        7.00043797887971,
+        -16.0,
+        42.9,
+        9.999562021120289,
+        -13.2,
+        45.9
+      ],
+      "volume_mm3": 13.85442360233099,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Small_Button_Green",
+      "label": "Small_Button_Green",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        9.900099435195578,
+        -16.0,
+        27.70039772557099,
+        12.49990056480442,
+        -13.2,
+        30.3
+      ],
+      "volume_mm3": 10.68769820751248,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "Vertical_Side_Lettering",
+      "label": "Vertical_Side_Lettering",
+      "type": "App::DocumentObjectGroup",
+      "properties": [
+        "ExpressionEngine",
+        "Group",
+        "Label",
+        "Label2",
+        "Visibility",
+        "_GroupTouched"
+      ],
+      "bounds": [
+        -24.65,
+        -4.823764534883721,
+        24.0,
+        24.65,
+        4.823764534883721,
+        69.0
+      ],
+      "volume_mm3": 192.30102830291412,
+      "valid": true,
+      "solids": 6
+    },
+    {
+      "name": "BMO_Letter_B",
+      "label": "BMO_Letter_B",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -24.65,
+        -4.183321220930234,
+        50.0,
+        -24.0,
+        4.183321220930233,
+        60.0
+      ],
+      "volume_mm3": 37.161882463093804,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Letter_M",
+      "label": "BMO_Letter_M",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -24.65,
+        -4.823764534883721,
+        37.0,
+        -24.0,
+        4.823764534883721,
+        47.0
+      ],
+      "volume_mm3": 44.59178763637673,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "BMO_Letter_O",
+      "label": "BMO_Letter_O",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        -24.65,
+        -4.6809164325842705,
+        24.0,
+        -24.0,
+        4.68091643258427,
+        34.0
+      ],
+      "volume_mm3": 30.598262773541144,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "DUT_Letter_D",
+      "label": "DUT_Letter_D",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        24.0,
+        -4.186727834302325,
+        59.0,
+        24.65,
+        4.186727834302326,
+        69.0
+      ],
+      "volume_mm3": 32.66631072418997,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "DUT_Letter_U",
+      "label": "DUT_Letter_U",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        24.0,
+        -3.9140625,
+        46.0,
+        24.65,
+        3.914062500000001,
+        56.0
+      ],
+      "volume_mm3": 27.685468852970846,
+      "valid": true,
+      "solids": 1
+    },
+    {
+      "name": "DUT_Letter_T",
+      "label": "DUT_Letter_T",
+      "type": "Part::Feature",
+      "properties": [
+        "AssemblyNote",
+        "ExpressionEngine",
+        "Label",
+        "Label2",
+        "Placement",
+        "Shape",
+        "ShapeMaterial",
+        "Visibility",
+        "_ElementMapVersion"
+      ],
+      "bounds": [
+        24.0,
+        -3.968704578488372,
+        33.0,
+        24.65,
+        3.9687045784883725,
+        43.0
+      ],
+      "volume_mm3": 19.59731585274133,
+      "valid": true,
+      "solids": 1
+    }
+  ],
+  "backup": "/Users/apple/QUOCDUY/PROJECT/BMO_QUOTA_PET/cad/hardware_review/backup-20261113-232011.FCStd",
+  "sha256": "6aaaebe2795070c3b5b7fbf255fe26e0dca1e1c2c7a25f409048c00c388f9543"
+}

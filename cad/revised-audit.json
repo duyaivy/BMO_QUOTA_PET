@@ -1,0 +1,305 @@
+{
+  "units": "mm",
+  "status": "PROVISIONAL \u2014 NOT PRINT RELEASE",
+  "shell_mm": [
+    48,
+    30,
+    68
+  ],
+  "objects": {
+    "OLED_096_PCB": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -10.6,
+        37.5,
+        13.5,
+        -9.0,
+        64.5
+      ]
+    },
+    "OLED_096_Glass": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -12.0,
+        -11.9,
+        43.5,
+        12.0,
+        -10.6,
+        58.0
+      ]
+    },
+    "OLED_096_ActiveArea": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -10.87,
+        -11.950000000000001,
+        45.32,
+        10.87,
+        -11.850000000000001,
+        56.18
+      ]
+    },
+    "OLED_096_Header": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -5.08,
+        -9.0,
+        62.0,
+        5.08,
+        -5.0,
+        64.5
+      ]
+    },
+    "Tactile_Switch_A_DPad": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -11.7,
+        9.0,
+        -7.5,
+        -7.0,
+        23.0
+      ]
+    },
+    "Tactile_Switch_B_Red": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        6.5,
+        -11.7,
+        2.5,
+        12.5,
+        -7.0,
+        16.5
+      ]
+    },
+    "LiPo_Battery_503040": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -14.996584493006669,
+        -6.2,
+        8.50341550699333,
+        14.996584493006669,
+        -1.0,
+        58.0
+      ]
+    },
+    "ESP32_CAM_AI_Thinker": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -0.5000000000000002,
+        20.0,
+        13.5,
+        7.300000000000001,
+        60.5
+      ]
+    },
+    "Power_Charger_Module": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -20.0,
+        1.5,
+        3.5,
+        20.0,
+        13.6,
+        18.5
+      ]
+    },
+    "BMO_Front_Shell": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.6,
+        -16.0,
+        0.0,
+        24.6,
+        12.0,
+        68.0
+      ]
+    },
+    "BMO_Back_Cover": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.0,
+        12.25,
+        0.0,
+        24.0,
+        15.000000000000005,
+        68.0
+      ]
+    },
+    "BMO_DPad_Yellow": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -17.0,
+        -16.5,
+        13.5,
+        -4.0,
+        -11.799999999999999,
+        26.5
+      ]
+    },
+    "BMO_Action_Button_Red": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        5.0045312005640845,
+        -16.5,
+        9.018115677021424,
+        13.995468799435915,
+        -11.799999999999999,
+        18.0
+      ]
+    },
+    "BMO_Sitting_Leg_Left": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -10.9,
+        -25.0,
+        0.0,
+        -5.1000000000000005,
+        -11.0,
+        10.0
+      ]
+    },
+    "BMO_Sitting_Leg_Right": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        5.1,
+        -25.0,
+        0.0,
+        10.899999999999999,
+        -11.0,
+        10.0
+      ]
+    },
+    "BMO_Sitting_Arm_Left": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -28.960145729932798,
+        -14.3,
+        0.0,
+        -21.5,
+        1.47332530887131,
+        23.5
+      ]
+    },
+    "BMO_Sitting_Arm_Right": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        21.5,
+        -14.3,
+        0.0,
+        28.957036230478856,
+        1.4733253128762702,
+        23.5
+      ]
+    }
+  },
+  "overlaps": [
+    {
+      "a": "OLED_096_Glass",
+      "b": "OLED_096_ActiveArea",
+      "volume_mm3": 11.8048,
+      "classification": "display overlay"
+    }
+  ],
+  "clearances": [
+    {
+      "a": "OLED_096_PCB",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 2.8
+    },
+    {
+      "a": "OLED_096_Glass",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 4.3999999999999995
+    },
+    {
+      "a": "OLED_096_ActiveArea",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 5.650000000000001
+    },
+    {
+      "a": "OLED_096_Header",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 4.330773602949016
+    },
+    {
+      "a": "Tactile_Switch_A_DPad",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 0.7999999999999998
+    },
+    {
+      "a": "Tactile_Switch_B_Red",
+      "b": "LiPo_Battery_503040",
+      "distance_mm": 0.7999999999999998
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "ESP32_CAM_AI_Thinker",
+      "distance_mm": 0.5
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "Power_Charger_Module",
+      "distance_mm": 2.5
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Front_Shell",
+      "distance_mm": 0.0
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Back_Cover",
+      "distance_mm": 13.25
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_DPad_Yellow",
+      "distance_mm": 5.599999999999999
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Action_Button_Red",
+      "distance_mm": 5.599999999999999
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Sitting_Leg_Left",
+      "distance_mm": 5.882176467941097
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Sitting_Leg_Right",
+      "distance_mm": 5.882176467941097
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Sitting_Arm_Left",
+      "distance_mm": 7.5
+    },
+    {
+      "a": "LiPo_Battery_503040",
+      "b": "BMO_Sitting_Arm_Right",
+      "distance_mm": 7.5
+    }
+  ]
+}
