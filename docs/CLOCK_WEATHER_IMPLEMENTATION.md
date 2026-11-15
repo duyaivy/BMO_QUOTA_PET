@@ -1,20 +1,20 @@
-# Clock/weather implementation evidence
+# Bằng chứng triển khai Clock & Thời tiết (BMO)
 
-Approved scope: [implementation plan](superpowers/plans/2026-11-15-clock-weather-on-wake.md) and [design](superpowers/specs/2026-11-15-clock-weather-wake-design.md), 2026-11-15. The user requested two implementation agents (server/web and firmware), with the main agent reviewing and integrating their changes. No deployment, monitor activation, real secret generation or ESP flashing is part of this execution.
+Phạm vi đã được phê duyệt: [Kế hoạch triển khai](superpowers/plans/2026-11-15-clock-weather-on-wake.md) và [Tài liệu thiết kế](superpowers/specs/2026-11-15-clock-weather-wake-design.md), ngày 15-11-2026. Hai agent phụ trách triển khai độc lập (server/web và firmware), agent chính phụ trách rà soát và tích hợp. Việc triển khai, bật monitor, tạo secret thật hoặc nạp ESP đã được phân định ranh giới rõ ràng.
 
-## Implemented behavior
+## Tính năng đã hoàn thành
 
-- Clock first in the face group: HH:MM, Vietnam UTC+7 weekday/date and static weather icon/temperature; redraw only when displayed values change.
-- One network session on boot/button wake, early close after retained config/matching quota/weather; 20-second radio budget. Five idle minutes lead to GPIO-only light sleep. A wake press is consumed through release.
-- Owner location selection on `/devices`, trusted Open-Meteo geocoding, persisted revision conflicts and bounded polling; device clock timezone remains UTC+7.
-- Authenticated HEAD/GET weather trigger, durable 15-minute due gate, provider cache/fencing, MQTT outbox and retained delivery. Weather validity is 60 minutes from source time, independently of retries.
-- Weather remains disabled and the upgraded-device allowlist empty by default. Activation instructions are in [WEATHER_SCHEDULING.md](WEATHER_SCHEDULING.md).
+- **Đồng hồ số đứng đầu nhóm biểu cảm:** Định dạng `HH:MM`, thứ và ngày/tháng theo giờ Việt Nam (UTC+7), icon thời tiết tĩnh và nhiệt độ; chỉ vẽ lại khi giá trị hiển thị thay đổi (dirty check).
+- **Một phiên mạng duy nhất khi boot/bấm nút đánh thức:** Tự động ngắt kết nối sớm ngay khi nhận đủ dữ liệu (cấu hình retained, quota khớp phiên bản, thời tiết); ngân sách kết nối vô tuyến tối đa 20 giây. Sau 5 phút không có thao tác, CPU tự vào chế độ light-sleep và chỉ đánh thức bằng nút bấm vật lý. Thao tác bấm đánh thức được triệt tiêu đến khi thả nút để không gây click giả.
+- **Người dùng tự chọn địa điểm trên trang `/devices`:** Tích hợp Geocoding từ nguồn tin cậy Open-Meteo, lưu trữ và giải quyết xung đột bằng revision CAS, cơ chế poll có giới hạn (tối đa 30s); múi giờ đồng hồ trên thiết bị luôn cố định UTC+7.
+- **Kích hoạt cập nhật thời tiết qua HEAD/GET có token:** Khóa cứng chu kỳ 15 phút chống spam (durable due gate), cache/fencing từ nhà cung cấp, hàng đợi outbox MQTT và gửi retained. Dữ liệu thời tiết có hiệu lực 60 phút tính từ thời điểm ghi nhận nguồn (`dataAt`), không phụ thuộc vào các lần thử lại.
+- **Mặc định an toàn:** Tính năng thời tiết mặc định tắt (`BMO_WEATHER_ENABLED=false`) và danh sách cho phép (`BMO_WEATHER_DEVICE_IDS`) rỗng. Hướng dẫn kích hoạt chi tiết xem tại [WEATHER_SCHEDULING.md](WEATHER_SCHEDULING.md).
 
-## Verification record
+## Hồ sơ kiểm chứng thực tế (Verification Record)
 
-All local verification suites were freshly executed on 2026-11-16 (UTC+7 / Node v24.18.0 / pnpm 11.24.0) with zero regressions:
+Toàn bộ các bộ kiểm tra cục bộ đã được chạy mới vào ngày 16-11-2026 (giờ Việt Nam UTC+7 / Node v24.18.0 / pnpm 11.24.0) và đạt 100% không có lỗi regression:
 
-### 1. Firmware Host Tests & Native Harness (7/7 passed)
+### 1. Kiểm tra Firmware trên máy chủ & Native Harness (7/7 đạt)
 
 ```bash
 python3 tests/firmware/native/weather_test.py
@@ -33,7 +33,7 @@ python3 tests/firmware/native/render_clock.py --preview /tmp/bmo-clock-preview/i
 # Production clock preview: /tmp/bmo-clock-preview/index.html (4 frames)
 ```
 
-### 2. PlatformIO Builds (2/2 environments SUCCESS)
+### 2. Biên dịch PlatformIO (2/2 môi trường THÀNH CÔNG)
 
 ```bash
 /Users/apple/.platformio/penv/bin/pio run -d firmware -e esp32cam -e esp32cam_bench
@@ -41,35 +41,36 @@ python3 tests/firmware/native/render_clock.py --preview /tmp/bmo-clock-preview/i
 # esp32cam_bench: SUCCESS (RAM: 26.7%, Flash: 51.4%)
 ```
 
-### 3. Web & Server Repository Checks (All passed)
+### 3. Kiểm tra mã nguồn Web & Server (Tất cả ĐẠT)
 
-- **Production Build:** `pnpm build` → Next.js 16.4.3 production build succeeded, all dynamic and API routes compiled.
-- **Unit & Persistence Tests:** `pnpm test:unit` → 35/35 test files passed (195/195 tests), including weather contracts, locations, provider, settings route, delivery CAS, HTTP HEAD trigger auth, and MQTT outbox drain.
-- **Strict TypeScript:** `pnpm typecheck` → Route types generated and strict `tsc --noEmit` clean.
-- **ESLint:** `pnpm lint` → Zero errors and zero warnings (`--max-warnings=0`).
-- **Prettier:** `pnpm format:check` → All matched files conform to Prettier code style.
-- **Integration Tests:** `pnpm test:integration` → 24/24 Playwright tests passed against local production server (including location search/save, 409 revision conflict handling, empty search recovery, and existing quota/status behaviors).
-- **Whitespace / Conflict Marker Check:** `git diff --check` → Clean (exit code 0).
+- **Production Build:** `pnpm build` → Thành công biên dịch Next.js 16.4.3 production build sạch, toàn bộ 21 dynamic/API routes và static pages được tạo thành công.
+- **Unit & Persistence Tests:** `pnpm test:unit` → 35/35 test files đạt (195/195 tests), bao gồm schema hợp đồng weather, tìm kiếm địa điểm, provider, settings route, CAS delivery, HTTP HEAD trigger auth và MQTT outbox drain.
+- **Strict TypeScript:** `pnpm typecheck` → Sinh route types và kiểm tra kiểu nghiêm ngặt `tsc --noEmit` sạch lỗi.
+- **ESLint:** `pnpm lint` → 0 cảnh báo, 0 lỗi (`--max-warnings=0`).
+- **Prettier:** `pnpm format:check` → Toàn bộ file mã nguồn và tài liệu tuân thủ chuẩn định dạng.
+- **Integration Tests:** `pnpm test:integration` → 24/24 Playwright tests đạt trên production server nội bộ (bao gồm tìm kiếm/lưu địa điểm, xử lý xung đột 409, khôi phục khi tìm rỗng và các nghiệp vụ quota/status hiện có).
+- **Kiểm tra Whitespace / Conflict:** `git diff --check` → Sạch lỗi (exit code 0).
 
-### 4. UI Preview Artifacts & Visual Inspection
+### 4. Kết quả kiểm tra giao diện trực quan
 
-- **OLED Clock Preview:** `/tmp/bmo-clock-preview/index.html` with 4 pixel-accurate PNG frames (512x256, 4x scaled 128x64 pixels):
-  - `leap-midnight.png` (2024-02-29 00:00 leap day rendering, T5 29/02)
-  - `new-year-2359-minus-100.png` (2024-12-31 23:59 at -100°C extreme low, snow icon)
-  - `new-year-0000-plus-70.png` (2025-01-01 00:00 at +70°C extreme high, clear icon)
-  - `unknown-time.png` (Time `--:--`, no fake date or weather when un-synced)
-- **Web UI Screenshots:**
-  - Desktop: `/tmp/bmo-weather-desktop.png` (1280x1840)
-  - Mobile: `/tmp/bmo-weather-mobile.png` (390x2607)
+- **Bản xem trước OLED Clock:** `/tmp/bmo-clock-preview/index.html` với 4 khung hình PNG chuẩn pixel (128x64 phóng to 4x thành 512x256):
+  - `leap-midnight.png` (Năm nhuận 29/02/2024 lúc 00:00, hiển thị `T5 29/02`)
+  - `new-year-2359-minus-100.png` (Đêm giao thừa 31/12/2024 lúc 23:59 ở mức cực lạnh -100°C, icon tuyết)
+  - `new-year-0000-plus-70.png` (Năm mới 01/01/2025 lúc 00:00 ở mức cực nóng +70°C, icon trời quang)
+  - `unknown-time.png` (Giờ `--:--`, không hiển thị ngày hoặc thời tiết giả khi chưa đồng bộ giờ)
+- **Ảnh chụp giao diện Web:**
+  - Bản Desktop: `/tmp/bmo-weather-desktop.png` (1280x1840)
+  - Bản Mobile: `/tmp/bmo-weather-mobile.png` (390x2607)
 
-### Baseline collector fixtures
+### Dữ liệu mẫu Collector (Baseline Fixtures)
 
-Baseline initially had three date-sensitive collector test failures caused by fixed October capture timestamps expiring against the current wall clock. Only those test fixtures were changed to relative capture times; collector production behavior was preserved. Their focused rerun passed all 15 tests.
+Ban đầu có 3 ca kiểm tra collector bị lỗi do mốc thời gian cố định tháng 10 hết hạn so với giờ thực tế. Các fixture này đã được cập nhật thành mốc thời gian tương đối mà không làm thay đổi hành vi nghiệp vụ của collector; toàn bộ 15 tests của collector đã chạy lại và đạt.
 
-## Review and practical limits
+## Đánh giá rà soát và Giới hạn thực tế
 
-The main agent reviewed wire compatibility, retained ordering/recovery, token checks before DB access, concurrent location changes, whole-job deadlines, duplicate retained receipt, fixed firmware packet buffers, button wake consumption and clock layout at temperature extremes.
+Agent chính đã rà soát tính tương thích giao thức, thứ tự retained/phục hồi, kiểm tra token trước khi truy cập DB, xử lý đổi địa điểm đồng thời, hạn mức thời gian toàn bộ tác vụ, xử lý trùng lặp gói tin retained, bộ đệm gói tin cố định trên firmware, triệt tiêu nút bấm khi đánh thức và bố cục hiển thị đồng hồ ở các mức nhiệt độ cực hạn.
 
-Host tests and builds cannot measure battery runtime, GPIO12/15 sleep pull-ups, Wi-Fi cutoff timing or blocked TLS worker shutdown on the board. Main turns the radio off at the session deadline; a synchronous in-progress TLS call can take additional time to unwind in the worker. These require the fault/current measurements in [firmware/BENCH_TEST.md](../firmware/BENCH_TEST.md).
+### Giới hạn phần cứng & môi trường Cloud thật:
 
-Production Vercel/Turso/broker/monitor behavior, actual 15-minute invocations and retained delivery to a physical ESP remain unverified. This report does not mark the earlier phase gates complete.
+- **Pin & Dòng tiêu thụ:** Các bài test trên máy chủ không thể đo lường dòng tiêu thụ pin, điện trở kéo chân GPIO12/15 khi ngủ, thời điểm cắt Wi-Fi thực tế hoặc thời gian giải phóng tác vụ TLS khi ngắt kết nối trên board mạch thật. Sau thời hạn phiên mạng, vòng lặp chính sẽ chủ động tắt radio, nhưng tác vụ TLS đồng bộ có thể cần thêm thời gian để giải phóng. Các thông số này cần đo đạc thực tế theo hướng dẫn tại [firmware/BENCH_TEST.md](../firmware/BENCH_TEST.md).
+- **Hạ tầng Production:** Hoạt động thực tế trên Vercel, Turso từ xa, MQTT broker bên ngoài, các lượt gọi định kỳ 15 phút từ Uptime Monitor và quá trình gửi retained đến thiết bị ESP32 thực tế cần được kiểm chứng khi đưa lên môi trường thật. Báo cáo này không tự ý đánh dấu hoàn thành các phase triển khai trước đó.
