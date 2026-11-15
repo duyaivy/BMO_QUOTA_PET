@@ -4,32 +4,40 @@ import { safeId } from "@/contracts/usage";
 export function weatherEnabled(): boolean {
   return process.env.BMO_WEATHER_ENABLED === "true";
 }
+
 export function weatherDeviceIds(): string[] {
-  const raw = (process.env.BMO_WEATHER_DEVICE_IDS ?? "[]").trim();
-  let value: unknown;
+  const raw = process.env.BMO_WEATHER_DEVICE_IDS;
+  if (!raw) return [];
+  let trimmed = String(raw).trim();
+  if (trimmed.startsWith("BMO_WEATHER_DEVICE_IDS=")) {
+    trimmed = trimmed.slice("BMO_WEATHER_DEVICE_IDS=".length).trim();
+  }
+  let list: string[] = [];
   try {
-    value = JSON.parse(raw);
-  } catch {
-    if (raw.startsWith("[") && raw.endsWith("]")) {
+    let val: unknown = JSON.parse(trimmed);
+    if (typeof val === "string") {
       try {
-        value = JSON.parse(raw.replace(/'/g, '"'));
+        val = JSON.parse(val);
       } catch {}
     }
-    if (!value && raw.length > 0 && !raw.startsWith("{")) {
-      value = raw
-        .split(",")
-        .map((s) => s.trim().replace(/^['"]|['"]$/g, ""))
+    if (Array.isArray(val)) {
+      list = val
+        .map(String)
+        .map((s) => s.trim())
         .filter(Boolean);
     }
-    if (!value) {
-      throw new Error("Invalid BMO_WEATHER_DEVICE_IDS");
+  } catch {}
+
+  if (list.length === 0 && trimmed.length > 0 && trimmed !== "[]") {
+    const matches = trimmed.match(/[A-Za-z0-9][A-Za-z0-9_.:-]*/g);
+    if (matches) {
+      list = matches.filter((m) => m !== "BMO_WEATHER_DEVICE_IDS");
     }
   }
-  if (
-    !Array.isArray(value) ||
-    value.some((x) => !safeId.safeParse(x).success) ||
-    new Set(value).size !== value.length
-  )
+
+  const unique = Array.from(new Set(list));
+  if (unique.some((x) => !safeId.safeParse(x).success)) {
     throw new Error("Invalid BMO_WEATHER_DEVICE_IDS");
-  return value as string[];
+  }
+  return unique;
 }
