@@ -6,17 +6,18 @@
 
 struct ClockText {
     char time[6];
-    char date[12];
+    char date[16];
     char temperature[8];
     WeatherCondition condition;
     bool isDay;
+    bool wifiConnected;
 };
 
 class BMOClockRenderer {
 public:
     BMOClockRenderer();
-    void format(time_t nowUtc, const WeatherSnapshot* weather, ClockText& out) const;
-    void renderIfChanged(time_t nowUtc, const WeatherSnapshot* weather, bool force);
+    void format(time_t nowUtc, const WeatherSnapshot* weather, ClockText& out, bool wifiConnected = true) const;
+    void renderIfChanged(time_t nowUtc, const WeatherSnapshot* weather, bool force, bool wifiConnected = true);
 private:
     ClockText _last;
     bool _rendered;

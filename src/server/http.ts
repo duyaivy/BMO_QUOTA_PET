@@ -31,6 +31,9 @@ function errorResponse(error: unknown, requestId: string) {
           : code === "PAYLOAD_TOO_LARGE"
             ? 413
             : 503;
+  if (status === 503) {
+    console.error("[HTTP_503_ERROR]", requestId, error);
+  }
   return Response.json(
     {
       error: {

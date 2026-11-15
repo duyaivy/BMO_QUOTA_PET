@@ -42,7 +42,7 @@ async function readProvider(
   const abort = () => controller.abort();
   signal.addEventListener("abort", abort, { once: true });
   if (signal.aborted) controller.abort();
-  const timer = setTimeout(abort, 5000);
+  const timer = setTimeout(abort, 10000);
   try {
     const response = await fetchImpl(url, {
       signal: controller.signal,

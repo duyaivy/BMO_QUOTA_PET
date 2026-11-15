@@ -18,7 +18,7 @@ class BMONavigationController {public: BMONavigationController();void begin();vo
 ''')
     (p/'mqtt_client.h').write_text('struct Weather{}; struct Mqtt {int count=3; Weather weather; int getTotalQuotaPages(){return count;}int getQuotaScreenCount(){return count;}bool isConnected(){return true;}bool hasWeather(){return false;}const Weather& getWeather(){return weather;}} mqttClient;')
     (p/'wifi_manager.h').write_text('struct Wifi {bool isWifiConnected(){return true;}long getCurrentEpoch(){return 0;}} connManager;')
-    (p/'clock_renderer.h').write_text('struct Clock {int renders=0;void renderIfChanged(long,const void*,bool){renders++;}} clockRenderer;')
+    (p/'clock_renderer.h').write_text('struct Clock {int renders=0;void renderIfChanged(long,const void*,bool,bool=true){renders++;}} clockRenderer;')
     (p/'power_manager.h').write_text('struct Power {int activity=0;void resetActivityTimer(){activity++;}} powerManager;')
     source='#include "clock_renderer.h"\n'+(root/'firmware/src/navigation.cpp').read_text()
     source+='''

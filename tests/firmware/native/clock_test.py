@@ -9,11 +9,13 @@ with tempfile.TemporaryDirectory() as directory:
     (path/'Arduino.h').write_text('#pragma once\n#include <cstdint>\n#include <cstddef>\n#include <cstring>\n#include <cstdio>\n')
     (path/'display.h').write_text('''#pragma once
 constexpr int SSD1306_WHITE=1;
+constexpr int SSD1306_BLACK=0;
 struct Driver {
  void clearDisplay(){} void setTextSize(int){} void setTextColor(int){} void setCursor(int,int){}
  void print(const char*){} void drawCircle(int,int,int,int){} void fillCircle(int,int,int,int){}
  void drawLine(int,int,int,int,int){} void drawRoundRect(int,int,int,int,int,int){}
- void drawFastHLine(int,int,int,int){} void drawPixel(int,int,int){}
+ void fillRoundRect(int,int,int,int,int,int){} void drawRect(int,int,int,int,int){}
+ void fillRect(int,int,int,int,int){} void drawFastHLine(int,int,int,int){} void drawPixel(int,int,int){}
 };
 struct Display {Driver driver; int flushes=0; Driver& getDriver(){return driver;} void update(){flushes++;}};
 extern Display display;
@@ -31,13 +33,13 @@ int main(){
  assert(strcmp(text.time,"--:--")==0 && text.date[0]=='\\0');
  // 2024-02-28T17:00:00Z is Thursday 29 February, 00:00 in UTC+7.
  clock.format(1709139600,nullptr,text);
- assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T5 29/02")==0);
+ assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T5 29/02/2024")==0);
  clock.format(1733072400,nullptr,text);
- assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T2 02/12")==0);
+ assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T2 02/12/2024")==0);
  clock.format(1735664340,nullptr,text);
- assert(strcmp(text.time,"23:59")==0 && strcmp(text.date,"T3 31/12")==0);
+ assert(strcmp(text.time,"23:59")==0 && strcmp(text.date,"T3 31/12/2024")==0);
  clock.format(1735664400,nullptr,text);
- assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T4 01/01")==0);
+ assert(strcmp(text.time,"00:00")==0 && strcmp(text.date,"T4 01/01/2025")==0);
  WeatherSnapshot weather{}; weather.valid=true;weather.hasObservation=true;
  weather.condition=WeatherCondition::RAIN;weather.temperatureC=-12.5f;
  weather.dataAt=1709139600;weather.validUntil=1709143200;
@@ -49,6 +51,8 @@ int main(){
  weather.dataAt=1709143501;weather.validUntil=1709147101;
  clock.format(1709143200,&weather,text);assert(strcmp(text.temperature,"--")==0);
  clock.renderIfChanged(1709143200,&weather,true);assert(display.flushes==4);
+ // Wi-Fi status change triggers dirty re-render
+ clock.renderIfChanged(1709143200,&weather,false,false);assert(display.flushes==5);
 }
 ''')
     subprocess.run(['c++','-std=c++17','-I',str(path),'-I',str(root/'firmware/include'),str(path/'test.cpp'),str(root/'firmware/src/clock_renderer.cpp'),str(root/'firmware/src/weather.cpp'),'-I',str(root/'firmware/.pio/libdeps/esp32cam/ArduinoJson/src'),'-o',str(path/'test')],check=True)

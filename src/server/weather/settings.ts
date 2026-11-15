@@ -79,7 +79,7 @@ export async function saveWeatherLocation(
 ): Promise<{ settings: WeatherSettingsView; changed: boolean }> {
   const value = saveWeatherLocationSchema.parse(input);
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
+  const timer = setTimeout(() => controller.abort(), 10000);
   let location: WeatherLocationChoice;
   try {
     location = weatherLocationChoiceSchema.parse(

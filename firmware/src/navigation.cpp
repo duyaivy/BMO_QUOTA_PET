@@ -116,7 +116,8 @@ void BMONavigationController::render() {
     switch (_mode) {
         case UIMode::CLOCK:
             clockRenderer.renderIfChanged(connManager.getCurrentEpoch(),
-                mqttClient.hasWeather() ? &mqttClient.getWeather() : nullptr, _forceClock);
+                mqttClient.hasWeather() ? &mqttClient.getWeather() : nullptr, _forceClock,
+                connManager.isWifiConnected());
             _forceClock = false;
             break;
         case UIMode::PET_FACE:

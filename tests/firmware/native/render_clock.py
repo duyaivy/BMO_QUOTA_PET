@@ -60,6 +60,7 @@ size_t print(const char* s){return write(s);} };
         (p / 'Adafruit_SSD1306.h').write_text('''#pragma once
 #include "Adafruit_GFX.h"
 #define SSD1306_WHITE 1
+#define SSD1306_BLACK 0
 class Adafruit_SSD1306 : public GFXcanvas1 { public:
  Adafruit_SSD1306():GFXcanvas1(128,64){setTextWrap(false);}
  void clearDisplay(){fillScreen(0);} };
@@ -74,20 +75,61 @@ extern Display display;
 #include <cstdio>
 Display display;
 bool weatherIsFresh(const WeatherSnapshot& w,time_t now){return w.valid&&w.hasObservation&&w.dataAt<=now+300&&now<w.validUntil;}
-void frame(time_t epoch, const WeatherSnapshot* weather) {
- clockRenderer.renderIfChanged(epoch,weather,true);
+void frame(time_t epoch, const WeatherSnapshot* weather, bool wifi = true) {
+ clockRenderer.renderIfChanged(epoch,weather,true,wifi);
  for(int y=0;y<64;y++)for(int x=0;x<128;x++)putchar(display.oled.getPixel(x,y)?'1':'0');
  putchar('\\n');
 }
+
 int main(){
- WeatherSnapshot cold{};
- cold.valid=true;cold.hasObservation=true;cold.condition=WeatherCondition::SNOW;
- cold.temperatureC=-100;cold.isDay=false;cold.dataAt=1735664340;cold.validUntil=1735667940;
- WeatherSnapshot hot=cold;hot.condition=WeatherCondition::CLEAR;hot.temperatureC=70;
- frame(1709139600,nullptr);
- frame(1735664340,&cold);
- frame(1735664400,&hot);
- frame(0,nullptr);
+ // 1. 00:00 midnight cold snow (SWEET DREAMS!, -12 deg, night, wifi)
+ // 1709139600 is 2024-02-29 00:00 UTC+7
+ WeatherSnapshot w1{}; w1.valid=true; w1.hasObservation=true; w1.condition=WeatherCondition::SNOW;
+ w1.temperatureC=-12; w1.isDay=false; w1.dataAt=1709139600; w1.validUntil=1709143200;
+ frame(1709139600, &w1, true);
+
+ // 2. 08:08 morning sunny (GOOD MORNING!, 8 deg single digit, sunny, wifi)
+ // 1709139600 + 8*3600 + 8*60 = 1709168880 (2024-02-29 08:08 UTC+7)
+ WeatherSnapshot w2=w1; w2.condition=WeatherCondition::CLEAR; w2.isDay=true; w2.temperatureC=8;
+ w2.dataAt=1709168880; w2.validUntil=1709172480;
+ frame(1709168880, &w2, true);
+
+ // 3. 09:41 morning cloudy (GOOD MORNING!, 28 deg, cloudy, wifi)
+ // 1709139600 + 9*3600 + 41*60 = 1709174460 (2024-02-29 09:41 UTC+7)
+ WeatherSnapshot w3=w1; w3.condition=WeatherCondition::CLOUDY; w3.isDay=true; w3.temperatureC=28;
+ w3.dataAt=1709174460; w3.validUntil=1709178060;
+ frame(1709174460, &w3, true);
+
+ // 4. 12:59 noon partly cloudy (HAVE A NICE DAY!, 32 deg, partly cloudy, wifi)
+ // 1709139600 + 12*3600 + 59*60 = 1709186340 (2024-02-29 12:59 UTC+7)
+ WeatherSnapshot w4=w1; w4.condition=WeatherCondition::PARTLY_CLOUDY; w4.isDay=true; w4.temperatureC=32;
+ w4.dataAt=1709186340; w4.validUntil=1709189940;
+ frame(1709186340, &w4, true);
+
+ // 5. 18:30 evening rain (GOOD EVENING!, 24 deg, rain, NO WIFI)
+ // 1709139600 + 18*3600 + 30*60 = 1709206200 (2024-02-29 18:30 UTC+7)
+ WeatherSnapshot w5=w1; w5.condition=WeatherCondition::RAIN; w5.isDay=false; w5.temperatureC=24;
+ w5.dataAt=1709206200; w5.validUntil=1709209800;
+ frame(1709206200, &w5, false);
+
+ // 6. 23:59 night thunderstorm extreme negative (SWEET DREAMS!, -100 deg, storm, wifi)
+ // 1735664340 is 2024-12-31 23:59 UTC+7
+ WeatherSnapshot w6=w1; w6.condition=WeatherCondition::STORM; w6.isDay=false; w6.temperatureC=-100;
+ w6.dataAt=1735664340; w6.validUntil=1735667940;
+ frame(1735664340, &w6, true);
+
+ // 7. 00:00 new year clear night (SWEET DREAMS!, 70 deg, clear night moon & star, wifi)
+ // 1735664400 is 2025-01-01 00:00 UTC+7
+ WeatherSnapshot w7=w1; w7.condition=WeatherCondition::CLEAR; w7.isDay=false; w7.temperatureC=70;
+ w7.dataAt=1735664400; w7.validUntil=1735668000;
+ frame(1735664400, &w7, true);
+
+ // 8. Unknown time / no NTP sync (BMO IS READY!, --:--, ?, -- deg, NO WIFI)
+ frame(0, nullptr, false);
+
+ // 9. Synced time but weather missing/expired (HAVE A NICE DAY!, 14:15, ?, -- deg, wifi)
+ // 1709139600 + 14*3600 + 15*60 = 1709190900 (2024-02-29 14:15 UTC+7)
+ frame(1709190900, nullptr, true);
 }
 ''')
         command = ['c++', '-std=c++17', '-DARDUINO=100', '-I', str(p), '-I', str(GFX),
@@ -97,20 +139,47 @@ int main(){
                    '-o', str(p/'test')]
         subprocess.run(command, check=True)
         frames = subprocess.run([str(p/'test')], capture_output=True, text=True, check=True).stdout.splitlines()
-        assert len(frames) == 4 and all(len(frame) == 8192 for frame in frames)
+        assert len(frames) == 9 and all(len(frame) == 8192 for frame in frames)
         output = pathlib.Path(preview)
         output.parent.mkdir(parents=True, exist_ok=True)
-        names = ['leap-midnight', 'new-year-2359-minus-100', 'new-year-0000-plus-70', 'unknown-time']
+        names = [
+            '01_midnight_0000_snow_neg12',
+            '02_morning_0808_sunny_8c',
+            '03_morning_0941_cloudy_28c',
+            '04_noon_1259_partlycloudy_32c',
+            '05_evening_1830_rain_nowifi',
+            '06_night_2359_storm_neg100',
+            '07_newyear_0000_clearnight_70c',
+            '08_unknown_time_no_weather',
+            '09_synced_time_no_weather',
+        ]
+        descriptions = [
+            '00:00 · SWEET DREAMS! · Snow (-12°C) · Wi-Fi ON',
+            '08:08 · GOOD MORNING! · Sunny (8°C) · Wi-Fi ON',
+            '09:41 · GOOD MORNING! · Cloudy (28°C) · Wi-Fi ON',
+            '12:59 · HAVE A NICE DAY! · Partly Cloudy (32°C) · Wi-Fi ON',
+            '18:30 · GOOD EVENING! · Rain (24°C) · Wi-Fi OFF',
+            '23:59 · SWEET DREAMS! · Storm (-100°C) · Wi-Fi ON',
+            '00:00 · SWEET DREAMS! · Clear Night (70°C) · Wi-Fi ON',
+            '--:-- · BMO IS READY! · Unknown (--°) · Wi-Fi OFF',
+            '14:15 · HAVE A NICE DAY! · Unknown (--°) · Wi-Fi ON',
+        ]
         for name, frame in zip(names, frames):
             (output.parent / (name + '.png')).write_bytes(png(frame))
-        output.write_text('<!doctype html><meta charset="utf-8"><title>BMO clock preview</title>'
-                          '<style>body{background:#101918;color:#e4f5ed;font:16px system-ui;margin:32px}'
+        output.write_text('<!doctype html><meta charset="utf-8"><title>BMO Minimal Pixel Clock Preview</title>'
+                          '<style>body{background:#0e1615;color:#e4f5ed;font:15px system-ui;margin:32px}'
+                          'h1{color:#8fe3be;font-size:24px;margin-bottom:8px}'
+                          'p{color:#94b8aa;margin-top:0;margin-bottom:24px}'
                           'main{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:24px}'
-                          'img{width:512px;image-rendering:pixelated;border:1px solid #667}</style>'
-                          '<h1>BMO clock · production GFX pixels</h1><main>' + ''.join(
-                              f'<figure><img src="{name}.png"><figcaption>{name}</figcaption></figure>'
-                              for name in names) + '</main>')
-        print(f'Production clock preview: {output} (4 frames)')
+                          'figure{background:#162422;padding:16px;border-radius:8px;border:1px solid #233a36;margin:0}'
+                          'figcaption{margin-top:10px;font-weight:600;color:#cfffe8}'
+                          'img{width:512px;height:256px;image-rendering:pixelated;border:1px solid #3d635c;border-radius:4px;display:block}'
+                          '</style>'
+                          '<h1>BMO Minimal Pixel Clock · OLED 128x64 Preview</h1>'
+                          '<p>Pixel-accurate render via Adafruit_GFX canvas engine (4x scale).</p><main>' + ''.join(
+                              f'<figure><img src="{name}.png"><figcaption>{desc}</figcaption></figure>'
+                              for name, desc in zip(names, descriptions)) + '</main>')
+        print(f'Production clock preview: {output} ({len(names)} frames)')
 
 
 if __name__ == '__main__':
