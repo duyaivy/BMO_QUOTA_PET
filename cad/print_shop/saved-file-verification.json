@@ -1,0 +1,96 @@
+{
+  "saved_cad_reopened": true,
+  "verified_objects": [
+    "BMO_MAIN_BODY",
+    "BMO_BACK_COVER",
+    "BMO_DPAD_YELLOW",
+    "BMO_BUTTON_RED",
+    "OLED_096_PCB",
+    "OLED_096_Glass",
+    "OLED_096_ActiveArea",
+    "OLED_096_Header",
+    "Tactile_Switch_A_DPad",
+    "Tactile_Switch_B_Red",
+    "ESP32_CAM_AI_Thinker",
+    "Battery_LiPo_503048",
+    "Power_Boost_MT3608",
+    "Capacitor_2200uF",
+    "Charger_Module_PLACEHOLDER",
+    "Power_Switch_PLACEHOLDER",
+    "Battery_Soft_Pad",
+    "Battery_Soft_Retaining_Band",
+    "Capacitor_Soft_Retaining_Strap",
+    "FR4_DPAD_CARRIER_NOT_PRINTED",
+    "FR4_RED_CARRIER_NOT_PRINTED"
+  ],
+  "printed_part_count": 4,
+  "mount_axes": [
+    {
+      "board": "FR4_DPAD_CARRIER_NOT_PRINTED",
+      "xz": [
+        -12.5,
+        18
+      ],
+      "checked_pilot_engagement_mm": 4.5,
+      "obstruction_mm": 0.0
+    },
+    {
+      "board": "FR4_DPAD_CARRIER_NOT_PRINTED",
+      "xz": [
+        -12.5,
+        36
+      ],
+      "checked_pilot_engagement_mm": 4.5,
+      "obstruction_mm": 0.0
+    },
+    {
+      "board": "FR4_RED_CARRIER_NOT_PRINTED",
+      "xz": [
+        12.5,
+        14.5
+      ],
+      "checked_pilot_engagement_mm": 4.5,
+      "obstruction_mm": 0.0
+    },
+    {
+      "board": "FR4_RED_CARRIER_NOT_PRINTED",
+      "xz": [
+        12.5,
+        29.5
+      ],
+      "checked_pilot_engagement_mm": 4.5,
+      "obstruction_mm": 0.0
+    }
+  ],
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "freecad_mesh_checks": [
+    {
+      "name": "BMO_MAIN_BODY",
+      "solid": true,
+      "nonmanifold": false,
+      "components": 1,
+      "self_intersections": false
+    },
+    {
+      "name": "BMO_BACK_COVER",
+      "solid": true,
+      "nonmanifold": false,
+      "components": 1,
+      "self_intersections": false
+    },
+    {
+      "name": "BMO_DPAD_YELLOW",
+      "solid": true,
+      "nonmanifold": false,
+      "components": 1,
+      "self_intersections": false
+    },
+    {
+      "name": "BMO_BUTTON_RED",
+      "solid": true,
+      "nonmanifold": false,
+      "components": 1,
+      "self_intersections": false
+    }
+  ]
+}

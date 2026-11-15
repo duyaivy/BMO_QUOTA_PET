@@ -1,0 +1,248 @@
+{
+  "roots": [
+    {
+      "part": "leg_Left",
+      "root_radius": 1.2,
+      "root_to_leg_overlap_mm3": 56.993265610907045
+    },
+    {
+      "part": "leg_Right",
+      "root_radius": 1.2,
+      "root_to_leg_overlap_mm3": 57.0328996628148
+    },
+    {
+      "part": "arm_Left",
+      "collar_diameter": 5,
+      "collar_to_original_arm_overlap_mm3": 38.81444305498593
+    },
+    {
+      "part": "arm_Right",
+      "collar_diameter": 5,
+      "collar_to_original_arm_overlap_mm3": 38.906981043538536
+    }
+  ],
+  "ears": [
+    {
+      "side": -1,
+      "outer_offset_mm": 0.65,
+      "depth_mm": 7,
+      "opening_preserved": true
+    },
+    {
+      "side": 1,
+      "outer_offset_mm": 0.65,
+      "depth_mm": 7,
+      "opening_preserved": true
+    }
+  ],
+  "text": [
+    {
+      "name": "BMO_Letter_B",
+      "bounds": [
+        -24.049999999999997,
+        0.4441769622093017,
+        57.75,
+        -23.4,
+        7.555823037790699,
+        66.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 24.78411323647955,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7
+    },
+    {
+      "name": "BMO_Letter_M",
+      "bounds": [
+        -24.049999999999997,
+        -0.1001998546511631,
+        44.75,
+        -23.4,
+        8.100199854651162,
+        53.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 29.739292215952716,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7
+    },
+    {
+      "name": "BMO_Letter_O",
+      "bounds": [
+        -24.049999999999997,
+        0.0212210323033708,
+        31.75,
+        -23.4,
+        7.978778967696629,
+        40.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 20.768194181787678,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7
+    },
+    {
+      "name": "DUT_Letter_D",
+      "bounds": [
+        23.4,
+        0.44128134084302273,
+        59.75,
+        24.049999999999997,
+        7.558718659156977,
+        68.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 21.785913521487544,
+      "outline_source": "original glyph, scaled in side plane only"
+    },
+    {
+      "name": "DUT_Letter_U",
+      "bounds": [
+        23.4,
+        0.6730468750000003,
+        46.75,
+        24.049999999999997,
+        7.326953124999999,
+        55.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 18.464078096430207,
+      "outline_source": "original glyph, scaled in side plane only"
+    },
+    {
+      "name": "DUT_Letter_T",
+      "bounds": [
+        23.4,
+        0.6266011082848837,
+        33.75,
+        24.049999999999997,
+        7.373398891715116,
+        42.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 13.069902187943608,
+      "outline_source": "original glyph, scaled in side plane only"
+    }
+  ],
+  "buttons": [
+    {
+      "cap": "BMO_DPad_Yellow",
+      "switch": "Tactile_Switch_A_DPad",
+      "center_xz": [
+        -12.5,
+        27
+      ],
+      "flange_front_rest_y": -12.8,
+      "flange_back_rest_y": -12.0,
+      "stem_front_rest_y": -11.95,
+      "rest_gap": 0.05,
+      "mechanical_stop_travel": 0.3,
+      "nominal_stem_compression_at_stop": 0.25
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "switch": "Tactile_Switch_B_Red",
+      "center_xz": [
+        10.5,
+        21.5
+      ],
+      "flange_front_rest_y": -12.8,
+      "flange_back_rest_y": -12.0,
+      "stem_front_rest_y": -11.95,
+      "rest_gap": 0.05,
+      "mechanical_stop_travel": 0.3,
+      "nominal_stem_compression_at_stop": 0.25
+    }
+  ],
+  "integrated": [
+    "BMO_Sitting_Leg_Left",
+    "BMO_Sitting_Leg_Right",
+    "BMO_Sitting_Arm_Left",
+    "BMO_Sitting_Arm_Right",
+    "Triangle_Cyan",
+    "Upper_Button_Blue",
+    "Small_Button_Green",
+    "Capacitor_Cradle",
+    "OLED_PCB_Edge_Supports",
+    "Charger_Edge_Bracket",
+    "ESP32_Edge_Cradle_No_PCB_Holes -> back cover",
+    "Boost_Tray_Removable",
+    "Battery_Tray_Removable -> back cover",
+    "Rear_AntiTip_Skid"
+  ],
+  "hardware_transforms": {
+    "ESP32_CAM_AI_Thinker": {
+      "translation": [
+        0,
+        -5.4,
+        0
+      ]
+    },
+    "Capacitor_2200uF": {
+      "translation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Battery_LiPo_503048": {
+      "translation": [
+        0,
+        -5.899999999999999,
+        0
+      ]
+    },
+    "Charger_Module_PLACEHOLDER": {
+      "translation": [
+        0,
+        -6,
+        0
+      ]
+    },
+    "Power_Switch_PLACEHOLDER": {
+      "translation": [
+        0,
+        -7,
+        0
+      ]
+    },
+    "Battery_Soft_Pad": {
+      "translation": [
+        0,
+        -5.899999999999999,
+        0
+      ]
+    },
+    "Battery_Soft_Retaining_Band": {
+      "translation": [
+        0,
+        -5.899999999999999,
+        0
+      ]
+    },
+    "Capacitor_Soft_Retaining_Strap": {
+      "translation": [
+        0,
+        0,
+        0
+      ]
+    },
+    "Power_Boost_MT3608": {
+      "rotation_x_deg": 90,
+      "bounds": [
+        -18.6,
+        8.0,
+        10.5,
+        18.6,
+        22.500000000000004,
+        27.699999999999996
+      ]
+    }
+  },
+  "signature": {
+    "text": "duyaivy",
+    "height": 4.5,
+    "depth": 0.6,
+    "same_mint_as_cover": true
+  }
+}

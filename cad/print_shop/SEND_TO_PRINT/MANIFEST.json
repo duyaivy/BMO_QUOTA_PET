@@ -1,0 +1,31 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "files": [
+    {
+      "name": "BMO_MAIN_BODY.stl",
+      "color": "mint",
+      "sha256": "d0f471762619e0cdd56be9a92de21d70db96d344a8347481f87471ca79433a36",
+      "bytes": 1954384
+    },
+    {
+      "name": "BMO_BACK_COVER.stl",
+      "color": "mint",
+      "sha256": "f30638d25944f3b3cfd9dc970a595663af089e26fe270d97821374945284bac5",
+      "bytes": 247284
+    },
+    {
+      "name": "BMO_DPAD_YELLOW.stl",
+      "color": "yellow",
+      "sha256": "f18b5144a0ba3357a3f51faa030a38094208645c8204563f3d33bf2312e0ad1d",
+      "bytes": 4684
+    },
+    {
+      "name": "BMO_BUTTON_RED.stl",
+      "color": "red",
+      "sha256": "5cadeba997506e316e74d36737ff5f9b41206d573d69bc609142a7bcc8147603",
+      "bytes": 51884
+    }
+  ],
+  "printed_part_count": 4,
+  "nonprinted_additional_hardware": "Two FR4 carriers and four M2 fasteners; actual tactile attachment/footprint must be verified."
+}

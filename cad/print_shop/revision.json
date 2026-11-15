@@ -1,0 +1,103 @@
+{
+  "source": "cad/final_print/BMO_FINAL_OPTIMIZED.FCStd",
+  "backup_sha256": "4bbe528294165ba4e01e0ea54bc5f301e4ecce896478e5193317494e49565590",
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "button_extra_shift_x_mm": 2,
+  "feet": [
+    {
+      "side": -1,
+      "sole_mm": [
+        8.4,
+        22.6,
+        4
+      ],
+      "ankle_diameter": 6,
+      "toe_y": -25.6,
+      "ankle_y": -7,
+      "root_blend_radius": 3.4,
+      "flat_bed_z": 0
+    },
+    {
+      "side": 1,
+      "sole_mm": [
+        8.4,
+        22.6,
+        4
+      ],
+      "ankle_diameter": 6,
+      "toe_y": -25.6,
+      "ankle_y": -7,
+      "root_blend_radius": 3.4,
+      "flat_bed_z": 0
+    }
+  ],
+  "rear_switch": {
+    "rotation_z_deg": 90,
+    "translation": [
+      -9.5,
+      14.5,
+      28
+    ],
+    "bounds": [
+      8.0,
+      28.0,
+      63.0,
+      16.000000000000004,
+      35.0,
+      69.0
+    ],
+    "cell_unchanged": true,
+    "actuator_rear_projection_mm": 2,
+    "mounting": "Nominal guide/ledge fit; verify actual switch and retention."
+  },
+  "parts": {
+    "BMO_MAIN_BODY": {
+      "bounds": [
+        -32.300000000000004,
+        -25.6,
+        -1e-15,
+        32.300000000000004,
+        30.0,
+        86.59869097278997
+      ],
+      "valid": true,
+      "solids": 1
+    },
+    "BMO_BACK_COVER": {
+      "bounds": [
+        -24.0,
+        -3.4,
+        7.0,
+        24.0,
+        33.00000000000001,
+        75.0
+      ],
+      "valid": true,
+      "solids": 1
+    },
+    "BMO_DPAD_YELLOW": {
+      "bounds": [
+        -19.0,
+        -16.7,
+        20.5,
+        -6.0,
+        -11.999999999999998,
+        33.5
+      ],
+      "valid": true,
+      "solids": 1
+    },
+    "BMO_BUTTON_RED": {
+      "bounds": [
+        8.004531200564085,
+        -16.7,
+        17.018115677021424,
+        16.995468799435915,
+        -11.999999999999998,
+        26.0
+      ],
+      "valid": true,
+      "solids": 1
+    }
+  }
+}

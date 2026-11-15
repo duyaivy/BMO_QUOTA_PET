@@ -1,0 +1,423 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "tools": {
+    "numpy": "2.5.4",
+    "trimesh": "5.2.1",
+    "pymeshlab": "2025.7.post1",
+    "manifold3d": "3.5.5"
+  },
+  "parts": [
+    {
+      "name": "BMO_MAIN_BODY",
+      "source": "cad/print_shop/_mesh_source/BMO_MAIN_BODY.stl",
+      "color": "mint",
+      "cad_volume_mm3": 37613.876814612595,
+      "rotate_x_degrees": 0,
+      "translation_mm": [
+        -0.0,
+        -2.1999998092651367,
+        1.0000000036274937e-15
+      ],
+      "before": {
+        "watertight": false,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 107343,
+        "vertices": 53649,
+        "volume_mm3": 37605.55634757682
+      },
+      "stages": [
+        {
+          "watertight": false,
+          "winding_consistent": true,
+          "positive_volume": true,
+          "components": 1,
+          "self_intersecting_faces": 0,
+          "faces": 107349,
+          "vertices": 53649,
+          "volume_mm3": 37605.55634757682
+        },
+        {
+          "watertight": true,
+          "winding_consistent": true,
+          "positive_volume": true,
+          "components": 1,
+          "self_intersecting_faces": 0,
+          "faces": 107350,
+          "vertices": 53649,
+          "volume_mm3": 37605.55634757682
+        },
+        {
+          "manifold_cleanup_tolerance_mm": 0.01,
+          "checks": {
+            "watertight": true,
+            "winding_consistent": true,
+            "positive_volume": true,
+            "components": 1,
+            "self_intersecting_faces": 0,
+            "faces": 39086,
+            "vertices": 19517,
+            "volume_mm3": 37608.86988426276
+          }
+        }
+      ],
+      "after": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 39086,
+        "vertices": 19517,
+        "volume_mm3": 37608.86988426276
+      },
+      "sampled_bidirectional_hausdorff": [
+        {
+          "RMS": 0.003415255341678858,
+          "diag_mesh_0": 121.50611114501953,
+          "diag_mesh_1": 121.50473154220728,
+          "max": 0.01646995358169079,
+          "mean": 0.002127043902873993,
+          "min": 0.0,
+          "n_samples": 60012
+        },
+        {
+          "RMS": 0.0025766491889953613,
+          "diag_mesh_0": 121.50473022460938,
+          "diag_mesh_1": 121.50611144431474,
+          "max": 0.01534215360879898,
+          "mean": 0.0011641716118901968,
+          "min": 0.0,
+          "n_samples": 59516
+        }
+      ],
+      "relative_volume_error_to_cad": 0.00013311391363661225,
+      "file": "cad/print_shop/SEND_TO_PRINT/BMO_MAIN_BODY.stl",
+      "saved_checks": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 39086,
+        "vertices": 19517,
+        "volume_mm3": 37608.86988426276
+      },
+      "bounds_mm": [
+        [
+          -32.299781799316406,
+          -27.798622131347656,
+          0.0
+        ],
+        [
+          32.299781799316406,
+          27.798622131347656,
+          86.5981674194336
+        ]
+      ],
+      "mesh_bed_translation_mm": [
+        -0.0,
+        -0.001377105712890625,
+        -0.0
+      ],
+      "sha256": "d0f471762619e0cdd56be9a92de21d70db96d344a8347481f87471ca79433a36",
+      "bytes": 1954384
+    },
+    {
+      "name": "BMO_BACK_COVER",
+      "source": "cad/print_shop/_mesh_source/BMO_BACK_COVER.stl",
+      "color": "mint",
+      "cad_volume_mm3": 10344.57037513575,
+      "rotate_x_degrees": -90,
+      "translation_mm": [
+        -0.0,
+        -41.0,
+        33.0
+      ],
+      "before": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 11150,
+        "vertices": 5561,
+        "volume_mm3": 10344.553124935743
+      },
+      "stages": [
+        {
+          "manifold_cleanup_tolerance_mm": 0.005,
+          "checks": {
+            "watertight": true,
+            "winding_consistent": true,
+            "positive_volume": true,
+            "components": 1,
+            "self_intersecting_faces": 0,
+            "faces": 4944,
+            "vertices": 2458,
+            "volume_mm3": 10341.974671657166
+          }
+        }
+      ],
+      "after": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 4944,
+        "vertices": 2458,
+        "volume_mm3": 10341.974671657166
+      },
+      "sampled_bidirectional_hausdorff": [
+        {
+          "RMS": 0.0009947913931682706,
+          "diag_mesh_0": 90.8458023071289,
+          "diag_mesh_1": 90.83349736409379,
+          "max": 0.006034838035702705,
+          "mean": 0.00027165410574525595,
+          "min": 0.0,
+          "n_samples": 45561
+        },
+        {
+          "RMS": 0.0008308497490361333,
+          "diag_mesh_0": 90.83349609375,
+          "diag_mesh_1": 90.84580403675223,
+          "max": 0.005091834347695112,
+          "mean": 0.0001614998618606478,
+          "min": 0.0,
+          "n_samples": 42457
+        }
+      ],
+      "relative_volume_error_to_cad": 0.0002509242418441367,
+      "file": "cad/print_shop/SEND_TO_PRINT/BMO_BACK_COVER.stl",
+      "saved_checks": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 4944,
+        "vertices": 2458,
+        "volume_mm3": 10341.974227420757
+      },
+      "bounds_mm": [
+        [
+          -23.995182037353516,
+          -33.99517822265625,
+          0.0
+        ],
+        [
+          23.995182037353516,
+          33.99517822265625,
+          36.400001525878906
+        ]
+      ],
+      "mesh_bed_translation_mm": [
+        -0.0,
+        1.9073486328125e-06,
+        -0.0
+      ],
+      "sha256": "f30638d25944f3b3cfd9dc970a595663af089e26fe270d97821374945284bac5",
+      "bytes": 247284
+    },
+    {
+      "name": "BMO_DPAD_YELLOW",
+      "source": "cad/print_shop/_mesh_source/BMO_DPAD_YELLOW.stl",
+      "color": "yellow",
+      "cad_volume_mm3": 394.6520000000004,
+      "rotate_x_degrees": 90,
+      "translation_mm": [
+        12.5,
+        27.0,
+        16.700000762939453
+      ],
+      "before": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 92,
+        "vertices": 48,
+        "volume_mm3": 394.6521155414684
+      },
+      "stages": [
+        {
+          "manifold_cleanup_tolerance_mm": 0.005,
+          "checks": {
+            "watertight": true,
+            "winding_consistent": true,
+            "positive_volume": true,
+            "components": 1,
+            "self_intersecting_faces": 0,
+            "faces": 92,
+            "vertices": 48,
+            "volume_mm3": 394.6521155414684
+          }
+        }
+      ],
+      "after": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 92,
+        "vertices": 48,
+        "volume_mm3": 394.6521155414684
+      },
+      "sampled_bidirectional_hausdorff": [
+        {
+          "RMS": 4.8904946060996976e-17,
+          "diag_mesh_0": 20.5358829498291,
+          "diag_mesh_1": 20.535883484071103,
+          "max": 1.7763568394002505e-15,
+          "mean": 4.466284376092799e-18,
+          "min": 0.0,
+          "n_samples": 40047
+        },
+        {
+          "RMS": 4.653001126068373e-17,
+          "diag_mesh_0": 20.5358829498291,
+          "diag_mesh_1": 20.535883484071103,
+          "max": 1.7763568394002505e-15,
+          "mean": 4.292669091685269e-18,
+          "min": 0.0,
+          "n_samples": 40047
+        }
+      ],
+      "relative_volume_error_to_cad": 2.927679778783103e-07,
+      "file": "cad/print_shop/SEND_TO_PRINT/BMO_DPAD_YELLOW.stl",
+      "saved_checks": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 92,
+        "vertices": 48,
+        "volume_mm3": 394.6521155414684
+      },
+      "bounds_mm": [
+        [
+          -6.5,
+          -6.5,
+          0.0
+        ],
+        [
+          6.5,
+          6.5,
+          9.15000057220459
+        ]
+      ],
+      "mesh_bed_translation_mm": [
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "sha256": "f18b5144a0ba3357a3f51faa030a38094208645c8204563f3d33bf2312e0ad1d",
+      "bytes": 4684
+    },
+    {
+      "name": "BMO_BUTTON_RED",
+      "source": "cad/print_shop/_mesh_source/BMO_BUTTON_RED.stl",
+      "color": "red",
+      "cad_volume_mm3": 201.0733641825969,
+      "rotate_x_degrees": 90,
+      "translation_mm": [
+        -12.500000476837158,
+        21.5,
+        16.700000762939453
+      ],
+      "before": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 1036,
+        "vertices": 520,
+        "volume_mm3": 200.9936197434587
+      },
+      "stages": [
+        {
+          "manifold_cleanup_tolerance_mm": 0.005,
+          "checks": {
+            "watertight": true,
+            "winding_consistent": true,
+            "positive_volume": true,
+            "components": 1,
+            "self_intersecting_faces": 0,
+            "faces": 1036,
+            "vertices": 520,
+            "volume_mm3": 200.9936197434587
+          }
+        }
+      ],
+      "after": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 1036,
+        "vertices": 520,
+        "volume_mm3": 200.9936197434587
+      },
+      "sampled_bidirectional_hausdorff": [
+        {
+          "RMS": 9.996313110605115e-09,
+          "diag_mesh_0": 15.673933029174805,
+          "diag_mesh_1": 15.673932818964172,
+          "max": 2.0122158730373485e-06,
+          "mean": 4.965984568006121e-11,
+          "min": 0.0,
+          "n_samples": 40520
+        },
+        {
+          "RMS": 1.295735548521363e-16,
+          "diag_mesh_0": 15.673933029174805,
+          "diag_mesh_1": 15.673932818964172,
+          "max": 1.7763568394002505e-15,
+          "mean": 2.877961859652466e-17,
+          "min": 0.0,
+          "n_samples": 40519
+        }
+      ],
+      "relative_volume_error_to_cad": 0.00039659374806980824,
+      "file": "cad/print_shop/SEND_TO_PRINT/BMO_BUTTON_RED.stl",
+      "saved_checks": {
+        "watertight": true,
+        "winding_consistent": true,
+        "positive_volume": true,
+        "components": 1,
+        "self_intersecting_faces": 0,
+        "faces": 1036,
+        "vertices": 520,
+        "volume_mm3": 200.9936197434587
+      },
+      "bounds_mm": [
+        [
+          -4.49860143661499,
+          -4.5,
+          0.0
+        ],
+        [
+          4.49860143661499,
+          4.5,
+          9.15000057220459
+        ]
+      ],
+      "mesh_bed_translation_mm": [
+        -4.76837158203125e-07,
+        -0.0,
+        -0.0
+      ],
+      "sha256": "5cadeba997506e316e74d36737ff5f9b41206d573d69bc609142a7bcc8147603",
+      "bytes": 51884
+    }
+  ]
+}

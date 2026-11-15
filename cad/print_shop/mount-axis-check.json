@@ -1,0 +1,38 @@
+[
+  {
+    "board": "FR4_DPAD_CARRIER_NOT_PRINTED",
+    "xz": [
+      -12.5,
+      18
+    ],
+    "checked_pilot_engagement_mm": 4.5,
+    "obstruction_mm": 0.0
+  },
+  {
+    "board": "FR4_DPAD_CARRIER_NOT_PRINTED",
+    "xz": [
+      -12.5,
+      36
+    ],
+    "checked_pilot_engagement_mm": 4.5,
+    "obstruction_mm": 0.0
+  },
+  {
+    "board": "FR4_RED_CARRIER_NOT_PRINTED",
+    "xz": [
+      12.5,
+      14.5
+    ],
+    "checked_pilot_engagement_mm": 4.5,
+    "obstruction_mm": 0.0
+  },
+  {
+    "board": "FR4_RED_CARRIER_NOT_PRINTED",
+    "xz": [
+      12.5,
+      29.5
+    ],
+    "checked_pilot_engagement_mm": 4.5,
+    "obstruction_mm": 0.0
+  }
+]

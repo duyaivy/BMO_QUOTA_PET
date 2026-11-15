@@ -1,0 +1,239 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "meshes": [
+    {
+      "part": "BMO_MAIN_BODY",
+      "file": "cad/final_print/stl/BMO_MAIN_BODY.stl",
+      "facets": 68294,
+      "volume_mm3": 37154.97265625,
+      "edge_counts_not_two": 11,
+      "checks": {
+        "isSolid": false,
+        "hasNonManifolds": true,
+        "hasNonUniformOrientedFacets": false,
+        "hasSelfIntersections": true,
+        "hasDegenerations": null,
+        "countComponents": 1
+      },
+      "assembly_bounds": [
+        -32.300000000000004,
+        -25.6,
+        -1e-15,
+        32.300000000000004,
+        30.0,
+        86.59869097278997
+      ],
+      "print_bounds": [
+        -32.29969258555616,
+        -27.8,
+        0.6504084023741016,
+        32.29969258555616,
+        27.8,
+        87.24851971080861
+      ],
+      "print_transform": {
+        "rotate_x_degrees": 0,
+        "translation_xyz_mm": [
+          -0.0,
+          -2.1999999999999993,
+          0.6504084023741026
+        ]
+      },
+      "material": "mint"
+    },
+    {
+      "part": "BMO_BACK_COVER",
+      "file": "cad/final_print/stl/BMO_BACK_COVER.stl",
+      "facets": 8778,
+      "volume_mm3": 10436.9033203125,
+      "edge_counts_not_two": 0,
+      "checks": {
+        "isSolid": true,
+        "hasNonManifolds": false,
+        "hasNonUniformOrientedFacets": false,
+        "hasSelfIntersections": true,
+        "hasDegenerations": null,
+        "countComponents": 1
+      },
+      "assembly_bounds": [
+        -24.0,
+        -3.4000000000000004,
+        7.0,
+        24.0,
+        33.00000000000001,
+        75.0
+      ],
+      "print_bounds": [
+        -24.0,
+        -34.0,
+        0.0,
+        24.0,
+        34.0,
+        36.40000000000001
+      ],
+      "print_transform": {
+        "rotate_x_degrees": -90,
+        "translation_xyz_mm": [
+          -0.0,
+          -41.0,
+          33.000000000000014
+        ]
+      },
+      "material": "mint"
+    },
+    {
+      "part": "BMO_DPAD_YELLOW",
+      "file": "cad/final_print/stl/BMO_DPAD_YELLOW.stl",
+      "facets": 60,
+      "volume_mm3": 381.8359375,
+      "edge_counts_not_two": 0,
+      "checks": {
+        "isSolid": true,
+        "hasNonManifolds": false,
+        "hasNonUniformOrientedFacets": false,
+        "hasSelfIntersections": false,
+        "hasDegenerations": null,
+        "countComponents": 1
+      },
+      "assembly_bounds": [
+        -19.0,
+        -16.7,
+        20.5,
+        -6.0,
+        -11.999999999999998,
+        33.5
+      ],
+      "print_bounds": [
+        -6.5,
+        -6.500000000000002,
+        -1.7763568394002505e-15,
+        6.5,
+        6.5,
+        4.700000000000003
+      ],
+      "print_transform": {
+        "rotate_x_degrees": -90,
+        "translation_xyz_mm": [
+          12.5,
+          -27.0,
+          -12.000000000000002
+        ]
+      },
+      "material": "yellow"
+    },
+    {
+      "part": "BMO_BUTTON_RED",
+      "file": "cad/final_print/stl/BMO_BUTTON_RED.stl",
+      "facets": 836,
+      "volume_mm3": 192.41490173339844,
+      "edge_counts_not_two": 0,
+      "checks": {
+        "isSolid": true,
+        "hasNonManifolds": false,
+        "hasNonUniformOrientedFacets": false,
+        "hasSelfIntersections": false,
+        "hasDegenerations": null,
+        "countComponents": 1
+      },
+      "assembly_bounds": [
+        6.0045312005640845,
+        -16.7,
+        17.018115677021424,
+        14.995468799435915,
+        -11.999999999999998,
+        26.0
+      ],
+      "print_bounds": [
+        -4.499496458146231,
+        -4.497985945275767,
+        0.0,
+        4.499496458146231,
+        4.5,
+        4.700000000000003
+      ],
+      "print_transform": {
+        "rotate_x_degrees": -90,
+        "translation_xyz_mm": [
+          -10.5,
+          -21.5,
+          -12.000000000000002
+        ]
+      },
+      "material": "red"
+    },
+    {
+      "part": "BMO_SWITCH_RETAINER",
+      "file": "cad/final_print/stl/BMO_SWITCH_RETAINER.stl",
+      "facets": 1304,
+      "volume_mm3": 556.9022827148438,
+      "edge_counts_not_two": 0,
+      "checks": {
+        "isSolid": true,
+        "hasNonManifolds": false,
+        "hasNonUniformOrientedFacets": false,
+        "hasSelfIntersections": false,
+        "hasDegenerations": null,
+        "countComponents": 1
+      },
+      "assembly_bounds": [
+        -19.59999680824793,
+        -11.7,
+        17.7,
+        18.59911416681431,
+        -5.6499999999999995,
+        40.6
+      ],
+      "print_bounds": [
+        -19.0990638130311,
+        -11.45,
+        -8.881784197001252e-16,
+        19.099480747975,
+        11.450000000000003,
+        6.050000000000001
+      ],
+      "print_transform": {
+        "rotate_x_degrees": -90,
+        "translation_xyz_mm": [
+          0.5,
+          -29.15,
+          -5.650000000000002
+        ]
+      },
+      "material": "mint"
+    }
+  ],
+  "renders": [
+    "cad/final_print/renders/01-assembly.png",
+    "cad/final_print/renders/02-front.png",
+    "cad/final_print/renders/03-left-side.png",
+    "cad/final_print/renders/04-right-side.png",
+    "cad/final_print/renders/05-back.png",
+    "cad/final_print/renders/06-exploded.png",
+    "cad/final_print/renders/07-section.png",
+    "cad/final_print/renders/08-internal-hardware.png",
+    "cad/final_print/renders/09-separated-print-parts.png"
+  ],
+  "parts": [
+    "BMO_MAIN_BODY",
+    "BMO_BACK_COVER",
+    "BMO_DPAD_YELLOW",
+    "BMO_BUTTON_RED",
+    "BMO_SWITCH_RETAINER"
+  ],
+  "stl_units": "mm",
+  "stl_coordinates": "Each part centered in XY and placed on Z=0 in suggested trial print orientation; see print_transform.",
+  "body_support_proxy": [
+    {
+      "orientation": "upright",
+      "downward_surface_area_over_45deg_mm2": 4749.859706290871
+    },
+    {
+      "orientation": "front_down",
+      "downward_surface_area_over_45deg_mm2": 3462.0352129475696
+    },
+    {
+      "orientation": "back_down",
+      "downward_surface_area_over_45deg_mm2": 2870.764983772018
+    }
+  ]
+}

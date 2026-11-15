@@ -1,0 +1,914 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "parts": {
+    "BMO_MAIN_BODY": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -32.300000000000004,
+        -25.6,
+        -1e-15,
+        32.300000000000004,
+        30.0,
+        86.59869097278997
+      ],
+      "volume_mm3": 37163.67496883105
+    },
+    "BMO_BACK_COVER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -24.0,
+        -3.4000000000000004,
+        7.0,
+        24.0,
+        33.00000000000001,
+        75.0
+      ],
+      "volume_mm3": 10437.076875549395
+    },
+    "BMO_DPAD_YELLOW": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -19.0,
+        -16.7,
+        20.5,
+        -6.0,
+        -11.999999999999998,
+        33.5
+      ],
+      "volume_mm3": 381.83600000000024
+    },
+    "BMO_BUTTON_RED": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        6.0045312005640845,
+        -16.7,
+        17.018115677021424,
+        14.995468799435915,
+        -11.999999999999998,
+        26.0
+      ],
+      "volume_mm3": 192.5293641825969
+    },
+    "BMO_SWITCH_RETAINER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -19.59999680824793,
+        -11.7,
+        17.7,
+        18.59911416681431,
+        -5.6499999999999995,
+        40.6
+      ],
+      "volume_mm3": 556.9338163145328
+    },
+    "OLED_096_PCB": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -10.6,
+        44.5,
+        13.5,
+        -9.0,
+        71.5
+      ],
+      "volume_mm3": 1146.2938070170253
+    },
+    "OLED_096_Glass": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -12.0,
+        -11.9,
+        50.5,
+        12.0,
+        -10.6,
+        65.0
+      ],
+      "volume_mm3": 452.40000000000026
+    },
+    "OLED_096_ActiveArea": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -10.87,
+        -11.950000000000001,
+        52.32,
+        10.87,
+        -11.850000000000001,
+        63.18
+      ],
+      "volume_mm3": 23.60963999999997
+    },
+    "OLED_096_Header": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -5.08,
+        -9.0,
+        69.0,
+        5.08,
+        -5.0,
+        71.5
+      ],
+      "volume_mm3": 66.90806399999998
+    },
+    "Tactile_Switch_A_DPad": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -15.5,
+        -11.95,
+        16.0,
+        -9.5,
+        -7.25,
+        30.0
+      ],
+      "volume_mm3": 149.46141393700853
+    },
+    "Tactile_Switch_B_Red": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        7.5,
+        -11.95,
+        10.5,
+        13.5,
+        -7.25,
+        24.5
+      ],
+      "volume_mm3": 149.46141393700856
+    },
+    "ESP32_CAM_AI_Thinker": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -13.5,
+        -3.8000000000000003,
+        29.0,
+        13.5,
+        9.799999999999999,
+        69.5
+      ],
+      "volume_mm3": 2417.682880000001
+    },
+    "Battery_LiPo_503048": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -14.0,
+        23.6,
+        12.0,
+        16.0,
+        28.6,
+        70.0
+      ],
+      "volume_mm3": 7548.315043202071
+    },
+    "Power_Boost_MT3608": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -18.6,
+        8.000000000000004,
+        10.5,
+        18.6,
+        22.500000000000007,
+        27.700000000000003
+      ],
+      "volume_mm3": 2860.8227608005195
+    },
+    "Capacitor_2200uF": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -12.5,
+        -5.204430463112837,
+        10.75,
+        17.5,
+        7.204430463112839,
+        23.25
+      ],
+      "volume_mm3": 3074.3233008948023
+    },
+    "Charger_Module_PLACEHOLDER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -21.0,
+        -1.0,
+        33.0,
+        -15.2,
+        33.5,
+        52.0
+      ],
+      "volume_mm3": 1539.2000000000003
+    },
+    "Power_Switch_PLACEHOLDER": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        18.0,
+        13.0,
+        35.0,
+        25.0,
+        21.0,
+        41.0
+      ],
+      "volume_mm3": 258.0
+    },
+    "Battery_Soft_Pad": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -14.0,
+        23.6,
+        11.5,
+        16.0,
+        28.6,
+        12.0
+      ],
+      "volume_mm3": 75.0
+    },
+    "Battery_Soft_Retaining_Band": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -16.5,
+        22.1,
+        40.0,
+        18.5,
+        29.8,
+        42.0
+      ],
+      "volume_mm3": 38.00000000000001
+    },
+    "Capacitor_Soft_Retaining_Strap": {
+      "valid": true,
+      "solids": 1,
+      "bounds": [
+        -2.0,
+        -6.24346750498394,
+        9.776118208066682,
+        2.0,
+        8.24346750498394,
+        24.25
+      ],
+      "volume_mm3": 121.39114013470981
+    }
+  },
+  "overlaps": [
+    {
+      "a": "OLED_096_Glass",
+      "b": "OLED_096_ActiveArea",
+      "volume_mm3": 11.804819999999804,
+      "expected": true
+    }
+  ],
+  "keepout_conflicts": [],
+  "service": [
+    {
+      "stage": "01_lid_battery_esp",
+      "moving": [
+        "BMO_BACK_COVER",
+        "Battery_LiPo_503048",
+        "Battery_Soft_Pad",
+        "Battery_Soft_Retaining_Band",
+        "ESP32_CAM_AI_Thinker"
+      ],
+      "rechecked_members": [
+        "Battery_Soft_Retaining_Band"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "02_power_switch",
+      "moving": [
+        "Power_Switch_PLACEHOLDER"
+      ],
+      "path_vectors_mm": [
+        [
+          -10,
+          0,
+          0
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "03_charger",
+      "moving": [
+        "Charger_Module_PLACEHOLDER"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "04_boost",
+      "moving": [
+        "Power_Boost_MT3608"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "05_capacitor",
+      "moving": [
+        "Capacitor_2200uF"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          0,
+          4
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "06_retainer_and_switches",
+      "moving": [
+        "BMO_SWITCH_RETAINER",
+        "Tactile_Switch_A_DPad",
+        "Tactile_Switch_B_Red"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          0,
+          1.5
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    },
+    {
+      "stage": "07_caps",
+      "moving": [
+        "BMO_BUTTON_RED",
+        "BMO_DPAD_YELLOW"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          5,
+          0
+        ],
+        [
+          3,
+          0,
+          -2
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": [],
+      "max_sample_step_mm": 0.25,
+      "limitation": "Sampled rigid translation, not a continuous motion certificate; wires/adhesives/straps released first.",
+      "precondition": "Disconnect wires, release elastics/adhesives, remove screws and all preceding stages."
+    }
+  ],
+  "button_sweeps": [
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": -0.05,
+      "body_overlap_mm3": 4.375999999999904,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.05,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.1,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.05
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.2,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.15000000000000002
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.25,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.2
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.3,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.25
+    },
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "travel_mm": 0.35,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.20000000000000562,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.3
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": -0.05,
+      "body_overlap_mm3": 0.9126326658678159,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.05,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.1,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.05
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.2,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.15000000000000002
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.25,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.2
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.3,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.0,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.25
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "travel_mm": 0.35,
+      "body_overlap_mm3": 0.0,
+      "retainer_overlap_mm3": 0.06701858756119934,
+      "housing_overlap_mm3": 0.0,
+      "compressed_stem_overlap_mm3": 0.0,
+      "stem_compression_mm": 0.3
+    }
+  ],
+  "ears": [
+    {
+      "side": -1,
+      "gauge_3mm_obstruction_mm3": 0.0,
+      "minimum_planar_ligament_sample_mm": 1.64319527196047
+    },
+    {
+      "side": 1,
+      "gauge_3mm_obstruction_mm3": 0.0,
+      "minimum_planar_ligament_sample_mm": 1.64319527196047
+    }
+  ],
+  "walls": {
+    "front": 2.7499999999999982,
+    "side_unengraved": 2.499999999999993,
+    "bottom": 2.5000000000000044,
+    "roof": 2.5000000000000426,
+    "back": 2.750000000000007
+  },
+  "comparisons": [
+    {
+      "name": "esp_landscape",
+      "bounds": [
+        -20.25,
+        -3.8000000000000003,
+        35.75,
+        20.250000000000004,
+        9.8,
+        62.75000000000001
+      ],
+      "collisions_at_same_bay": [
+        {
+          "part": "BMO_BACK_COVER",
+          "volume_mm3": 84.77200000000006
+        },
+        {
+          "part": "Charger_Module_PLACEHOLDER",
+          "volume_mm3": 11.288450000000227
+        }
+      ],
+      "scope": "rotation at current populated bay; not a global packing search"
+    },
+    {
+      "name": "esp_headers_forward",
+      "bounds": [
+        -13.499999999999998,
+        -3.8000000000000016,
+        29.0,
+        13.500000000000002,
+        9.8,
+        69.5
+      ],
+      "collisions_at_same_bay": [],
+      "scope": "rotation at current populated bay; not a global packing search"
+    },
+    {
+      "name": "cap_upright",
+      "bounds": [
+        -3.75,
+        -5.25,
+        10.750000000000002,
+        8.750000000000004,
+        7.25,
+        40.75
+      ],
+      "collisions_at_same_bay": [
+        {
+          "part": "BMO_MAIN_BODY",
+          "volume_mm3": 32.37488031426433
+        },
+        {
+          "part": "BMO_BACK_COVER",
+          "volume_mm3": 89.11847544352908
+        },
+        {
+          "part": "ESP32_CAM_AI_Thinker",
+          "volume_mm3": 151.2731578782004
+        }
+      ],
+      "scope": "rotation at current populated bay; not a global packing search"
+    },
+    {
+      "name": "boost_flat",
+      "bounds": [
+        -18.6,
+        6.6500000000000075,
+        11.850000000000005,
+        18.6,
+        23.85000000000001,
+        26.35000000000001
+      ],
+      "collisions_at_same_bay": [
+        {
+          "part": "BMO_BACK_COVER",
+          "volume_mm3": 28.511999999999926
+        },
+        {
+          "part": "Battery_LiPo_503048",
+          "volume_mm3": 12.000000000000227
+        },
+        {
+          "part": "Capacitor_Soft_Retaining_Strap",
+          "volume_mm3": 2.941038880435033
+        }
+      ],
+      "scope": "rotation at current populated bay; not a global packing search"
+    }
+  ],
+  "elastic_strap_path_rechecked": true,
+  "rest_gaps_mm": {
+    "BMO_DPAD_YELLOW": 0.049999999999998934,
+    "BMO_BUTTON_RED": 0.049999999999998934
+  },
+  "lettering": [
+    {
+      "name": "BMO_Letter_B",
+      "bounds": [
+        -24.049999999999997,
+        0.4441769622093017,
+        57.75,
+        -23.4,
+        7.555823037790699,
+        66.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 24.78411323647955,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7,
+      "sampled_stroke_widths_mm": [
+        1.7920491494158526,
+        1.7142078488372103,
+        6.104924861928975,
+        1.6752444173588348,
+        1.7142078488372103
+      ]
+    },
+    {
+      "name": "BMO_Letter_M",
+      "bounds": [
+        -24.049999999999997,
+        -0.1001998546511631,
+        44.75,
+        -23.4,
+        8.100199854651162,
+        53.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 29.739292215952716,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7,
+      "sampled_stroke_widths_mm": [
+        1.5925917514534884,
+        1.4941309844706794,
+        1.5081111038842199,
+        1.5925917514534866,
+        1.5925917514534884,
+        1.4803489770054323,
+        1.4894051033064954,
+        1.5925917514534866,
+        1.5925917514534884,
+        1.4665669695401835,
+        1.4706991027287692,
+        1.5925917514534866
+      ]
+    },
+    {
+      "name": "BMO_Letter_O",
+      "bounds": [
+        -24.049999999999997,
+        0.0212210323033708,
+        31.75,
+        -23.4,
+        7.978778967696629,
+        40.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 20.768194181787678,
+      "outline_source": "original glyph, scaled in side plane only",
+      "raise_z_mm": 7,
+      "sampled_stroke_widths_mm": [
+        1.7586194299839342,
+        1.7608577599702961,
+        1.7124381414282013,
+        1.7066406666754936,
+        1.738786913972465,
+        1.7439619853684185
+      ]
+    },
+    {
+      "name": "DUT_Letter_D",
+      "bounds": [
+        23.4,
+        0.44128134084302273,
+        59.75,
+        24.049999999999997,
+        7.558718659156977,
+        68.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 21.785913521487544,
+      "outline_source": "original glyph, scaled in side plane only",
+      "sampled_stroke_widths_mm": [
+        1.7142078488372086,
+        1.7740066270545167,
+        1.7142078488372086,
+        1.77179684345343,
+        1.7142078488372086,
+        1.771112442807727
+      ]
+    },
+    {
+      "name": "DUT_Letter_U",
+      "bounds": [
+        23.4,
+        0.6730468750000003,
+        46.75,
+        24.049999999999997,
+        7.326953124999999,
+        55.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 18.464078096430207,
+      "outline_source": "original glyph, scaled in side plane only",
+      "sampled_stroke_widths_mm": [
+        1.6749052519231107,
+        1.6791351091919857,
+        1.6848214285714285,
+        1.6848214285714285,
+        1.6848214285714285,
+        1.6848214285714285
+      ]
+    },
+    {
+      "name": "DUT_Letter_T",
+      "bounds": [
+        23.4,
+        0.6266011082848837,
+        33.75,
+        24.049999999999997,
+        7.373398891715116,
+        42.25
+      ],
+      "depth": 0.6,
+      "cut_volume": 13.069902187943608,
+      "outline_source": "original glyph, scaled in side plane only",
+      "sampled_stroke_widths_mm": [
+        1.7142078488372103,
+        1.7142078488372103,
+        1.7142078488372103
+      ]
+    }
+  ],
+  "hardware_distances_mm": [
+    {
+      "a": "ESP32_CAM_AI_Thinker",
+      "b": "Battery_LiPo_503048",
+      "distance": 13.800000000000002
+    },
+    {
+      "a": "ESP32_CAM_AI_Thinker",
+      "b": "Power_Boost_MT3608",
+      "distance": 9.873702446397703
+    },
+    {
+      "a": "ESP32_CAM_AI_Thinker",
+      "b": "Capacitor_2200uF",
+      "distance": 5.809850745345068
+    },
+    {
+      "a": "ESP32_CAM_AI_Thinker",
+      "b": "Charger_Module_PLACEHOLDER",
+      "distance": 1.9299999999999997
+    },
+    {
+      "a": "Battery_LiPo_503048",
+      "b": "Power_Boost_MT3608",
+      "distance": 1.208304597359452
+    },
+    {
+      "a": "Battery_LiPo_503048",
+      "b": "Capacitor_2200uF",
+      "distance": 16.35
+    },
+    {
+      "a": "Battery_LiPo_503048",
+      "b": "Charger_Module_PLACEHOLDER",
+      "distance": 3.3000000000000007
+    },
+    {
+      "a": "Power_Boost_MT3608",
+      "b": "Capacitor_2200uF",
+      "distance": 0.7500000000000036
+    },
+    {
+      "a": "Power_Boost_MT3608",
+      "b": "Charger_Module_PLACEHOLDER",
+      "distance": 5.360037313302956
+    },
+    {
+      "a": "Capacitor_2200uF",
+      "b": "Charger_Module_PLACEHOLDER",
+      "distance": 11.944559430971072
+    }
+  ],
+  "lid_plane_clearance_mm": {
+    "Battery_LiPo_503048": 1.6499999999999986,
+    "Capacitor_2200uF": 23.0
+  },
+  "lid_screw_axes": [
+    {
+      "xz": [
+        -20,
+        30
+      ],
+      "obstruction_length_mm": 0.0
+    },
+    {
+      "xz": [
+        20,
+        30
+      ],
+      "obstruction_length_mm": 0.0
+    },
+    {
+      "xz": [
+        -21.5,
+        69
+      ],
+      "obstruction_length_mm": 0.0
+    },
+    {
+      "xz": [
+        21.5,
+        69
+      ],
+      "obstruction_length_mm": 0.0
+    }
+  ]
+}

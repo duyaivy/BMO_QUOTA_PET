@@ -1,0 +1,23 @@
+[
+  {
+    "variant": "original",
+    "input_orientation": "Forward",
+    "volume": 874.3915006862453,
+    "valid": true,
+    "solids": 1,
+    "combined_volume": 37382.72661878351,
+    "combined_valid": false,
+    "combined_solids": 2
+  },
+  {
+    "variant": "step_roundtrip",
+    "input_orientation": "Forward",
+    "volume": 874.4272842849782,
+    "valid": true,
+    "solids": 1,
+    "combined_volume": 37369.51343557554,
+    "combined_valid": true,
+    "combined_solids": 1,
+    "selected": true
+  }
+]

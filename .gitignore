@@ -47,3 +47,11 @@ __pycache__/
 # FreeCAD automatic backups and reproducible review bundles
 *.FCBak
 /cad/hardware_review/BMO_HARDWARE_REVIEW_PACKAGE.zip
+
+# Reproducible CAD mesh intermediates and local delivery archive
+/cad/final_print/stl/
+/cad/final_print/assembly-validation-progress.json
+/cad/print_shop/_mesh_source/
+/cad/print_shop/*-trial.stl
+/cad/print_shop/mesh-*-study.json
+/cad/print_shop/BMO_SEND_TO_PRINT.zip

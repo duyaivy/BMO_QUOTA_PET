@@ -1,0 +1,17 @@
+{
+  "body_depth": 48,
+  "esp_shift_y": -5.4,
+  "boost_min_y": 8,
+  "cap_shift_y": 0,
+  "battery_rear_offset": 9.4,
+  "button_layout": "A_left_dpad_raised_triangle",
+  "button_radial_clearance": 0.4,
+  "button_free_gap": 0.05,
+  "button_max_travel": 0.3,
+  "text_scale": 0.85,
+  "text_depth": 0.6,
+  "text_center_y": 4,
+  "ear_outer_reinforcement": 0.65,
+  "ear_depth": 7,
+  "status": "DESIGN_REVIEW_REQUIRED"
+}

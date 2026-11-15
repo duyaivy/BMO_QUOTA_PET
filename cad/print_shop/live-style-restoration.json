@@ -1,0 +1,51 @@
+{
+  "reference": "cad/final_print/LIVE_STATE_BEFORE.FCStd",
+  "feet": "Original full foot solids restored; original exterior retained, internal peg replaced by fused root.",
+  "BMO_letters": [
+    {
+      "name": "BMO_Letter_B",
+      "source_bounds": [
+        -24.65,
+        -4.1833212209302335,
+        50.0,
+        -24.0,
+        4.183321220930233,
+        60.0
+      ],
+      "outer_outline_and_position": "Exact LIVE_STATE_BEFORE geometry; only hidden inward overlap added for fusion."
+    },
+    {
+      "name": "BMO_Letter_M",
+      "source_bounds": [
+        -24.65,
+        -4.823764534883721,
+        37.0,
+        -24.0,
+        4.823764534883721,
+        47.0
+      ],
+      "outer_outline_and_position": "Exact LIVE_STATE_BEFORE geometry; only hidden inward overlap added for fusion."
+    },
+    {
+      "name": "BMO_Letter_O",
+      "source_bounds": [
+        -24.65,
+        -4.68091643258427,
+        24.0,
+        -24.0,
+        4.68091643258427,
+        34.0
+      ],
+      "outer_outline_and_position": "Exact LIVE_STATE_BEFORE geometry; only hidden inward overlap added for fusion."
+    }
+  ],
+  "O_center_yz_mm": [
+    0,
+    29
+  ],
+  "arm_root_center_yz_mm": [
+    0,
+    29
+  ],
+  "unchanged_user_changes": "Buttons shifted right; rear power switch; four print parts."
+}

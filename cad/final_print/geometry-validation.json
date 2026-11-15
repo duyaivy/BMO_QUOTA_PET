@@ -1,0 +1,513 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "parts": {
+    "BMO_MAIN_BODY": {
+      "valid": true,
+      "bounds": [
+        -32.300000000000004,
+        -25.6,
+        -1e-15,
+        32.300000000000004,
+        30.0,
+        86.59869097278997
+      ],
+      "solids": 1,
+      "volume": 37115.82940818207
+    },
+    "BMO_BACK_COVER": {
+      "valid": true,
+      "bounds": [
+        -24.0,
+        -3.4000000000000004,
+        7.0,
+        24.0,
+        33.00000000000001,
+        75.0
+      ],
+      "solids": 1,
+      "volume": 9905.40661349582
+    },
+    "BMO_DPad_Yellow": {
+      "valid": true,
+      "bounds": [
+        -19.0,
+        -16.7,
+        20.5,
+        -6.0,
+        -11.999999999999998,
+        33.5
+      ],
+      "solids": 1,
+      "volume": 381.83600000000024
+    },
+    "BMO_Action_Button_Red": {
+      "valid": true,
+      "bounds": [
+        6.0,
+        -16.7,
+        17.0,
+        15.0,
+        -11.999999999999998,
+        26.0
+      ],
+      "solids": 1,
+      "volume": 192.5293641825969
+    },
+    "BMO_SWITCH_RETAINER": {
+      "valid": true,
+      "bounds": [
+        -19.59999680824793,
+        -11.7,
+        17.7,
+        18.59911416681431,
+        -5.6499999999999995,
+        40.6
+      ],
+      "solids": 1,
+      "volume": 556.9338163145328
+    },
+    "OLED_096_PCB": {
+      "valid": true,
+      "bounds": [
+        -13.5,
+        -10.6,
+        44.5,
+        13.5,
+        -9.0,
+        71.5
+      ],
+      "solids": 1,
+      "volume": 1146.2938070170253
+    },
+    "OLED_096_Glass": {
+      "valid": true,
+      "bounds": [
+        -12.0,
+        -11.9,
+        50.5,
+        12.0,
+        -10.6,
+        65.0
+      ],
+      "solids": 1,
+      "volume": 452.40000000000026
+    },
+    "OLED_096_ActiveArea": {
+      "valid": true,
+      "bounds": [
+        -10.87,
+        -11.950000000000001,
+        52.32,
+        10.87,
+        -11.850000000000001,
+        63.18
+      ],
+      "solids": 1,
+      "volume": 23.60963999999997
+    },
+    "OLED_096_Header": {
+      "valid": true,
+      "bounds": [
+        -5.08,
+        -9.0,
+        69.0,
+        5.08,
+        -5.0,
+        71.5
+      ],
+      "solids": 1,
+      "volume": 66.90806399999998
+    },
+    "Tactile_Switch_A_DPad": {
+      "valid": true,
+      "bounds": [
+        -15.5,
+        -11.95,
+        16.0,
+        -9.5,
+        -7.25,
+        30.0
+      ],
+      "solids": 1,
+      "volume": 149.46141393700853
+    },
+    "Tactile_Switch_B_Red": {
+      "valid": true,
+      "bounds": [
+        7.5,
+        -11.95,
+        10.5,
+        13.5,
+        -7.25,
+        24.5
+      ],
+      "solids": 1,
+      "volume": 149.46141393700856
+    },
+    "ESP32_CAM_AI_Thinker": {
+      "valid": true,
+      "bounds": [
+        -13.5,
+        -3.8000000000000003,
+        29.0,
+        13.5,
+        9.799999999999999,
+        69.5
+      ],
+      "solids": 1,
+      "volume": 2417.682880000001
+    },
+    "Battery_LiPo_503048": {
+      "valid": true,
+      "bounds": [
+        -14.0,
+        23.6,
+        12.0,
+        16.0,
+        28.6,
+        70.0
+      ],
+      "solids": 1,
+      "volume": 7548.315043202071
+    },
+    "Power_Boost_MT3608": {
+      "valid": true,
+      "bounds": [
+        -18.6,
+        8.000000000000004,
+        10.5,
+        18.6,
+        22.500000000000007,
+        27.700000000000003
+      ],
+      "solids": 1,
+      "volume": 2860.8227608005195
+    },
+    "Capacitor_2200uF": {
+      "valid": true,
+      "bounds": [
+        -12.5,
+        -5.204430463112837,
+        10.75,
+        17.5,
+        7.204430463112839,
+        23.25
+      ],
+      "solids": 1,
+      "volume": 3074.3233008948023
+    },
+    "Charger_Module_PLACEHOLDER": {
+      "valid": true,
+      "bounds": [
+        -21.0,
+        -1.0,
+        33.0,
+        -15.2,
+        33.5,
+        52.0
+      ],
+      "solids": 1,
+      "volume": 1539.2000000000003
+    },
+    "Power_Switch_PLACEHOLDER": {
+      "valid": true,
+      "bounds": [
+        18.0,
+        13.0,
+        35.0,
+        25.0,
+        21.0,
+        41.0
+      ],
+      "solids": 1,
+      "volume": 258.0
+    },
+    "Battery_Soft_Pad": {
+      "valid": true,
+      "bounds": [
+        -14.0,
+        23.6,
+        11.5,
+        16.0,
+        28.6,
+        12.0
+      ],
+      "solids": 1,
+      "volume": 75.0
+    },
+    "Battery_Soft_Retaining_Band": {
+      "valid": true,
+      "bounds": [
+        -15.0,
+        23.0,
+        40.0,
+        17.0,
+        29.200000000000003,
+        42.0
+      ],
+      "solids": 1,
+      "volume": 54.08000000000026
+    },
+    "Capacitor_Soft_Retaining_Strap": {
+      "valid": true,
+      "bounds": [
+        -2.0,
+        -6.24346750498394,
+        9.776118208066682,
+        2.0,
+        8.24346750498394,
+        24.25
+      ],
+      "solids": 1,
+      "volume": 121.39114013470981
+    }
+  },
+  "overlaps": [
+    {
+      "a": "OLED_096_Glass",
+      "b": "OLED_096_ActiveArea",
+      "volume": 11.804819999999804,
+      "expected": true
+    }
+  ],
+  "button_sweeps": [
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": -0.05,
+      "body_overlap": 4.375999999999904,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.05,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.1,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.2,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.25,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.3,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_DPad_Yellow",
+      "travel": 0.35,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.20000000000000562
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": -0.05,
+      "body_overlap": 0.9126326658678159,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.05,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.1,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.2,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.25,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.3,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.0
+    },
+    {
+      "cap": "BMO_Action_Button_Red",
+      "travel": 0.35,
+      "body_overlap": 0.0,
+      "retainer_overlap": 0.06701858756119934
+    }
+  ],
+  "keepouts": [],
+  "service": [
+    {
+      "stage": "lid_with_battery_and_esp",
+      "sampled_translation_conflicts": []
+    },
+    {
+      "stage": "charger",
+      "sampled_translation_conflicts": []
+    },
+    {
+      "stage": "boost",
+      "sampled_translation_conflicts": []
+    },
+    {
+      "stage": "capacitor",
+      "sampled_translation_conflicts": [
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 0.25,
+          "volume": 1.7496407885795582
+        },
+        {
+          "moving": "Capacitor_2200uF",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 1,
+          "volume": 3.2517062298779558
+        },
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 1,
+          "volume": 6.976995065492422
+        },
+        {
+          "moving": "Capacitor_2200uF",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 3,
+          "volume": 35.78151822834611
+        },
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 3,
+          "volume": 14.057053454383045
+        },
+        {
+          "moving": "Capacitor_2200uF",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 6,
+          "volume": 57.20851029846926
+        },
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 6,
+          "volume": 12.482848779513905
+        },
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 12,
+          "volume": 8.188834395495277
+        },
+        {
+          "moving": "Capacitor_Soft_Retaining_Strap",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 24,
+          "volume": 0.5517923740094032
+        }
+      ]
+    },
+    {
+      "stage": "retainer_with_switches",
+      "sampled_translation_conflicts": [
+        {
+          "moving": "Tactile_Switch_B_Red",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 3,
+          "volume": 1.4359773990845728
+        },
+        {
+          "moving": "Tactile_Switch_B_Red",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 6,
+          "volume": 1.5384105572334017
+        },
+        {
+          "moving": "Tactile_Switch_B_Red",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 12,
+          "volume": 0.5565955512846019
+        }
+      ]
+    },
+    {
+      "stage": "caps",
+      "sampled_translation_conflicts": [
+        {
+          "moving": "BMO_DPad_Yellow",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 12,
+          "volume": 1.4000000000000012
+        },
+        {
+          "moving": "BMO_DPad_Yellow",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 24,
+          "volume": 5.418012253686159
+        },
+        {
+          "moving": "BMO_DPad_Yellow",
+          "obstacle": "BMO_MAIN_BODY",
+          "travel": 40,
+          "volume": 4.018012253686171
+        }
+      ]
+    }
+  ],
+  "clearances": [
+    {
+      "a": "Battery_LiPo_503048",
+      "b": "BMO_BACK_COVER",
+      "mm": 0.3000000000000007
+    },
+    {
+      "a": "Capacitor_2200uF",
+      "b": "BMO_BACK_COVER",
+      "mm": 4.849999999999987
+    },
+    {
+      "a": "Power_Boost_MT3608",
+      "b": "Battery_LiPo_503048",
+      "mm": 1.208304597359452
+    },
+    {
+      "a": "ESP32_CAM_AI_Thinker",
+      "b": "OLED_096_PCB",
+      "mm": 5.199999999999999
+    }
+  ]
+}

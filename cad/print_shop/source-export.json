@@ -1,0 +1,76 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "printed_parts": [
+    {
+      "name": "BMO_MAIN_BODY",
+      "source": "cad/print_shop/_mesh_source/BMO_MAIN_BODY.stl",
+      "color": "mint",
+      "cad_volume_mm3": 37613.876814612595,
+      "rotate_x_degrees": 0,
+      "translation_mm": [
+        -0.0,
+        -2.1999998092651367,
+        1.0000000036274937e-15
+      ]
+    },
+    {
+      "name": "BMO_BACK_COVER",
+      "source": "cad/print_shop/_mesh_source/BMO_BACK_COVER.stl",
+      "color": "mint",
+      "cad_volume_mm3": 10344.57037513575,
+      "rotate_x_degrees": -90,
+      "translation_mm": [
+        -0.0,
+        -41.0,
+        33.0
+      ]
+    },
+    {
+      "name": "BMO_DPAD_YELLOW",
+      "source": "cad/print_shop/_mesh_source/BMO_DPAD_YELLOW.stl",
+      "color": "yellow",
+      "cad_volume_mm3": 394.6520000000004,
+      "rotate_x_degrees": 90,
+      "translation_mm": [
+        12.5,
+        27.0,
+        16.700000762939453
+      ]
+    },
+    {
+      "name": "BMO_BUTTON_RED",
+      "source": "cad/print_shop/_mesh_source/BMO_BUTTON_RED.stl",
+      "color": "red",
+      "cad_volume_mm3": 201.0733641825969,
+      "rotate_x_degrees": 90,
+      "translation_mm": [
+        -12.500000476837158,
+        21.5,
+        16.700000762939453
+      ]
+    }
+  ],
+  "assembly_objects": [
+    "BMO_MAIN_BODY",
+    "BMO_BACK_COVER",
+    "BMO_DPAD_YELLOW",
+    "BMO_BUTTON_RED",
+    "OLED_096_PCB",
+    "OLED_096_Glass",
+    "OLED_096_ActiveArea",
+    "OLED_096_Header",
+    "Tactile_Switch_A_DPad",
+    "Tactile_Switch_B_Red",
+    "ESP32_CAM_AI_Thinker",
+    "Battery_LiPo_503048",
+    "Power_Boost_MT3608",
+    "Capacitor_2200uF",
+    "Charger_Module_PLACEHOLDER",
+    "Power_Switch_PLACEHOLDER",
+    "Battery_Soft_Pad",
+    "Battery_Soft_Retaining_Band",
+    "Capacitor_Soft_Retaining_Strap",
+    "FR4_DPAD_CARRIER_NOT_PRINTED",
+    "FR4_RED_CARRIER_NOT_PRINTED"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "diameter_mm": 2.2,
+  "corridors": [
+    {
+      "name": "Right_ESP_Corridor",
+      "path_xyz_mm": [
+        [
+          16.5,
+          10,
+          31
+        ],
+        [
+          16.5,
+          10,
+          58
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "name": "OLED_Front_Side_Corridor",
+      "path_xyz_mm": [
+        [
+          19.5,
+          -7.5,
+          45
+        ],
+        [
+          19.5,
+          -7.5,
+          70
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "name": "Rear_Battery_Corridor",
+      "path_xyz_mm": [
+        [
+          16.5,
+          10,
+          45
+        ],
+        [
+          19.2,
+          10,
+          45
+        ],
+        [
+          19.2,
+          26.1,
+          45
+        ],
+        [
+          19.2,
+          26.1,
+          63.5
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "name": "Capacitor_Side_Corridor",
+      "path_xyz_mm": [
+        [
+          16.2,
+          1,
+          32
+        ],
+        [
+          16.2,
+          6,
+          36
+        ]
+      ],
+      "conflicts": []
+    }
+  ],
+  "limitations": "Allocated free corridors only, not complete wiring harnesses. No verified endpoints/pin maps, bundle wire counts, bend radius, connector insertion or strain relief. Individual lead terminations require physical measurement."
+}

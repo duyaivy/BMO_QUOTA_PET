@@ -1,0 +1,73 @@
+{
+  "printed_parts": [
+    "BMO_MAIN_BODY",
+    "BMO_BACK_COVER",
+    "BMO_DPAD_YELLOW",
+    "BMO_BUTTON_RED"
+  ],
+  "nonprinted_carriers": [
+    {
+      "name": "FR4_DPAD_CARRIER_NOT_PRINTED",
+      "thickness": 1.6,
+      "mounts_xz": [
+        [
+          -12.5,
+          18
+        ],
+        [
+          -12.5,
+          36
+        ]
+      ],
+      "outline_width": 13.5,
+      "center_xz": [
+        -12.5,
+        27
+      ],
+      "switch": "Tactile_Switch_A_DPad",
+      "attachment": "Solder/retention method and lead form require actual-switch coupon; no PCB routing claimed."
+    },
+    {
+      "name": "FR4_RED_CARRIER_NOT_PRINTED",
+      "thickness": 1.6,
+      "mounts_xz": [
+        [
+          12.5,
+          14.5
+        ],
+        [
+          12.5,
+          29.5
+        ]
+      ],
+      "outline_width": 11.5,
+      "center_xz": [
+        12.5,
+        21.5
+      ],
+      "switch": "Tactile_Switch_B_Red",
+      "attachment": "Solder/retention method and lead form require actual-switch coupon; no PCB routing claimed."
+    }
+  ],
+  "cap_stops": [
+    {
+      "cap": "BMO_DPAD_YELLOW",
+      "integrated_posts": 2,
+      "post_end_rest_y": -7.55,
+      "carrier_front_y": -7.25,
+      "hard_stop_travel_mm": 0.3,
+      "stem_gap_mm": 0.05
+    },
+    {
+      "cap": "BMO_BUTTON_RED",
+      "integrated_posts": 2,
+      "post_end_rest_y": -7.55,
+      "carrier_front_y": -7.25,
+      "hard_stop_travel_mm": 0.3,
+      "stem_gap_mm": 0.05
+    }
+  ],
+  "additional_hardware": "Two FR4/perfboard pieces cut from stock, four M2 fasteners; switch attachment/lead form to be measured.",
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "decision": "Default mechanical proposal for four printed parts; no extra electronic functions."
+}

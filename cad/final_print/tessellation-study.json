@@ -1,0 +1,46 @@
+[
+  {
+    "part": "BMO_MAIN_BODY",
+    "accuracy": 0.025,
+    "before": {
+      "solid": false,
+      "nonmanifold": true,
+      "self_intersections": true,
+      "facets": 130076
+    },
+    "fix_doc": "Repair self-intersections"
+  },
+  {
+    "part": "BMO_MAIN_BODY",
+    "accuracy": 0.01,
+    "before": {
+      "solid": false,
+      "nonmanifold": true,
+      "self_intersections": true,
+      "facets": 137077
+    },
+    "fix_doc": "Repair self-intersections"
+  },
+  {
+    "part": "BMO_BACK_COVER",
+    "accuracy": 0.025,
+    "before": {
+      "solid": true,
+      "nonmanifold": false,
+      "self_intersections": true,
+      "facets": 15212
+    },
+    "fix_doc": "Repair self-intersections"
+  },
+  {
+    "part": "BMO_BACK_COVER",
+    "accuracy": 0.01,
+    "before": {
+      "solid": true,
+      "nonmanifold": false,
+      "self_intersections": true,
+      "facets": 15128
+    },
+    "fix_doc": "Repair self-intersections"
+  }
+]

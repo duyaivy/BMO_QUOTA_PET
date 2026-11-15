@@ -1,0 +1,176 @@
+{
+  "status": "DESIGN_REVIEW_REQUIRED",
+  "maximum_sample_step_mm": 0.5,
+  "method": "Exact BRep interference at sampled rigid translations, not a continuous motion proof. Disconnect wires/release straps/adhesives/remove screws before movement.",
+  "stages": [
+    {
+      "stage": "lid_esp_battery_rear_switch",
+      "moving": [
+        "BMO_BACK_COVER",
+        "Battery_LiPo_503048",
+        "Battery_Soft_Pad",
+        "Battery_Soft_Retaining_Band",
+        "ESP32_CAM_AI_Thinker",
+        "Power_Switch_PLACEHOLDER"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "charger",
+      "moving": [
+        "Charger_Module_PLACEHOLDER"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "boost",
+      "moving": [
+        "Power_Boost_MT3608"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "capacitor",
+      "moving": [
+        "Capacitor_2200uF"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          0,
+          4
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "dpad_FR4_switch",
+      "moving": [
+        "FR4_DPAD_CARRIER_NOT_PRINTED",
+        "Tactile_Switch_A_DPad"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "red_FR4_switch",
+      "moving": [
+        "FR4_RED_CARRIER_NOT_PRINTED",
+        "Tactile_Switch_B_Red"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          0.2,
+          0
+        ],
+        [
+          0,
+          0,
+          1.5
+        ],
+        [
+          0,
+          4.8,
+          0
+        ],
+        [
+          -2,
+          0,
+          0
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "dpad_cap",
+      "moving": [
+        "BMO_DPAD_YELLOW"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          6,
+          0
+        ],
+        [
+          4,
+          0,
+          -2
+        ],
+        [
+          0,
+          50,
+          0
+        ]
+      ],
+      "conflicts": []
+    },
+    {
+      "stage": "red_cap",
+      "moving": [
+        "BMO_BUTTON_RED"
+      ],
+      "path_vectors_mm": [
+        [
+          0,
+          56,
+          0
+        ]
+      ],
+      "conflicts": []
+    }
+  ]
+}
