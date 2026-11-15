@@ -4,8 +4,10 @@
 #include "buttons.h"
 #include "faces.h"
 #include "quota_renderer.h"
+#include "clock_renderer.h"
 
 enum class UIMode {
+    CLOCK,
     PET_FACE,
     QUOTA_VIEW,
     END_OF_LIST
@@ -17,6 +19,7 @@ public:
     void begin();
     void update();
     void render();
+    void showClock();
 
     UIMode getCurrentMode() const { return _mode; }
     uint8_t getCurrentQuotaIndex() const { return _quotaIndex; }
@@ -28,6 +31,7 @@ private:
     UIMode _mode;
     uint8_t _quotaIndex;
     unsigned long _endOfListEnteredAt;
+    bool _forceClock;
 };
 
 extern BMONavigationController navigation;

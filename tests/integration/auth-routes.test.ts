@@ -95,7 +95,12 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   await closeDbForTests();
-  await rm(directory, { recursive: true, force: true });
+  await rm(directory, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
   vi.unstubAllEnvs();
 });
 describe("auth HTTP boundaries with real seals and local libSQL", () => {

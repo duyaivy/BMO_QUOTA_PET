@@ -3,6 +3,8 @@
 #include "esp_pm.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+#include "esp_sleep.h"
+#include "driver/gpio.h"
 
 BMOPowerManager powerManager;
 
@@ -51,14 +53,29 @@ void BMOPowerManager::wakeScreen() {
     }
 }
 
-void BMOPowerManager::update() {
-    unsigned long now = millis();
+bool BMOPowerManager::shouldEnterSleep(uint32_t nowMs) const {
+    return !_screenAsleep && uint32_t(nowMs - _lastActivityTime) >= SCREEN_TIMEOUT_MS &&
+           digitalRead(PIN_BUTTON_A) == HIGH && digitalRead(PIN_BUTTON_B) == HIGH;
+}
 
-    // Check if idle timeout has elapsed
-    if (!_screenAsleep && (now - _lastActivityTime >= SCREEN_TIMEOUT_MS)) {
-        _screenAsleep = true;
-        auto& oled = display.getDriver();
-        oled.ssd1306_command(SSD1306_DISPLAYOFF);
-        Serial.println("[POWER] Screen entered sleep mode to preserve OLED life.");
-    }
+bool BMOPowerManager::enterButtonSleep() {
+    if (!shouldEnterSleep(millis())) return false;
+    _screenAsleep = true;
+    display.getDriver().ssd1306_command(SSD1306_DISPLAYOFF);
+    // GPIO light sleep wake uses ANY low-level button; no timer wake source.
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    gpio_wakeup_enable(static_cast<gpio_num_t>(PIN_BUTTON_A), GPIO_INTR_LOW_LEVEL);
+    gpio_wakeup_enable(static_cast<gpio_num_t>(PIN_BUTTON_B), GPIO_INTR_LOW_LEVEL);
+    esp_sleep_enable_gpio_wakeup();
+    esp_err_t result = esp_light_sleep_start();
+    gpio_wakeup_disable(static_cast<gpio_num_t>(PIN_BUTTON_A));
+    gpio_wakeup_disable(static_cast<gpio_num_t>(PIN_BUTTON_B));
+    if (result != ESP_OK) Serial.printf("[POWER] Light sleep failed: %d\n", result);
+    wakeScreen();
+    _lastActivityTime = millis();
+    return result == ESP_OK;
+}
+
+void BMOPowerManager::update() {
+    // Main orchestrates sleep only after network worker/radio have stopped.
 }

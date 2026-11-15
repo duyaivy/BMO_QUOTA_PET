@@ -24,16 +24,19 @@ test("status reflects persisted provider quota without treating upload or verifi
   const codex = snapshot.providers.find(
     (provider) => provider.providerId === "codex",
   )!;
+  const now = new Date().toISOString();
   const sequence = Date.now();
-  const old = new Date(Date.now() - 960000).toISOString();
   const windows = codex.windows.length
-    ? codex.windows.map(({ window }) => fixtureWindow(window.windowId, 47, old))
-    : [fixtureWindow("status-window", 47, old)];
+    ? codex.windows.map(({ window }) =>
+        fixtureWindow(window.windowId, 47, now, { sourceFreshness: "stale" }),
+      )
+    : [fixtureWindow("status-window", 47, now, { sourceFreshness: "stale" })];
   const event = observation({
     ownershipGeneration: codex.ownershipGeneration,
     sequence,
-    collectedAt: old,
-    upstreamObservedAt: old,
+    collectedAt: now,
+    upstreamObservedAt: now,
+    sourceFreshness: "stale",
     windows,
   });
   const signed = signedRequest(event);

@@ -310,3 +310,14 @@ Validate server-only config by owning phase: app origin, DB, admin/session keys,
 | 10 | All live integrations gated by Phase 2 evidence; synthetic parser success is not verification |
 
 Retained evidence: [Codex local research](feasibility/01-codex-local-vps.md), [Claude local research](feasibility/03-claude-local-vps.md), [Antigravity local research](feasibility/02-antigravity-local-vps.md), [PoC](feasibility/POC_RESULTS.md), and [pre-existing edited Antigravity report](research/02-antigravity.md). Old RPC/VPS next steps are superseded. The last report's “no structured output” claim was superseded by native statusline research; its credential-access warnings remain relevant.
+
+## 15. Approved clock/weather and wake-only network extension (2026-11-15)
+
+The owner approved the [clock/weather plan](superpowers/plans/2026-11-15-clock-weather-on-wake.md) as an explicit extension to the earlier phase boundaries. This does not complete the outstanding physical or live provider gates.
+
+- Clock is the first local page in the face group, with numeric HH:MM, UTC+7 weekday/date and static weather icons. Config/snapshot v1 and existing face IDs remain unchanged. Clock display changes do not require MQTT ticks or flash writes.
+- One network session runs on normal boot or button wake, with a 20-second radio budget and early completion after valid retained data. No periodic weather wake, reconnect loop or captive portal on an ordinary failed wake. Initial/manual provisioning remains separate. After five idle minutes, GPIO button wake replaces display-only standby with CPU light sleep and Wi-Fi off.
+- Weather has its own retained QoS1 topic `bmo/v1/devices/<deviceId>/weather`, maximum 512 UTF-8 bytes; config/snapshot retain their 8 KiB limit. Source `dataAt` determines the 60-minute validity. Revisions and location changes are durable; retries never refresh source age. Only explicitly allowlisted upgraded devices receive weather.
+- The owner chooses one shared location on `/devices`; server-side geocoding resolves provider IDs, with owner auth, CSRF, rate limits and revision conflicts. UTC+7 device time is independent of location timezone.
+- Vercel runs bounded Node functions against remote Turso and an external MQTT broker. An external uptime monitor calls authenticated HEAD every 15 minutes; GET supports manual diagnostics. SHA256 token-digest authentication is separate from maintenance/session credentials. Durable due/lease state prevents repeat provider calls within 900 seconds. No native weather cron, persistent subscriber or in-memory-only cache is introduced.
+- Local builds and fixture tests establish software behavior. GPIO wake, DNS/TLS fault timing, whole-board current, physical retained delivery and production monitor/CDN/protection behavior require their own evidence before activation claims. See [implementation evidence](CLOCK_WEATHER_IMPLEMENTATION.md) and [scheduler runbook](WEATHER_SCHEDULING.md).

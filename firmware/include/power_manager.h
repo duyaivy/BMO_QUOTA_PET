@@ -9,14 +9,16 @@ public:
     void begin();
     void resetActivityTimer();
     void update();
+    bool shouldEnterSleep(uint32_t nowMs) const;
+    bool enterButtonSleep();
 
     bool isScreenAsleep() const { return _screenAsleep; }
     void wakeScreen();
 
 private:
-    unsigned long _lastActivityTime;
+    uint32_t _lastActivityTime;
     bool _screenAsleep;
-    static const unsigned long SCREEN_TIMEOUT_MS = 300000; // 5 minutes idle screen saver
+    static const uint32_t SCREEN_TIMEOUT_MS = 300000;
 };
 
 extern BMOPowerManager powerManager;

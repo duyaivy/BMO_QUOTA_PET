@@ -1,8 +1,10 @@
 #include "buttons.h"
+#include <initializer_list>
 
 BMOButtonManager buttonManager;
 
 BMOButtonManager::BMOButtonManager() {
+    _consumingWakePress = false;
     _btnA.pin = PIN_BUTTON_A;
     _btnA.lastRawState = HIGH;
     _btnA.debouncedState = HIGH;
@@ -46,6 +48,25 @@ void BMOButtonManager::begin() {
 void BMOButtonManager::update() {
     updateButton(_btnA);
     updateButton(_btnB);
+    if (_consumingWakePress && _btnA.debouncedState == HIGH && _btnB.debouncedState == HIGH &&
+        !anyPressed()) _consumingWakePress = false;
+}
+
+bool BMOButtonManager::anyPressed() const {
+    return digitalRead(_btnA.pin) == LOW || digitalRead(_btnB.pin) == LOW;
+}
+
+void BMOButtonManager::consumeWakePress() {
+    _consumingWakePress = true;
+    unsigned long now = millis();
+    for (ButtonState* button : {&_btnA, &_btnB}) {
+        button->lastRawState = digitalRead(button->pin);
+        button->debouncedState = button->lastRawState;
+        button->lastDebounceTime = now;
+        button->pressStartTime = now;
+        button->clickedEvent = false;
+        button->heldEvent = false;
+    }
 }
 
 void BMOButtonManager::updateButton(ButtonState& btn) {
@@ -70,7 +91,7 @@ void BMOButtonManager::updateButton(ButtonState& btn) {
             } else {
                 // Button released
                 unsigned long duration = now - btn.pressStartTime;
-                if (duration < BUTTON_HOLD_MS) {
+                if (!_consumingWakePress && duration < BUTTON_HOLD_MS) {
                     btn.clickedEvent = true;
                     Serial.printf("[BUTTONS] GPIO %d CLICKED (held %lums)\n", btn.pin, duration);
                 }

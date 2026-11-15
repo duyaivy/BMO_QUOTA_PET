@@ -6,6 +6,27 @@
 #include "buttons.h"
 #include "navigation.h"
 #include "power_manager.h"
+#include "wake_session.h"
+
+namespace {
+class DeviceWakeTransport final : public BMOWakeTransport {
+public:
+    void startWakeConnection() override { connManager.startWakeConnection(); }
+    bool isWifiConnected() const override { return connManager.isWifiConnected(); }
+    void requestTimeSync() override { connManager.requestTimeSync(); }
+    bool hasTrustedTime() const override { return connManager.isTimeSynced(); }
+    void startMqttConnection() override { mqttClient.startWakeConnection(); }
+    bool hasConfig() const override { return mqttClient.hasWakeConfig(); }
+    bool hasMatchingSnapshot() const override { return mqttClient.hasWakeSnapshot(); }
+    bool hasWeatherResponse() const override { return mqttClient.hasWakeWeather(); }
+    void stopForSleep() override {
+        mqttClient.stopForSleep();
+        connManager.stopForSleep();
+    }
+};
+DeviceWakeTransport wakeTransport;
+BMOWakeSession wakeSession(wakeTransport);
+}
 
 static unsigned long lastFrameTick = 0;
 
@@ -30,19 +51,19 @@ void setup() {
         }
     }
 
-    // 4. Show initial boot splash
-    display.showSplashScreen("v1.0 (ESP32-CAM)");
-    delay(1500);
+    // Clock is the first normal boot face, even while network setup runs.
+    navigation.begin();
+    navigation.render();
 
     // Bench build exercises the real UI without network credentials or services.
 #if defined(BMO_BENCH_OFFLINE) && BMO_BENCH_OFFLINE
     Serial.println("[BENCH] Offline OLED/buttons test; Wi-Fi and MQTT disabled.");
 #else
-    // Check if Button A is held during boot to trigger Wi-Fi reset & config portal
+    bool resetTriggered = false;
+    // Boot-only long hold deliberately opens provisioning; wake failures never do.
     if (digitalRead(PIN_BUTTON_A) == LOW) {
         display.showMessageScreen("WI-FI SETUP", "Hold 3s to reset...", "Release to cancel");
         unsigned long pressStart = millis();
-        bool resetTriggered = false;
         while (digitalRead(PIN_BUTTON_A) == LOW) {
             if (millis() - pressStart >= 3000) {
                 resetTriggered = true;
@@ -52,21 +73,17 @@ void setup() {
             }
             delay(50);
         }
-        if (resetTriggered) {
-            connManager.resetWifiSettings();
-        }
     }
 
-    // 5. Initialize Wi-Fi Connection Manager & SNTP Time
-    display.showConnectingScreen("Connecting Wi-Fi...");
     connManager.begin();
-
-    // 6. Initialize MQTT Client for Quota & Screen Topics
+    if (resetTriggered) connManager.resetWifiSettings();
+    if (resetTriggered || connManager.needsProvisioning()) {
+        connManager.openConfigPortal();
+        navigation.showClock();
+    }
     mqttClient.begin();
+    wakeSession.begin(millis());
 #endif
-
-    // 7. Initialize UI Navigation Controller (Defaults to BMO Happy Face)
-    navigation.begin();
 
     Serial.println("[MAIN] Boot sequence complete. Starting main loop.");
 }
@@ -78,9 +95,11 @@ void loop() {
 #if !defined(BMO_BENCH_OFFLINE) || !BMO_BENCH_OFFLINE
     connManager.loop();
     mqttClient.loop();
+    wakeSession.update(now);
 #endif
 
     // 2. Poll Physical Buttons and Update Navigation State
+    if (buttonManager.anyPressed()) powerManager.resetActivityTimer();
     navigation.update();
 
     // 4. Render UI Frame at target frame rate (30 FPS)
@@ -92,8 +111,19 @@ void loop() {
         }
     }
 
-    // 5. Update Power & Screen Saver Manager
-    powerManager.update();
+    // One button-only light sleep after five minutes without interaction.
+    // The worker must finish closing its transport before CPU sleep.
+    if (powerManager.shouldEnterSleep(now) && mqttClient.workerIdle()) {
+        mqttClient.stopForSleep();
+        connManager.stopForSleep();
+        if (powerManager.enterButtonSleep()) {
+            buttonManager.consumeWakePress();
+            navigation.showClock();
+#if !defined(BMO_BENCH_OFFLINE) || !BMO_BENCH_OFFLINE
+            wakeSession.begin(millis());
+#endif
+        }
+    }
 
     // Yield short CPU time for FreeRTOS background tasks (Wi-Fi stack, TCP/IP)
     vTaskDelay(pdMS_TO_TICKS(2));

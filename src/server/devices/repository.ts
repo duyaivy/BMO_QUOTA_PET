@@ -15,6 +15,10 @@ import {
   enqueueDeviceSnapshot,
   enqueueDeviceTombstones,
 } from "@/server/mqtt/outbox";
+import {
+  enqueueDeviceWeather,
+  enqueueWeatherTombstone,
+} from "@/server/weather/projection";
 
 export class RevisionConflict extends Error {}
 export class DeviceNotFound extends Error {}
@@ -115,6 +119,7 @@ export async function createDevice(input: unknown): Promise<DeviceConfig> {
     ];
     await enqueueDeviceConfig(tx, value.deviceId, 1, initialScreens, now);
     await enqueueDeviceSnapshot(tx, value.deviceId, now);
+    await enqueueDeviceWeather(tx, value.deviceId, now);
   });
 
   return {
@@ -187,6 +192,7 @@ export async function retireDevice(
 
     // Enqueue retained tombstones to clear broker state
     await enqueueDeviceTombstones(tx, value.deviceId, now);
+    await enqueueWeatherTombstone(tx, value.deviceId, now);
   });
 
   return { deviceId: value.deviceId, enabled: false };

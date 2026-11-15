@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <time.h>
 #include "config.h"
+#include <atomic>
 
 enum class WifiState {
     DISCONNECTED,
@@ -17,6 +18,9 @@ public:
     BMOConnectionManager();
     void begin();
     void loop();
+    void startWakeConnection();
+    void stopForSleep();
+    void requestTimeSync();
 
     bool isWifiConnected() const;
     bool isTimeSynced() const;
@@ -24,16 +28,15 @@ public:
     String getFormattedTime() const;
 
     void resetWifiSettings();
+    void openConfigPortal();
+    bool needsProvisioning() const;
 
 private:
-    void startConnecting();
-    void syncTime();
-
     WifiState _state;
-    unsigned long _lastAttemptTime;
-    unsigned long _connectStartTime;
-    unsigned long _lastNtpSync;
     bool _timeSynced;
+    bool _timeTrustedBeforeRequest;
+    bool _syncRequested;
+    uint32_t _syncRequestedAtMs;
 };
 
 extern BMOConnectionManager connManager;

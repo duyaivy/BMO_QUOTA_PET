@@ -231,3 +231,15 @@ Kỳ vọng nhìn thấy dòng chữ:
    - Kiểm tra xem máy Mac có đang bật và kết nối Internet không.
    - Kiểm tra xem tiến trình Collector có đang chạy không: `ps aux | grep bmo-collector`.
    - Nếu Collector bị dừng, chỉ cần click mở lại `BMO-Collector.app`.
+
+---
+
+## 8. Kích hoạt thời tiết theo lịch ngoài
+
+Tính năng này mặc định tắt. Dùng Node.js 24.18.0 và pnpm 11.24.0 theo repository; đối chiếu phiên bản Node được Vercel hỗ trợ trước khi triển khai. Production cần Turso từ xa (`libsql://` hoặc HTTPS), không dùng SQLite file cục bộ của Function. Migration SQL trong `drizzle/` phải được đóng gói trong deployment; kiểm tra migration `0006_weather_cache.sql` đã áp dụng và chạy lại không đổi checksum.
+
+Thêm `BMO_WEATHER_ENABLED=true`, `BMO_WEATHER_DEVICE_IDS` là mảng JSON ID thiết bị đã cài firmware mới, và `BMO_WEATHER_TRIGGER_TOKEN_SHA256` là digest hex SHA-256 của token ngẫu nhiên 32 byte. Không lưu token thô trên server; không đưa digest hoặc token xuống web. Để preview với weather tắt và allowlist rỗng, không chia sẻ database, broker hoặc secret production. Chọn địa điểm ở `/devices` sau khi đăng nhập; server lưu địa điểm vào Turso.
+
+Broker MQTT ngoài Vercel cần TLS, quyền publish retained QoS 1 cho topic `bmo/v1/devices/<deviceId>/weather` và quyền subscribe tương ứng cho thiết bị. Kiểm tra retained persistence qua broker restart và ACL bằng thiết bị đã nâng firmware. Đặt Function gần Turso và broker nếu có thể. Nếu Deployment Protection chặn monitor trước Function, cấp quyền automation của nền tảng cho monitor nhưng vẫn giữ token weather và xác thực dashboard.
+
+Lịch gọi và quy trình token nằm trong [WEATHER_SCHEDULING.md](WEATHER_SCHEDULING.md). Monitor bên ngoài gửi `HEAD` mỗi 15 phút, timeout tối thiểu 30 giây; không thêm weather cron Vercel. Chỉ smoke production với monitor, Turso và broker thật mới xác nhận đường đi qua CDN/protection, retained delivery và dữ liệu nguồn. Việc này chưa được thực hiện trong thay đổi mã nguồn này.

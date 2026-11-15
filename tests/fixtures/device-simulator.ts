@@ -6,6 +6,10 @@ import {
   deviceMqttSnapshotSchema,
   parseDeviceTopic,
 } from "@/contracts/mqtt";
+import {
+  parseDeviceWeatherPayload,
+  type DeviceWeatherV1,
+} from "@/contracts/weather";
 
 export interface RenderedPage {
   screenId: string;
@@ -19,6 +23,7 @@ export class SimulatedDevice {
   private socket: net.Socket | null = null;
   public activeConfig: DeviceMqttConfig | null = null;
   public activeSnapshot: DeviceMqttSnapshot | null = null;
+  public activeWeather: DeviceWeatherV1 | null = null;
   public isRetired: boolean = false;
   public mismatchedRevisionsCount: number = 0;
   public receivedMessageCount: number = 0;
@@ -71,6 +76,7 @@ export class SimulatedDevice {
     await this.stop();
     this.activeConfig = null;
     this.activeSnapshot = null;
+    this.activeWeather = null;
     this.isRetired = false;
     await this.start();
   }
@@ -123,14 +129,35 @@ export class SimulatedDevice {
       buffer = buffer.subarray(packetEnd);
 
       if (packetType === 2) {
-        // CONNACK: subscribe to topics
-        // Note: In our simplified broker fixture, subscriptions receive retained messages immediately
+        if (body[1] === 0) this.subscribeToDeviceTopics();
       } else if (packetType === 3) {
         // PUBLISH
         this.handlePublish(flags, body);
       }
     }
     return buffer;
+  }
+
+  private subscribeToDeviceTopics(): void {
+    const parts = [Buffer.from([0, 1])]; // packet ID
+    for (const kind of ["config", "snapshot", "weather"]) {
+      const topic = Buffer.from(
+        `bmo/v1/devices/${this.deviceId}/${kind}`,
+        "utf8",
+      );
+      const length = Buffer.alloc(2);
+      length.writeUInt16BE(topic.length);
+      parts.push(length, topic, Buffer.from([0])); // QoS0 subscription
+    }
+    const body = Buffer.concat(parts);
+    const encoded: number[] = [];
+    let remaining = body.length;
+    do {
+      const digit = remaining % 128;
+      remaining = Math.floor(remaining / 128);
+      encoded.push(digit | (remaining ? 128 : 0));
+    } while (remaining);
+    this.socket?.write(Buffer.concat([Buffer.from([0x82, ...encoded]), body]));
   }
 
   public handlePublishDirect(topic: string, payload: Buffer): void {
@@ -141,9 +168,23 @@ export class SimulatedDevice {
 
     // Check for Tombstone (zero-byte payload)
     if (payload.length === 0) {
+      if (parsedTopic.kind === "weather") {
+        this.activeWeather = null;
+        return;
+      }
       this.isRetired = true;
       this.activeConfig = null;
       this.activeSnapshot = null;
+      this.activeWeather = null;
+      return;
+    }
+
+    if (parsedTopic.kind === "weather") {
+      this.activeWeather = parseDeviceWeatherPayload(
+        payload,
+        this.deviceId,
+        this.activeWeather,
+      );
       return;
     }
 

@@ -3,12 +3,15 @@ import { randomUUID } from "node:crypto";
 import { after } from "next/server";
 import { writeTransaction } from "@/server/db";
 import { MqttClient } from "./publisher";
+import type { MqttTopicKind } from "@/contracts/mqtt";
 
 export interface DrainOptions {
   batchSize?: number;
   publisher?: MqttClient;
   nowMs?: number;
   leaseDurationMs?: number;
+  deadlineMs?: number;
+  topicKinds?: MqttTopicKind[];
 }
 
 export interface DrainResult {
@@ -24,7 +27,7 @@ export async function drainOutbox(
 ): Promise<DrainResult> {
   const now = options.nowMs ?? Date.now();
   const batchSize = options.batchSize ?? 10;
-  const leaseDurationMs = options.leaseDurationMs ?? 15000;
+  const leaseDurationMs = options.leaseDurationMs ?? 30000;
   const workerToken = `worker-${randomUUID()}`;
 
   // Step 1: Attempt to acquire lease atomically
@@ -68,7 +71,18 @@ export async function drainOutbox(
     };
   }
 
-  const publisher = options.publisher ?? new MqttClient();
+  const publisher =
+    options.publisher ??
+    new MqttClient({
+      connectTimeoutMs: Math.max(
+        1,
+        Math.min(5000, (options.deadlineMs ?? Date.now() + 5000) - Date.now()),
+      ),
+      publishTimeoutMs: Math.max(
+        1,
+        Math.min(5000, (options.deadlineMs ?? Date.now() + 5000) - Date.now()),
+      ),
+    });
   const errors: string[] = [];
   let publishedCount = 0;
   let failedCount = 0;
@@ -80,14 +94,25 @@ export async function drainOutbox(
         sql: "UPDATE mqtt_outbox SET state='failed', next_attempt_at=?, updated_at=? WHERE state='in_flight' AND updated_at < ?",
         args: [now, now, now - 30000],
       });
+      await tx.execute({
+        sql: "UPDATE mqtt_outbox SET state='superseded',updated_at=? WHERE topic LIKE '%/weather' AND state IN ('pending','failed','in_flight') AND EXISTS (SELECT 1 FROM weather_topic_state w WHERE w.device_id=mqtt_outbox.device_id AND w.revision>mqtt_outbox.revision)",
+        args: [now],
+      });
     });
 
     // Step 3: Fetch due messages and mark in_flight
     const candidateRows = await writeTransaction(async (tx) => {
+      const filter = options.topicKinds?.length
+        ? ` AND (${options.topicKinds.map(() => "topic LIKE ?").join(" OR ")})`
+        : "";
       const rows = (
         await tx.execute({
-          sql: "SELECT id, device_id, topic, revision, payload, is_tombstone, attempts FROM mqtt_outbox WHERE state IN ('pending', 'failed') AND next_attempt_at <= ? ORDER BY next_attempt_at ASC, revision ASC LIMIT ?",
-          args: [now, batchSize],
+          sql: `SELECT id, device_id, topic, revision, payload, is_tombstone, attempts FROM mqtt_outbox WHERE state IN ('pending', 'failed') AND next_attempt_at <= ?${filter} ORDER BY next_attempt_at ASC, revision ASC LIMIT ?`,
+          args: [
+            now,
+            ...(options.topicKinds?.map((kind) => `%/${kind}`) ?? []),
+            batchSize,
+          ],
         })
       ).rows;
 
@@ -103,6 +128,8 @@ export async function drainOutbox(
     // Step 4: Publish candidate messages
     // If publisher supports batching and we have multiple messages, try single-connection batch first
     if (
+      !options.deadlineMs &&
+      !candidateRows.some((row) => String(row.topic).endsWith("/weather")) &&
       typeof publisher.publishBatch === "function" &&
       candidateRows.length > 1
     ) {
@@ -147,22 +174,62 @@ export async function drainOutbox(
       const isTombstone = Boolean(row.is_tombstone);
       const attempts = Number(row.attempts ?? 0);
 
+      if (
+        options.deadlineMs !== undefined &&
+        Date.now() >= options.deadlineMs
+      ) {
+        errors.push("Outbox deadline exceeded");
+        failedCount++;
+        await writeTransaction(async (tx) => {
+          await tx.execute({
+            sql: "UPDATE mqtt_outbox SET state='failed',next_attempt_at=?,updated_at=? WHERE state='in_flight' AND updated_at=?",
+            args: [Date.now() + 1000, Date.now(), now],
+          });
+        });
+        break;
+      }
+      const current = await writeTransaction(async (tx) => {
+        const state = (
+          await tx.execute({
+            sql: "SELECT state FROM mqtt_outbox WHERE id=?",
+            args: [id],
+          })
+        ).rows[0];
+        const lease = (
+          await tx.execute(
+            "SELECT lease_owner,lease_expires_at FROM operational_state WHERE resource='mqtt_outbox_drain'",
+          )
+        ).rows[0];
+        return (
+          state?.state === "in_flight" &&
+          lease?.lease_owner === workerToken &&
+          Number(lease.lease_expires_at) > Date.now()
+        );
+      });
+      if (!current) continue;
+
       try {
         await publisher.publish({
           topic,
           payload: isTombstone ? Buffer.alloc(0) : payload,
           qos: 1,
           retain: true,
+          deadlineMs: options.deadlineMs,
         });
 
         // Mark published
-        await writeTransaction(async (tx) => {
-          await tx.execute({
-            sql: "UPDATE mqtt_outbox SET state='published', acknowledged_at=?, updated_at=? WHERE id=?",
-            args: [Date.now(), Date.now(), id],
+        const acknowledged = await writeTransaction(async (tx) => {
+          const result = await tx.execute({
+            sql: "UPDATE mqtt_outbox SET state='published', acknowledged_at=?, updated_at=? WHERE id=? AND state='in_flight' AND EXISTS (SELECT 1 FROM operational_state WHERE resource='mqtt_outbox_drain' AND lease_owner=? AND lease_expires_at>?)",
+            args: [Date.now(), Date.now(), id, workerToken, Date.now()],
           });
+          return result.rowsAffected === 1;
         });
-        publishedCount++;
+        if (acknowledged) publishedCount++;
+        else {
+          failedCount++;
+          errors.push(`Outbox publish acknowledgement lost for ${id}`);
+        }
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
         errors.push(`Failed to publish message ${id} to ${topic}: ${errMsg}`);
@@ -178,8 +245,16 @@ export async function drainOutbox(
 
         await writeTransaction(async (tx) => {
           await tx.execute({
-            sql: "UPDATE mqtt_outbox SET state='failed', attempts=?, next_attempt_at=?, last_error=?, updated_at=? WHERE id=?",
-            args: [nextAttempts, nextAttemptAt, errMsg, Date.now(), id],
+            sql: "UPDATE mqtt_outbox SET state='failed', attempts=?, next_attempt_at=?, last_error=?, updated_at=? WHERE id=? AND state='in_flight' AND EXISTS (SELECT 1 FROM operational_state WHERE resource='mqtt_outbox_drain' AND lease_owner=? AND lease_expires_at>?)",
+            args: [
+              nextAttempts,
+              nextAttemptAt,
+              errMsg,
+              Date.now(),
+              id,
+              workerToken,
+              Date.now(),
+            ],
           });
         });
       }

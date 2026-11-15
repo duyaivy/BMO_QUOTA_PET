@@ -12,6 +12,7 @@ const fixture = (a: number, b: number) =>
   });
 describe("durable collector", () => {
   it("preserves unchanged bucket times and persistent sequence across restart", async () => {
+    const capturedAt = Date.now();
     const dir = await mkdtemp(join(tmpdir(), "bmo-"));
     const secret = join(dir, "secret");
     await writeFile(secret, "a".repeat(64));
@@ -27,19 +28,23 @@ describe("durable collector", () => {
     };
     let c = await FixtureCollector.open(config);
     expect(
-      await c.capture("claude", fixture(10, 20), "2026-10-31T00:00:01.000Z"),
+      await c.capture(
+        "claude",
+        fixture(10, 20),
+        new Date(capturedAt).toISOString(),
+      ),
     ).toEqual({ code: "QUEUED", queued: true });
     const first = (await c.pendingEvents())[0];
     if (first.kind !== "observation") throw new Error();
     const bTime = first.windows.find((w) => w.windowId === "b")?.collectedAt;
     await c.uploadOnce(
       async () => new Response("temporary", { status: 503 }),
-      Date.parse("2026-10-31T00:00:03.000Z"),
+      capturedAt + 3000,
     );
     const secondCapture = await c.capture(
       "claude",
       fixture(11, 20),
-      "2026-10-31T00:00:02.000Z",
+      new Date(capturedAt + 1000).toISOString(),
     );
     expect(secondCapture).toEqual({ code: "QUEUED", queued: true });
     const second = (await c.pendingEvents())[1];
@@ -70,7 +75,7 @@ describe("durable collector", () => {
       providers: { claude: { enabled: true, generation: 1 } },
     };
     const c = await FixtureCollector.open(config);
-    await c.capture("claude", fixture(10, 20), "2026-10-31T00:00:01.000Z");
+    await c.capture("claude", fixture(10, 20), new Date().toISOString());
     let body = "",
       signature = "",
       nonce = "";

@@ -17,6 +17,8 @@ public:
     // Check and consume click events
     bool wasClicked(ButtonId btn);
     bool isHeld(ButtonId btn);
+    bool anyPressed() const;
+    void consumeWakePress();
 
 private:
     struct ButtonState {
@@ -31,6 +33,7 @@ private:
 
     ButtonState _btnA;
     ButtonState _btnB;
+    bool _consumingWakePress;
 
     void updateButton(ButtonState& btn);
 };

@@ -463,6 +463,8 @@ Use a local test broker or mocked broker transport; actual production EMQX deplo
 
 ## Phase 5 — Deployment & End-to-End Validation
 
+**Approved extension, 2026-11-15:** The owner separately authorized [clock/weather with a wake-only network session](superpowers/plans/2026-11-15-clock-weather-on-wake.md), including web location selection and authenticated uptime-monitor HEAD scheduling. Implementation and local evidence are tracked in [CLOCK_WEATHER_IMPLEMENTATION.md](CLOCK_WEATHER_IMPLEMENTATION.md). This authorization does not start deployment/monitor activation or complete Phase 4D hardware measurements, Phase 2B/2C live provider verification, or Phase 5 release gates.
+
 Production secrets are requested/configured only for the relevant selected deployment subphase; never placed in Git or logs. Provisioning/deployment requires the owner's explicit phase authorization.
 
 ### Phase 5A — Render + Turso Configuration

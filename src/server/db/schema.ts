@@ -291,3 +291,30 @@ export const mqttOutbox = sqliteTable(
     index("mqtt_outbox_device_topic_idx").on(table.deviceId, table.topic),
   ],
 );
+
+export const weatherSettings = sqliteTable("weather_settings", {
+  id: integer("id").primaryKey().default(1),
+  revision: integer("revision").notNull().default(1),
+  locationJson: text("location_json"),
+  updatedAt: integer("updated_at").notNull(),
+});
+export const weatherCache = sqliteTable("weather_cache", {
+  id: integer("id").primaryKey().default(1),
+  locationRevision: integer("location_revision").notNull().default(1),
+  observationJson: text("observation_json"),
+  dataAt: integer("data_at"),
+  fetchedAt: integer("fetched_at"),
+  lastJobAt: integer("last_job_at"),
+  nextAttemptAt: integer("next_attempt_at").notNull().default(0),
+  leaseOwner: text("lease_owner"),
+  leaseExpiresAt: integer("lease_expires_at"),
+  lastErrorCode: text("last_error_code"),
+});
+export const weatherTopicState = sqliteTable("weather_topic_state", {
+  deviceId: text("device_id")
+    .primaryKey()
+    .references(() => devices.deviceId),
+  revision: integer("revision").notNull(),
+  semanticHash: text("semantic_hash").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});

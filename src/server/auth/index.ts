@@ -165,7 +165,7 @@ export async function getAdminSession() {
     .limit(1);
   return !record || record.revokedAt !== null || record.expiresAt <= Date.now()
     ? null
-    : { expiresAt: record.expiresAt };
+    : { expiresAt: record.expiresAt, handleHash: hash(session.handle) };
 }
 export async function requireAdmin() {
   const record = await getAdminSession();

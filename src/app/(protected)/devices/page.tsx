@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeviceEditor } from "@/components/device/device-editor";
 import { readDashboard } from "@/server/quota/queries";
 import { getDeviceProvisioningInfo } from "@/server/devices/repository";
+import { readWeatherSettings } from "@/server/weather/settings";
+import { WeatherSettings } from "@/components/weather/weather-settings";
 
 export const metadata: Metadata = {
   title: "Thiết bị | BMO Personal",
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 export default async function DevicesPage() {
   const snapshot = await readDashboard();
   const provisioning = getDeviceProvisioningInfo(snapshot.device.deviceId);
+  const weatherSettings = await readWeatherSettings();
 
   return (
     <>
@@ -30,6 +33,7 @@ export default async function DevicesPage() {
         generatedAt={snapshot.generatedAt}
         freshnessThresholdSeconds={snapshot.freshnessThresholdSeconds}
       />
+      <WeatherSettings initialSettings={weatherSettings} />
       <details className="rounded-xl border border-border bg-card px-5 py-4">
         <summary className="min-h-7 text-sm font-semibold">
           Kết nối và bảo mật thiết bị

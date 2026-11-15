@@ -6,9 +6,9 @@ export const MAX_MQTT_PAYLOAD_BYTES = 8192; // 8 KiB ceiling as per architecture
 
 export const mqttTopicSchema = z
   .string()
-  .regex(/^bmo\/v1\/devices\/[A-Za-z0-9_.-]+\/(config|snapshot)$/);
+  .regex(/^bmo\/v1\/devices\/[A-Za-z0-9_.-]+\/(config|snapshot|weather)$/);
 
-export type MqttTopicKind = "config" | "snapshot";
+export type MqttTopicKind = "config" | "snapshot" | "weather";
 
 export function buildDeviceTopic(
   deviceId: string,
@@ -24,7 +24,7 @@ export function parseDeviceTopic(
   topic: string,
 ): { deviceId: string; kind: MqttTopicKind } | null {
   const match = topic.match(
-    /^bmo\/v1\/devices\/([A-Za-z0-9_.-]+)\/(config|snapshot)$/,
+    /^bmo\/v1\/devices\/([A-Za-z0-9_.-]+)\/(config|snapshot|weather)$/,
   );
   if (!match) return null;
   return {

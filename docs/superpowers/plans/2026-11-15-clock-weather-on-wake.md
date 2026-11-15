@@ -10,7 +10,7 @@
 
 **Spec:** [Thiết kế theo yêu cầu đã chốt](../specs/2026-11-15-clock-weather-wake-design.md). Đọc cả spec trước khi thực hiện; bản lựa chọn cũ chỉ còn là lịch sử phương án.
 
-**Trạng thái:** Bản cập nhật 2 theo yêu cầu uptime HEAD và địa điểm trên web; các quyết định kỹ thuật còn lại đã chọn theo ủy quyền, **CHƯA TRIỂN KHAI**. Các lệnh và kết quả mong đợi dưới đây là hướng dẫn cho lượt thực hiện, chưa phải bằng chứng đã chạy. Thực hiện lần lượt; lượt hiện tại chỉ sửa tài liệu.
+**Trạng thái thực hiện:** Chủ dự án đã duyệt triển khai ngày 2026-11-15, yêu cầu hai agent phụ trách server/web và firmware, main agent kiểm tra tích hợp. Mã nguồn đang được kiểm chứng; kết quả thực chạy và giới hạn được ghi tại [CLOCK_WEATHER_IMPLEMENTATION.md](../../CLOCK_WEATHER_IMPLEMENTATION.md). Các checkbox bên dưới giữ vai trò checklist gốc; không dùng kết quả mong đợi trong task làm bằng chứng PASS. Deploy, kích hoạt monitor và thử pin/board vẫn là bước riêng.
 
 ## Global Constraints
 
@@ -65,7 +65,7 @@ Bổ sung file map cho yêu cầu mới:
 | Địa điểm web    | `src/components/weather/weather-settings.tsx`, `tests/browser/weather.spec.ts`                                                  | `src/app/(protected)/devices/page.tsx`, `tests/fixtures` setup hiện có khi cần      |
 | Auth monitor    | `src/server/weather/trigger-auth.ts`                                                                                            | `src/app/api/internal/weather/refresh/route.ts`, `.env.example`, docs scheduling    |
 
-Thứ tự thực hiện: **Task 1 → 2A → 3 → 2 → 4 → 4A → 5 → 6 → 7 → 8**. Task 2A tạo cả schema settings/cache; Task 3 hoàn thiện enqueue/delivery để Task 2 có thể commit observation và enqueue qua interface đã tồn tại. Các task có hậu tố giữ số để đọc lại các liên kết bản trước. Trong lượt thực hiện dùng `superpowers:executing-plans`, làm tuần tự trong phiên; không cần hỏi lại cách chia việc đã được giao quyết định.
+Thứ tự phụ thuộc: **Task 1 → 2A → 3 → 2 → 4 → 4A → 5 → 6 → 7 → 8**. Task 2A tạo cả schema settings/cache; Task 3 hoàn thiện enqueue/delivery để Task 2 có thể commit observation và enqueue qua interface đã tồn tại. Các task có hậu tố giữ số để đọc lại các liên kết bản trước. Theo yêu cầu triển khai mới của chủ dự án, hai agent làm song song theo phạm vi server/web và firmware, thống nhất wire contract; main agent rà soát và kiểm chứng tích hợp. Không tự commit, deploy hoặc flash trong lượt này.
 
 ---
 

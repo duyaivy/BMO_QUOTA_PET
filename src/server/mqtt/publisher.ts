@@ -9,6 +9,7 @@ export interface MqttPublishOptions {
   payload: string | Buffer;
   qos?: 0 | 1;
   retain?: boolean;
+  deadlineMs?: number;
 }
 
 export interface MqttPublishResult {
@@ -112,7 +113,18 @@ export class MqttClient {
 
     assertMqttPayloadSize(payloadBuffer);
 
-    const socket = await this.connect();
+    const socket = await this.connect(options.deadlineMs);
+    socket.on("error", () => {});
+    const deadlineTimer =
+      options.deadlineMs === undefined
+        ? undefined
+        : setTimeout(
+            () =>
+              socket.destroy(
+                new MqttError("MQTT operation deadline exceeded", "TIMEOUT"),
+              ),
+            Math.max(1, options.deadlineMs - Date.now()),
+          );
 
     try {
       const packetId = qos === 1 ? nextPacketId() : 0;
@@ -126,11 +138,12 @@ export class MqttClient {
       );
 
       if (qos === 1) {
-        await this.waitForPuback(socket, packetId);
+        await this.waitForPuback(socket, packetId, options.deadlineMs);
       }
 
       // Send DISCONNECT
-      await this.sendDisconnect(socket);
+      if (options.deadlineMs === undefined || Date.now() < options.deadlineMs)
+        await this.sendDisconnect(socket);
 
       return {
         topic: options.topic,
@@ -140,6 +153,7 @@ export class MqttClient {
         durationMs: Date.now() - startTime,
       };
     } finally {
+      if (deadlineTimer) clearTimeout(deadlineTimer);
       socket.destroy();
     }
   }
@@ -201,16 +215,32 @@ export class MqttClient {
     }
   }
 
-  private async connect(): Promise<net.Socket> {
+  private remaining(
+    deadlineMs: number | undefined,
+    configuredMs: number,
+  ): number {
+    if (deadlineMs === undefined) return configuredMs;
+    const remaining = deadlineMs - Date.now();
+    if (remaining <= 0)
+      throw new MqttError("MQTT deadline exceeded", "TIMEOUT");
+    return Math.min(configuredMs, remaining);
+  }
+
+  private async connect(deadlineMs?: number): Promise<net.Socket> {
     return new Promise((resolve, reject) => {
       let isSettled = false;
-      const timer = setTimeout(() => {
-        if (!isSettled) {
-          isSettled = true;
-          socket.destroy();
-          reject(new MqttError("MQTT connection deadline exceeded", "TIMEOUT"));
-        }
-      }, this.config.connectTimeoutMs);
+      const timer = setTimeout(
+        () => {
+          if (!isSettled) {
+            isSettled = true;
+            socket.destroy();
+            reject(
+              new MqttError("MQTT connection deadline exceeded", "TIMEOUT"),
+            );
+          }
+        },
+        this.remaining(deadlineMs, this.config.connectTimeoutMs),
+      );
 
       const cleanup = () => {
         clearTimeout(timer);
@@ -252,7 +282,7 @@ export class MqttClient {
 
       const onConnect = async () => {
         try {
-          await this.performMqttHandshake(socket);
+          await this.performMqttHandshake(socket, deadlineMs);
           if (!isSettled) {
             isSettled = true;
             cleanup();
@@ -276,7 +306,10 @@ export class MqttClient {
     });
   }
 
-  private async performMqttHandshake(socket: net.Socket): Promise<void> {
+  private async performMqttHandshake(
+    socket: net.Socket,
+    deadlineMs?: number,
+  ): Promise<void> {
     // Build CONNECT packet
     // Variable header: Protocol Name ("MQTT"), Level (4), Connect Flags, Keep Alive (30s)
     const protoName = encodeUtf8String("MQTT");
@@ -339,7 +372,7 @@ export class MqttClient {
     const connack = await this.readExactBytes(
       socket,
       4,
-      this.config.connectTimeoutMs,
+      this.remaining(deadlineMs, this.config.connectTimeoutMs),
     );
     if (connack[0] !== 0x20 || connack[1] !== 0x02) {
       throw new MqttError(
@@ -413,12 +446,13 @@ export class MqttClient {
   private async waitForPuback(
     socket: net.Socket,
     expectedPacketId: number,
+    deadlineMs?: number,
   ): Promise<void> {
     // PUBACK is 4 bytes: 0x40, 0x02, MSB, LSB
     const puback = await this.readExactBytes(
       socket,
       4,
-      this.config.publishTimeoutMs,
+      this.remaining(deadlineMs, this.config.publishTimeoutMs),
     );
     if (puback[0] !== 0x40 || puback[1] !== 0x02) {
       throw new MqttError(

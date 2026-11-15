@@ -11,7 +11,8 @@
 #define BMO_WIFI_SSID           "YOUR_WIFI_SSID"
 #define BMO_WIFI_PASSWORD       "YOUR_WIFI_PASSWORD"
 #define BMO_WIFI_TIMEOUT_MS     15000
-#define BMO_WIFI_RETRY_DELAY_MS 5000
+// Ordinary boot/button wake gets one network session capped at 20 seconds.
+// Failed wakes never reopen a portal or retry while awake.
 
 // --- Wi-Fi Captive Portal (SoftAP) Settings ---
 #define BMO_WIFI_AP_SSID        "duyaivy's pet"
@@ -23,7 +24,7 @@
 #define BMO_NTP_SERVER_2        "time.google.com"
 #define BMO_GMT_OFFSET_SEC      0          // UTC offset in seconds (e.g. +7*3600 for ICT/Vietnam)
 #define BMO_DAYLIGHT_OFFSET_SEC 0          // Daylight savings offset in seconds
-#define BMO_NTP_SYNC_INTERVAL_MS 3600000   // Re-sync clock every 1 hour
+// System epoch stays UTC; Clock adds UTC+7 for display only.
 
 // --- MQTT Broker Settings (Phase 3 Architecture §11) ---
 #define BMO_MQTT_BROKER         "192.168.1.100" // IP or hostname of EMQX / local broker
@@ -32,6 +33,7 @@
 #define BMO_MQTT_PASSWORD       "device_secret"
 #define BMO_DEVICE_ID           "bmo-dev-01"    // Matches device ID registered in Dashboard
 #define BMO_MQTT_BUFFER_SIZE    8192            // 8 KiB maximum payload limit as per contract
+// Weather has its own 512-byte parser limit and retained weather topic.
 
 #define BMO_MQTT_TLS            1
 #define BMO_MQTT_CA_CERT        "" // PEM root CA required for TLS; never use setInsecure

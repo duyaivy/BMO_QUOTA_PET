@@ -6,14 +6,23 @@
 BMONavigationController navigation;
 
 BMONavigationController::BMONavigationController()
-    : _mode(UIMode::PET_FACE),
+    : _mode(UIMode::CLOCK),
       _quotaIndex(0),
-      _endOfListEnteredAt(0) {}
+      _endOfListEnteredAt(0),
+      _forceClock(true) {}
 
 void BMONavigationController::begin() {
-    _mode = UIMode::PET_FACE;
+    _mode = UIMode::CLOCK;
     _quotaIndex = 0;
-    Serial.println("[NAV] Navigation initialized. Default mode: BMO Face (Pet Home)");
+    _forceClock = true;
+    Serial.println("[NAV] Navigation initialized. Default mode: Clock");
+}
+
+void BMONavigationController::showClock() {
+    _mode = UIMode::CLOCK;
+    _quotaIndex = 0;
+    _forceClock = true;
+    faceRenderer.setFace(FACE_HAPPY);
 }
 
 void BMONavigationController::update() {
@@ -37,23 +46,26 @@ void BMONavigationController::update() {
     if (_mode == UIMode::END_OF_LIST) {
         if (END_OF_LIST_AUTO_WRAP_MS > 0 && millis() - _endOfListEnteredAt > END_OF_LIST_AUTO_WRAP_MS) {
             Serial.println("[NAV] End of list timeout reached. Returning to face.");
-            _mode = UIMode::PET_FACE;
-            _quotaIndex = 0;
+            showClock();
         }
     }
 }
 
 void BMONavigationController::handleButtonA() {
-    if (_mode == UIMode::PET_FACE) {
+    if (_mode == UIMode::CLOCK) {
+        faceRenderer.setFace(FACE_HAPPY);
+        _mode = UIMode::PET_FACE;
+    } else if (_mode == UIMode::PET_FACE) {
         // Already on Face screen: cycle through all registered pet scenes
-        faceRenderer.nextFace();
+        if (int(faceRenderer.getCurrentFace()) == FACE_COUNT - 1) showClock();
+        else faceRenderer.nextFace();
         Serial.printf("[NAV] Button A pressed: Cycled face to '%s' (%d/%d)\n",
                       faceRenderer.getFaceName(faceRenderer.getCurrentFace()),
                       (int)faceRenderer.getCurrentFace() + 1,
                       FACE_COUNT);
     } else {
         // In Quota view or End-of-List: switch back to BMO Face mode
-        _mode = UIMode::PET_FACE;
+        showClock();
         Serial.println("[NAV] Button A pressed: Switched to BMO Face mode.");
     }
 }
@@ -61,7 +73,7 @@ void BMONavigationController::handleButtonA() {
 void BMONavigationController::handleButtonB() {
     uint8_t totalPages = mqttClient.getTotalQuotaPages();
 
-    if (_mode == UIMode::PET_FACE) {
+    if (_mode == UIMode::CLOCK || _mode == UIMode::PET_FACE) {
         // Switched from Face mode to Quota mode
         if (totalPages == 0) {
             _mode = UIMode::QUOTA_VIEW;
@@ -102,6 +114,11 @@ void BMONavigationController::handleButtonB() {
 
 void BMONavigationController::render() {
     switch (_mode) {
+        case UIMode::CLOCK:
+            clockRenderer.renderIfChanged(connManager.getCurrentEpoch(),
+                mqttClient.hasWeather() ? &mqttClient.getWeather() : nullptr, _forceClock);
+            _forceClock = false;
+            break;
         case UIMode::PET_FACE:
             faceRenderer.render(display.getDriver());
             display.update();

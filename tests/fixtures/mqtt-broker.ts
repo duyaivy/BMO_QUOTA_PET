@@ -20,6 +20,7 @@ export class MockMqttBroker {
   public publishedMessages: ReceivedMessage[] = [];
   public retainedMessages: Map<string, ReceivedMessage> = new Map();
   public clientCount: number = 0;
+  private subscriptions = new Map<net.Socket, Set<string>>();
 
   constructor(private options: MockBrokerOptions = {}) {
     this.server = net.createServer((socket) => this.handleConnection(socket));
@@ -52,6 +53,7 @@ export class MockMqttBroker {
 
   private handleConnection(socket: net.Socket) {
     this.clientCount++;
+    this.subscriptions.set(socket, new Set());
     let buffer: Buffer<ArrayBufferLike> = Buffer.alloc(0);
 
     socket.on("data", (chunk) => {
@@ -61,6 +63,7 @@ export class MockMqttBroker {
 
     socket.on("close", () => {
       this.clientCount--;
+      this.subscriptions.delete(socket);
     });
 
     socket.on("error", () => {
@@ -117,9 +120,61 @@ export class MockMqttBroker {
       case 3: // PUBLISH
         this.handlePublish(socket, flags, body);
         break;
+      case 8: // SUBSCRIBE (exact topics; enough for the device fixture)
+        this.handleSubscribe(socket, body);
+        break;
       case 14: // DISCONNECT
         socket.end();
         break;
+    }
+  }
+
+  private sendMessage(
+    socket: net.Socket,
+    message: ReceivedMessage,
+    retained: boolean,
+  ) {
+    const topic = Buffer.from(message.topic, "utf8");
+    const body = Buffer.alloc(2 + topic.length + message.payload.length);
+    body.writeUInt16BE(topic.length, 0);
+    topic.copy(body, 2);
+    message.payload.copy(body, 2 + topic.length);
+    const length: number[] = [];
+    let remaining = body.length;
+    do {
+      const digit = remaining % 128;
+      remaining = Math.floor(remaining / 128);
+      length.push(digit | (remaining ? 128 : 0));
+    } while (remaining);
+    socket.write(
+      Buffer.concat([Buffer.from([retained ? 0x31 : 0x30, ...length]), body]),
+    );
+  }
+
+  private handleSubscribe(socket: net.Socket, body: Buffer) {
+    if (body.length < 2) return;
+    const topics: string[] = [];
+    let offset = 2;
+    while (offset + 2 <= body.length) {
+      const length = body.readUInt16BE(offset);
+      offset += 2;
+      if (offset + length + 1 > body.length) return;
+      topics.push(body.subarray(offset, offset + length).toString("utf8"));
+      offset += length + 1;
+    }
+    socket.write(
+      Buffer.from([
+        0x90,
+        2 + topics.length,
+        body[0],
+        body[1],
+        ...topics.map(() => 0),
+      ]),
+    );
+    for (const topic of topics) {
+      this.subscriptions.get(socket)?.add(topic);
+      const retained = this.retainedMessages.get(topic);
+      if (retained) this.sendMessage(socket, retained, true);
     }
   }
 
@@ -160,7 +215,11 @@ export class MockMqttBroker {
 
     this.publishedMessages.push(message);
     if (retain) {
-      this.retainedMessages.set(topic, message);
+      if (payload.length === 0) this.retainedMessages.delete(topic);
+      else this.retainedMessages.set(topic, message);
+    }
+    for (const [subscriber, topics] of this.subscriptions) {
+      if (topics.has(topic)) this.sendMessage(subscriber, message, false);
     }
 
     if (qos === 1 && packetId !== undefined) {

@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <ctype.h>
 #include <strings.h>
+#include <lwip/dns.h>
 
 BMOMqttClient mqttClient;
 
@@ -16,23 +17,33 @@ static void staticMqttCallback(char* topic, uint8_t* payload, unsigned int lengt
 BMOMqttClient::BMOMqttClient()
     : _mqtt(_wifiClient),
       _isRetired(false),
-      _lastReconnectAttempt(0) {
+      _receivedConfigThisWake(false),
+      _receivedSnapshotThisWake(false),
+      _receivedWeatherThisWake(false),
+      _acceptedConfig(false),
+      _acceptedSnapshot(false),
+      _connected(false),
+      _stopRequested(true),
+      _workerBusy(false),
+      _workerTask(nullptr),
+      _packetQueue(nullptr) {
     memset(&_config, 0, sizeof(_config));
     memset(&_snapshot, 0, sizeof(_snapshot));
+    memset(&_weather, 0, sizeof(_weather));
+    memset(_slotUsed, 0, sizeof(_slotUsed));
     snprintf(_configTopic, sizeof(_configTopic), "bmo/v1/devices/%s/config", BMO_DEVICE_ID);
     snprintf(_snapshotTopic, sizeof(_snapshotTopic), "bmo/v1/devices/%s/snapshot", BMO_DEVICE_ID);
+    snprintf(_weatherTopic, sizeof(_weatherTopic), "bmo/v1/devices/%s/weather", BMO_DEVICE_ID);
 }
 
 void BMOMqttClient::begin() {
     #if BMO_MQTT_TLS
-    if (strlen(BMO_MQTT_CA_CERT) > 0) {
-        _wifiClient.setCACert(BMO_MQTT_CA_CERT);
-    } else {
-        _wifiClient.setInsecure();
-        Serial.println("[MQTT] TLS enabled without CA certificate (using setInsecure)");
-    }
+    if (strlen(BMO_MQTT_CA_CERT) > 0) _wifiClient.setCACert(BMO_MQTT_CA_CERT);
+    else Serial.println("[MQTT] TLS CA missing; MQTT connection disabled");
+    _wifiClient.setHandshakeTimeout(3);
+    _wifiClient.setTimeout(2);
     #endif
-    _mqtt.setSocketTimeout(3);
+    _mqtt.setSocketTimeout(2);
     _mqtt.setServer(BMO_MQTT_BROKER, BMO_MQTT_PORT);
     _mqtt.setBufferSize(BMO_MQTT_BUFFER_SIZE + 256); // Support up to 8 KiB MQTT payloads
 
@@ -40,80 +51,168 @@ void BMOMqttClient::begin() {
         this->onMessage(topic, payload, length);
     });
 
+    _packetQueue = xQueueCreate(4, sizeof(uint8_t));
+    if (_packetQueue == nullptr || xTaskCreatePinnedToCore(workerEntry, "bmo-mqtt", 8192, this, 1, &_workerTask, 0) != pdPASS)
+        Serial.println("[MQTT] Worker allocation failed; wake sessions remain offline");
+
     Serial.printf("[MQTT] Initialized client for device: %s\n", BMO_DEVICE_ID);
 }
 
 void BMOMqttClient::loop() {
-    if (!WiFi.isConnected()) {
-        return;
-    }
-
-    if (!_mqtt.connected()) {
-        unsigned long now = millis();
-        if (now - _lastReconnectAttempt > 5000) {
-            _lastReconnectAttempt = now;
-            reconnect();
+    if (!_packetQueue) return;
+    uint8_t slot = 0;
+    while (xQueueReceive(_packetQueue, &slot, 0) == pdTRUE) {
+        Packet* packet = &_packetSlots[slot];
+        if (packet->kind == 0) {
+            if (packet->length == 0) {
+                _isRetired = true;
+                _config.valid = false;
+                _snapshot.valid = false;
+                _weather.valid = false;
+                _receivedConfigThisWake = true;
+            } else {
+                _acceptedConfig = false;
+                handleConfigPayload(packet->payload, packet->length);
+                _receivedConfigThisWake = _acceptedConfig;
+            }
+        } else if (packet->kind == 1) {
+            if (packet->length == 0) {
+                _snapshot.valid = false;
+                _receivedSnapshotThisWake = true;
+            } else {
+                _acceptedSnapshot = false;
+                handleSnapshotPayload(packet->payload, packet->length);
+                _receivedSnapshotThisWake = _acceptedSnapshot;
+            }
+        } else if (!_isRetired) {
+            if (packet->length == 0) {
+                _weather.valid = false;
+                _receivedWeatherThisWake = true;
+            } else {
+                WeatherSnapshot next{};
+                if (parseWeatherPayload(packet->payload, packet->length, BMO_DEVICE_ID, next) &&
+                    applyWeatherSnapshot(next, _weather)) _receivedWeatherThisWake = true;
+            }
         }
-    } else {
-        _mqtt.loop();
+        portENTER_CRITICAL(&_slotMux);
+        _slotUsed[slot] = false;
+        portEXIT_CRITICAL(&_slotMux);
     }
 }
 
 bool BMOMqttClient::isConnected() {
-    return _mqtt.connected();
+    return _connected;
 }
 
-void BMOMqttClient::reconnect() {
-    if (_mqtt.connected()) return;
-    #if BMO_MQTT_TLS
-    if (strlen(BMO_MQTT_CA_CERT) == 0) {
-        _wifiClient.setInsecure();
+void BMOMqttClient::startWakeConnection() {
+    if (!_workerTask || _workerBusy.load() || !WiFi.isConnected()) return;
+    _receivedConfigThisWake = false;
+    _receivedSnapshotThisWake = false;
+    _receivedWeatherThisWake = false;
+    _stopRequested = false;
+    xTaskNotifyGive(_workerTask);
+}
+
+void BMOMqttClient::stopForSleep() {
+    _stopRequested = true;
+    _connected = false;
+    // The worker owns the TLS socket and closes it after its current bounded call.
+    // The caller cuts radio power at the 20-second session deadline.
+}
+
+void BMOMqttClient::workerEntry(void* context) {
+    static_cast<BMOMqttClient*>(context)->workerLoop();
+}
+
+namespace {
+struct DnsResult {
+    std::atomic<bool> done;
+    ip_addr_t address;
+};
+void dnsDone(const char*, const ip_addr_t* address, void* context) {
+    auto* result = static_cast<DnsResult*>(context);
+    if (address) result->address = *address;
+    result->done = true;
+}
+}
+
+bool BMOMqttClient::connectOnce() {
+#if BMO_MQTT_TLS
+    if (strlen(BMO_MQTT_CA_CERT) == 0) return false;
+#endif
+    static DnsResult dns{}; // Stable until lwIP's bounded DNS callback completes.
+    dns.done = false;
+    memset(&dns.address, 0, sizeof(dns.address));
+    IPAddress brokerIp;
+    if (!brokerIp.fromString(BMO_MQTT_BROKER)) {
+        ip_addr_t address{};
+        err_t error = dns_gethostbyname(BMO_MQTT_BROKER, &address, dnsDone, &dns);
+        if (error == ERR_OK) { dns.address = address; dns.done = true; }
+        else if (error != ERR_INPROGRESS) return false;
+        uint32_t started = millis();
+        while (!dns.done && !_stopRequested.load() && uint32_t(millis() - started) < 5000u)
+            vTaskDelay(pdMS_TO_TICKS(10));
+        if (!dns.done || _stopRequested.load() || dns.address.u_addr.ip4.addr == 0) return false;
+        brokerIp = IPAddress(dns.address.u_addr.ip4.addr);
     }
-    #endif
-
-    Serial.printf("[MQTT] Attempting connection to %s:%d as %s...\n",
-                  BMO_MQTT_BROKER, BMO_MQTT_PORT, BMO_DEVICE_ID);
-
+    if (_stopRequested.load()) return false;
+    _mqtt.setServer(brokerIp, BMO_MQTT_PORT); // PubSubClient must not re-enter blocking hostname DNS.
+#if BMO_MQTT_TLS
+    // Pre-resolved IP avoids the Arduino core's 31-second hostByName path.
+    // The original hostname is still passed for SNI and certificate identity.
+    if (!_wifiClient.connect(brokerIp, BMO_MQTT_PORT, BMO_MQTT_BROKER, BMO_MQTT_CA_CERT, nullptr, nullptr)) return false;
+#else
+    if (!_wifiClient.connect(brokerIp, BMO_MQTT_PORT, 3000)) return false;
+#endif
+    if (_stopRequested.load()) return false;
     char clientId[48];
     snprintf(clientId, sizeof(clientId), "bmo-esp32-%s", BMO_DEVICE_ID);
+    bool connected = strlen(BMO_MQTT_USER) > 0
+        ? _mqtt.connect(clientId, BMO_MQTT_USER, BMO_MQTT_PASSWORD)
+        : _mqtt.connect(clientId);
+    if (!connected || _stopRequested.load()) return false;
+    _mqtt.subscribe(_configTopic, 1);
+    _mqtt.subscribe(_snapshotTopic, 1);
+    _mqtt.subscribe(_weatherTopic, 1);
+    _connected = true;
+    return true;
+}
 
-    bool connected = false;
-    if (strlen(BMO_MQTT_USER) > 0) {
-        connected = _mqtt.connect(clientId, BMO_MQTT_USER, BMO_MQTT_PASSWORD);
-    } else {
-        connected = _mqtt.connect(clientId);
-    }
-
-    if (connected) {
-        Serial.println("[MQTT] Connected successfully to broker!");
-        // Subscribe to device config and snapshot topics (QoS 1)
-        _mqtt.subscribe(_configTopic, 1);
-        _mqtt.subscribe(_snapshotTopic, 1);
-        Serial.printf("[MQTT] Subscribed to %s and %s\n", _configTopic, _snapshotTopic);
-    } else {
-        Serial.printf("[MQTT] Connection failed, rc=%d. Will retry in 5s.\n", _mqtt.state());
+void BMOMqttClient::workerLoop() {
+    for (;;) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        _workerBusy = true;
+        if (!_stopRequested.load() && connectOnce()) {
+            while (!_stopRequested.load() && WiFi.isConnected() && _mqtt.connected()) {
+                _mqtt.loop();
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
+        }
+        _connected = false;
+        _mqtt.disconnect();
+        _wifiClient.stop();
+        _workerBusy = false;
     }
 }
 
 void BMOMqttClient::onMessage(char* topic, uint8_t* payload, unsigned int length) {
-    Serial.printf("[MQTT] Received message on %s (%u bytes)\n", topic, length);
-
-    if (strcmp(topic, _configTopic) != 0 && strcmp(topic, _snapshotTopic) != 0) return;
-    if (length > BMO_MQTT_BUFFER_SIZE) return;
-
-    // Check for Tombstone (zero-byte payload = retirement per Architecture §11)
-    if (length == 0) {
-        Serial.println("[MQTT] Tombstone received! Device is marked RETIRED.");
-        _isRetired = true;
-        _config.valid = false;
-        _snapshot.valid = false;
-        return;
-    }
-
-    if (strcmp(topic, _configTopic) == 0) {
-        handleConfigPayload(payload, length);
-    } else if (strcmp(topic, _snapshotTopic) == 0) {
-        handleSnapshotPayload(payload, length);
+    uint8_t kind = strcmp(topic, _configTopic) == 0 ? 0 : strcmp(topic, _snapshotTopic) == 0 ? 1 :
+                   strcmp(topic, _weatherTopic) == 0 ? 2 : 255;
+    if (kind == 255 || length > (kind == 2 ? MAX_WEATHER_PAYLOAD_BYTES : BMO_MQTT_BUFFER_SIZE)) return;
+    if (length > sizeof(_packetSlots[0].payload)) return;
+    uint8_t slot = 4;
+    portENTER_CRITICAL(&_slotMux);
+    for (uint8_t i = 0; i < 4; ++i) if (!_slotUsed[i]) { _slotUsed[i] = true; slot = i; break; }
+    portEXIT_CRITICAL(&_slotMux);
+    if (slot == 4) return;
+    Packet* packet = &_packetSlots[slot];
+    packet->kind = kind;
+    packet->length = static_cast<uint16_t>(length);
+    if (length) memcpy(packet->payload, payload, length);
+    if (xQueueSend(_packetQueue, &slot, 0) != pdTRUE) {
+        portENTER_CRITICAL(&_slotMux);
+        _slotUsed[slot] = false;
+        portEXIT_CRITICAL(&_slotMux);
     }
 }
 
@@ -170,6 +269,7 @@ void BMOMqttClient::handleConfigPayload(const uint8_t* payload, unsigned int len
     _config.screenCount = count;
     _config.valid = true;
     _isRetired = false;
+    _acceptedConfig = true;
 
     Serial.printf("[MQTT] Config updated: rev %u with %u screens\n", _config.revision, _config.screenCount);
 }
@@ -256,6 +356,7 @@ void BMOMqttClient::handleSnapshotPayload(const uint8_t* payload, unsigned int l
     }
     _snapshot.windowCount = count;
     _snapshot.valid = true;
+    _acceptedSnapshot = true;
 
     Serial.printf("[MQTT] Snapshot updated: rev %u with %u windows\n", _snapshot.revision, _snapshot.windowCount);
 }

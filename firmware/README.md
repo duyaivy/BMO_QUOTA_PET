@@ -20,16 +20,17 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
   11. `SIUUU FACE`: Eyes and mouth only; inhales, bounces with squeezed happy eyes and a pulsing mouth while displaying "SIUUU!", then smiles. This is a silent OLED animation.
   12. `COOL`: Oversized sunglasses with traveling reflections, a grin and head bob.
   13. `STARRY`: Pulsing five-pointed star eyes and an excited mouth.
+- **Clock and weather:** Boots into a 24-hour Vietnam clock (UTC+7) with weekday/date and a static weather icon. The clock reads a retained `weather` MQTT topic during a single wake session, keeps it in RAM, and hides expired or future observations. No periodic weather wake is scheduled.
 - **Interactive 2-Button Navigation:**
   - **Button A (Face Mode):**
-    - Switches from Quota view back to BMO Face mode.
-    - While in Face mode, pressing Button A cycles through all 13 scenes; the first six positions are preserved.
+    - Switches from Quota view back to Clock.
+    - From Clock, opens the Happy face. In Face mode, cycles through all 13 scenes and then returns to Clock; the scene IDs are preserved.
   - **Button B (Quota Provider Mode):**
     - Switches from Face mode to Quota mode (showing Quota screen #1).
     - While in Quota mode, pressing Button B cycles through configured provider quotas (Claude, Codex, Antigravity).
     - Upon reaching the end of the quota list, displays the **"ALL PROVIDERS VIEWED / End of Quota List"** screen, informing the user that all providers have been seen and prompting either to restart or return to Face!
 - **Robust Real-Time Telemetry:**
-  - Subscribes to retained MQTT topics (`bmo/v1/devices/<deviceId>/{config,snapshot}`).
+  - Subscribes to retained MQTT topics (`bmo/v1/devices/<deviceId>/{config,snapshot,weather}`) once per boot or button wake.
   - Validates monotonic revisions (`revision`, `configRevision`) and limits payloads to < 8 KiB.
   - Renders provider quota percentages, dynamic progress bars, and status pills (`[OK]`, `[STALE]`, `[UNAVAILABLE]`, `[UNSUPPORTED]`, `[ERROR]`).
   - Supports tombstones (zero-byte retirement messages).
@@ -37,7 +38,7 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
   - Custom I2C pin assignment: SDA on **GPIO 13**, SCL on **GPIO 14** (existing wiring).
   - Immediate boot suppression of the blinding GPIO 4 flash LED.
   - 160 MHz CPU power optimization for cool operation and reduced CPU frequency (power stability requires bench testing).
-  - Idle screen saver timeout (5 minutes) to protect OLED phosphor from burn-in.
+  - After five idle minutes, powers down radio and OLED and enters button-only CPU light sleep. A/B wake is consumed through release.
 
 ---
 
@@ -133,31 +134,36 @@ Edit `include/config.local.h` and update:
 
 | Button | Current Screen | Action | Result |
 |---|---|---|---|
-| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Starry) |
-| **Button A** | Quota View | Press | Immediately returns to Face Mode |
-| **Button A** | End of List | Press | Returns to Face Mode |
-| **Button B** | Face Mode | Press | Enters Quota Mode at first provider screen |
+| **Button A** | Clock | Press | Opens Happy face |
+| **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Starry -> Clock) |
+| **Button A** | Quota View | Press | Immediately returns to Clock |
+| **Button A** | End of List | Press | Returns to Clock |
+| **Button B** | Clock or Face Mode | Press | Enters Quota Mode at first provider screen |
 | **Button B** | Quota View | Press | Advances to next Quota screen |
 | **Button B** | Last Quota Screen | Press | Displays **"ALL PROVIDERS VIEWED / End of Quota List"** screen |
 | **Button B** | End of List | Press | Wraps back to first Quota screen |
+| **A or B** | Light sleep | Press | Wakes to Clock; release is consumed |
 
 ## Correction and verification status
 
-Button A cycles faces. Button B advances configured quota pages. Empty lists and
-end-of-list notifications return to the current face after 3 seconds. A returns
+Button A cycles faces after Clock. Button B advances configured quota pages. Empty lists and
+end-of-list notifications return to Clock after 3 seconds. A returns
 immediately; B on the end notification restarts the list. A zero remaining quota
 is displayed as a quota value; it does not mean the list has ended.
 
 Use ignored `include/config.local.h` for credentials. The tracked `config.h` is
 only a loader. TLS is enabled by default: supply the broker hostname, port 8883,
 and PEM root CA in `BMO_MQTT_CA_CERT`. Missing CA or unsynchronized time prevents
-connection. Plaintext (`BMO_MQTT_TLS=0`, port 1883) is for trusted local tests only.
+connection. The firmware never calls `setInsecure`; missing CA disables TLS MQTT.
+Plaintext (`BMO_MQTT_TLS=0`, port 1883) is for trusted local tests only.
 
-Run `python3 tests/firmware/native/navigation_test.py` from the repository root
-for host tests of the production navigation implementation. The TypeScript
-simulator alone is not firmware validation. Both `esp32cam` and `esp32cam_bench`
-compiled successfully on 2026-11-03. TLS integration, OLED output, electrical
-design, runtime and charging require physical validation.
+Run the host tests under `tests/firmware/native/` for weather parsing, the wake
+session, buttons, power policy, navigation, and clock formatting. Build both
+`esp32cam` and `esp32cam_bench` PlatformIO environments. The preview at
+`/tmp/bmo-clock-preview/index.html` can be regenerated with
+`python3 tests/firmware/native/render_clock.py --preview /tmp/bmo-clock-preview/index.html`.
+These checks do not prove DNS/TLS completion time, wake pin pull-ups, or battery
+runtime on the ESP32-CAM. Those require the physical bench procedure.
 Arduino IDE compatibility has not been validated; use the PlatformIO project.
 
 ## Pet animation preview
@@ -167,8 +173,8 @@ Navigation dots are removed to free the full display height. Face scenes fill
 the wide frame; full-body scenes and the MU mark preserve aspect ratio.
 Fixed per-scene bounds include the full movement, avoiding scale changes while
 an eye moves. Rendering uses one reusable 1 KiB scratch buffer.
-New scenes repeat on a nonblocking 3.6-second cycle; Button A restarts the selected scene. The existing five-minute OLED
-sleep policy is unchanged.
+New scenes repeat on a nonblocking 3.6-second cycle; Button A restarts the selected scene.
+The five-minute idle policy now turns off OLED/radio and enters button-only light sleep.
 
 After a PlatformIO build installs the Adafruit GFX dependency, run:
 

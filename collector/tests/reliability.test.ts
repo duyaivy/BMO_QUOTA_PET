@@ -52,21 +52,22 @@ async function setup(
 describe("queue and uploader reliability", () => {
   it("retains disjoint partial snapshots and coalesces only fully superseded pending data", async () => {
     const s = await setup();
+    const capturedAt = Date.now();
     await s.collector.capture(
       "claude",
       raw({ a: 1 }),
-      "2026-10-31T00:00:00.000Z",
+      new Date(capturedAt).toISOString(),
     );
     await s.collector.capture(
       "claude",
       raw({ b: 2 }),
-      "2026-10-31T00:00:01.000Z",
+      new Date(capturedAt + 1000).toISOString(),
     );
     expect(await s.collector.pendingEvents()).toHaveLength(2);
     await s.collector.capture(
       "claude",
       raw({ a: 3 }),
-      "2026-10-31T00:00:02.000Z",
+      new Date(capturedAt + 2000).toISOString(),
     );
     const pending = await s.collector.pendingEvents();
     expect(pending).toHaveLength(2);
