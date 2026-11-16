@@ -130,6 +130,12 @@ int main(){
  // 9. Synced time but weather missing/expired (HAVE A NICE DAY!, 14:15, ?, -- deg, wifi)
  // 1709139600 + 14*3600 + 15*60 = 1709190900 (2024-02-29 14:15 UTC+7)
  frame(1709190900, nullptr, true);
+
+ // Reminder boundaries and the longest footer, using production GFX rendering.
+ frame(1709173800, nullptr, false); // 09:30 hydration break
+ frame(1709195400, nullptr, false); // 15:30 hydration break
+ frame(1709186400, nullptr, false); // 13:00 nap
+ frame(1709140500, nullptr, false); // 00:15 late-night reminder
 }
 ''')
         command = ['c++', '-std=c++17', '-DARDUINO=100', '-I', str(p), '-I', str(GFX),
@@ -139,7 +145,7 @@ int main(){
                    '-o', str(p/'test')]
         subprocess.run(command, check=True)
         frames = subprocess.run([str(p/'test')], capture_output=True, text=True, check=True).stdout.splitlines()
-        assert len(frames) == 9 and all(len(frame) == 8192 for frame in frames)
+        assert len(frames) == 13 and all(len(frame) == 8192 for frame in frames)
         output = pathlib.Path(preview)
         output.parent.mkdir(parents=True, exist_ok=True)
         names = [
@@ -152,17 +158,25 @@ int main(){
             '07_newyear_0000_clearnight_70c',
             '08_unknown_time_no_weather',
             '09_synced_time_no_weather',
+            '10_morning_hydration_break',
+            '11_afternoon_hydration_break',
+            '12_lunch_nap',
+            '13_late_night_sleep',
         ]
         descriptions = [
-            '00:00 · SWEET DREAMS! · Snow (-12°C) · Wi-Fi ON',
+            '00:00 · IT’S LATE, SLEEP! · Snow (-12°C) · Wi-Fi ON',
             '08:08 · GOOD MORNING! · Sunny (8°C) · Wi-Fi ON',
-            '09:41 · GOOD MORNING! · Cloudy (28°C) · Wi-Fi ON',
-            '12:59 · HAVE A NICE DAY! · Partly Cloudy (32°C) · Wi-Fi ON',
-            '18:30 · GOOD EVENING! · Rain (24°C) · Wi-Fi OFF',
+            '09:41 · HAVE A NICE DAY! · Cloudy (28°C) · Wi-Fi ON',
+            '12:59 · TIME FOR LUNCH! · Partly Cloudy (32°C) · Wi-Fi ON',
+            '18:30 · TIME FOR DINNER! · Rain (24°C) · Wi-Fi OFF',
             '23:59 · SWEET DREAMS! · Storm (-100°C) · Wi-Fi ON',
-            '00:00 · SWEET DREAMS! · Clear Night (70°C) · Wi-Fi ON',
+            '00:00 · IT’S LATE, SLEEP! · Clear Night (70°C) · Wi-Fi ON',
             '--:-- · BMO IS READY! · Unknown (--°) · Wi-Fi OFF',
-            '14:15 · HAVE A NICE DAY! · Unknown (--°) · Wi-Fi ON',
+            '14:15 · FANCY A COFFEE? · Unknown (--°) · Wi-Fi ON',
+            '09:30 · TAKE A REST, HYDRATE! · Wi-Fi OFF',
+            '15:30 · TAKE A REST, HYDRATE! · Wi-Fi OFF',
+            '13:00 · NAP & RECHARGE! · Wi-Fi OFF',
+            '00:15 · IT’S LATE, SLEEP! · Wi-Fi OFF',
         ]
         for name, frame in zip(names, frames):
             (output.parent / (name + '.png')).write_bytes(png(frame))

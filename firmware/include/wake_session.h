@@ -10,7 +10,7 @@ public:
     virtual ~BMOWakeTransport() = default;
     virtual void startWakeConnection() = 0;
     virtual bool isWifiConnected() const = 0;
-    virtual void requestTimeSync() = 0;
+    virtual void requestTimeSync(bool useFallback = false) = 0;
     virtual bool hasTrustedTime() const = 0;
     virtual void startMqttConnection() = 0;
     virtual bool hasConfig() const = 0;
@@ -26,8 +26,9 @@ public:
     void update(uint32_t nowMs);
     bool isFinished() const { return _state == State::COMPLETE || _state == State::DEADLINE; }
 private:
-    enum class State : uint8_t { INACTIVE, WIFI, TIME, MQTT, COMPLETE, DEADLINE };
+    enum class State : uint8_t { INACTIVE, WIFI, TIME, TIME_FALLBACK, MQTT, COMPLETE, DEADLINE };
     BMOWakeTransport& _transport;
     uint32_t _startMs;
+    uint32_t _timeRequestedMs;
     State _state;
 };

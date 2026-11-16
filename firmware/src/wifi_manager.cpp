@@ -92,14 +92,15 @@ void BMOConnectionManager::loop() {
     _timeSynced = getCurrentEpoch() >= 1700000000;
 }
 
-void BMOConnectionManager::requestTimeSync() {
+void BMOConnectionManager::requestTimeSync(bool useFallback) {
     // Keep the system epoch in UTC; display conversion happens in the clock renderer.
     _timeTrustedBeforeRequest = _timeSynced;
     _syncRequestedAtMs = millis();
     _syncRequested = true;
     receivedWakeSync.store(false);
     esp_sntp_set_time_sync_notification_cb([](timeval*) { receivedWakeSync.store(true); });
-    configTime(0, 0, BMO_NTP_SERVER_1, BMO_NTP_SERVER_2);
+    configTime(0, 0, useFallback ? BMO_NTP_SERVER_2 : BMO_NTP_SERVER_1,
+        useFallback ? BMO_NTP_SERVER_1 : BMO_NTP_SERVER_2);
 }
 
 bool BMOConnectionManager::isWifiConnected() const {

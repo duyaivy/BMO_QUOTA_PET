@@ -91,7 +91,12 @@ void BMOMqttClient::loop() {
             } else {
                 WeatherSnapshot next{};
                 if (parseWeatherPayload(packet->payload, packet->length, BMO_DEVICE_ID, next) &&
-                    applyWeatherSnapshot(next, _weather)) _receivedWeatherThisWake = true;
+                    applyWeatherSnapshot(next, _weather)) {
+                    _receivedWeatherThisWake = true;
+                    Serial.printf("[MQTT] Weather updated: rev %llu, observation=%s, temperature=%.1f C\n",
+                        static_cast<unsigned long long>(_weather.revision),
+                        _weather.hasObservation ? "yes" : "no", _weather.temperatureC);
+                } else Serial.println("[MQTT] Weather payload rejected");
             }
         }
         portENTER_CRITICAL(&_slotMux);
@@ -138,7 +143,10 @@ void dnsDone(const char*, const ip_addr_t* address, void* context) {
 
 bool BMOMqttClient::connectOnce() {
 #if BMO_MQTT_TLS
-    if (strlen(BMO_MQTT_CA_CERT) == 0) return false;
+    if (strlen(BMO_MQTT_CA_CERT) == 0) {
+        Serial.println("[MQTT] Cannot connect: configure BMO_MQTT_CA_CERT in config.local.h");
+        return false;
+    }
 #endif
     static DnsResult dns{}; // Stable until lwIP's bounded DNS callback completes.
     dns.done = false;
@@ -170,11 +178,15 @@ bool BMOMqttClient::connectOnce() {
     bool connected = strlen(BMO_MQTT_USER) > 0
         ? _mqtt.connect(clientId, BMO_MQTT_USER, BMO_MQTT_PASSWORD)
         : _mqtt.connect(clientId);
-    if (!connected || _stopRequested.load()) return false;
+    if (!connected || _stopRequested.load()) {
+        Serial.printf("[MQTT] Connection failed: state=%d\n", _mqtt.state());
+        return false;
+    }
     _mqtt.subscribe(_configTopic, 1);
     _mqtt.subscribe(_snapshotTopic, 1);
     _mqtt.subscribe(_weatherTopic, 1);
     _connected = true;
+    Serial.println("[MQTT] Connected; subscribed to retained config/snapshot/weather");
     return true;
 }
 

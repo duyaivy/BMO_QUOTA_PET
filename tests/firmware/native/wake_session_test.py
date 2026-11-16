@@ -12,10 +12,11 @@ with tempfile.TemporaryDirectory() as directory:
 #include <cassert>
 struct Fake : BMOWakeTransport {
     bool wifi=false, time=false, config=false, snapshot=false, weather=false;
+    bool fallback=false;
     int starts=0, syncs=0, mqtts=0, stops=0;
     void startWakeConnection() override { starts++; }
     bool isWifiConnected() const override { return wifi; }
-    void requestTimeSync() override { syncs++; }
+    void requestTimeSync(bool useFallback = false) override { syncs++; fallback=useFallback; }
     bool hasTrustedTime() const override { return time; }
     void startMqttConnection() override { mqtts++; }
     bool hasConfig() const override { return config; }
@@ -67,6 +68,35 @@ int main() {
     assert(transport.mqtts==2 && !session.isFinished());
     session.update(120000);
     assert(session.isFinished() && transport.stops==4);
+    // A silent first NTP server must not consume the entire wake budget.
+    Fake delayed;
+    delayed.wifi=true;
+    BMOWakeSession retry(delayed);
+    retry.begin(0xfffffff0u);
+    retry.update(0xfffffff1u);
+    assert(delayed.syncs==1 && !delayed.fallback);
+    retry.update(0x00000ba8u); // 2999 ms after initial request, across rollover.
+    assert(delayed.syncs==1);
+    retry.update(0x00000ba9u); // Try the second server at 3000 ms.
+    assert(delayed.syncs==2 && delayed.fallback);
+    retry.update(0x00000baau);
+    assert(delayed.syncs==2); // No per-frame restart of SNTP.
+    delayed.time=true;
+    retry.update(0x00000babu);
+    assert(delayed.mqtts==1);
+    delayed.config=true;delayed.snapshot=true;delayed.weather=true;
+    retry.update(0x00000bacu);
+    assert(retry.isFinished() && delayed.stops==1);
+    delayed.time=false;
+    retry.begin(100000);
+    retry.update(100001);
+    assert(!delayed.fallback); // Each wake starts with the primary server.
+    retry.update(103001);
+    assert(delayed.fallback);
+    retry.update(119999);
+    assert(!retry.isFinished());
+    retry.update(120000);
+    assert(retry.isFinished() && delayed.stops==2); // Original deadline stays fixed.
 }
 ''')
     subprocess.run(['c++', '-std=c++17', '-I', str(path), '-I', str(root/'firmware/include'), str(path/'test.cpp'), str(root/'firmware/src/wake_session.cpp'), '-o', str(path/'test')], check=True)

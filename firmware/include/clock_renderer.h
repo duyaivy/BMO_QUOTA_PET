@@ -8,6 +8,7 @@ struct ClockText {
     char time[6];
     char date[16];
     char temperature[8];
+    char reminder[22]; // At most 21 characters at 6 pixels each on a 128px OLED.
     WeatherCondition condition;
     bool isDay;
     bool wifiConnected;

@@ -6,7 +6,7 @@ bool wakeTimeReady(bool trustedBeforeRequest, bool syncArrived,
 }
 
 BMOWakeSession::BMOWakeSession(BMOWakeTransport& transport)
-    : _transport(transport), _startMs(0), _state(State::INACTIVE) {}
+    : _transport(transport), _startMs(0), _timeRequestedMs(0), _state(State::INACTIVE) {}
 
 void BMOWakeSession::begin(uint32_t nowMs) {
     if (!isFinished() && _state != State::INACTIVE) return;
@@ -23,12 +23,19 @@ void BMOWakeSession::update(uint32_t nowMs) {
         return;
     }
     if (_state == State::WIFI && _transport.isWifiConnected()) {
-        _transport.requestTimeSync();
+        _transport.requestTimeSync(false);
+        _timeRequestedMs = nowMs;
         _state = State::TIME;
     }
-    if (_state == State::TIME && _transport.hasTrustedTime()) {
-        _transport.startMqttConnection();
-        _state = State::MQTT;
+    if (_state == State::TIME || _state == State::TIME_FALLBACK) {
+        if (_transport.hasTrustedTime()) {
+            _transport.startMqttConnection();
+            _state = State::MQTT;
+        } else if (_state == State::TIME && uint32_t(nowMs - _timeRequestedMs) >= 3000u) {
+            // lwIP's default server failover can outlast our entire wake budget.
+            _transport.requestTimeSync(true);
+            _state = State::TIME_FALLBACK;
+        }
     }
     if (_state == State::MQTT && _transport.hasConfig() &&
         _transport.hasMatchingSnapshot() && _transport.hasWeatherResponse()) {

@@ -20,7 +20,7 @@ public:
     void loop();
     void startWakeConnection();
     void stopForSleep();
-    void requestTimeSync();
+    void requestTimeSync(bool useFallback = false);
 
     bool isWifiConnected() const;
     bool isTimeSynced() const;

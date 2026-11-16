@@ -40,20 +40,29 @@ void drawHeader(OLED& oled, const ClockText& text) {
         oled.print("BMO CLOCK");
     }
 
-    // 7x7 Crisp Monochrome Wi-Fi Glyph at top-right (x: 118..124, y: 1..7)
-    if (text.wifiConnected) {
-        oled.drawPixel(121, 7, SSD1306_WHITE);
-        oled.drawPixel(120, 5, SSD1306_WHITE);
-        oled.drawPixel(121, 4, SSD1306_WHITE);
-        oled.drawPixel(122, 5, SSD1306_WHITE);
-        oled.drawFastHLine(119, 1, 5, SSD1306_WHITE);
-        oled.drawPixel(118, 2, SSD1306_WHITE);
-        oled.drawPixel(124, 2, SSD1306_WHITE);
-    } else {
-        oled.drawPixel(121, 7, SSD1306_WHITE);
-        oled.drawLine(118, 1, 124, 7, SSD1306_WHITE);
-        oled.drawPixel(118, 2, SSD1306_WHITE);
-        oled.drawPixel(124, 6, SSD1306_WHITE);
+    // Three nested signal arcs and a dot, readable at the OLED's native size.
+    // Keep the same Wi-Fi silhouette when offline instead of a lone diagonal.
+    constexpr uint16_t wifiRows[] = {
+        0b00111111100,
+        0b01000000010,
+        0b10011111001,
+        0b00100000100,
+        0b00001110000,
+        0b00010001000,
+        0b00000000000,
+        0b00000100000,
+    };
+    for (int y = 0; y < 8; ++y) {
+        for (int x = 0; x < 11; ++x) {
+            if (wifiRows[y] & (1u << (10 - x)))
+                oled.drawPixel(115 + x, 1 + y, SSD1306_WHITE);
+        }
+    }
+    if (!text.wifiConnected) {
+        // Clear a one-pixel border so the slash stays distinct from the arcs.
+        oled.drawLine(116, 0, 125, 7, SSD1306_BLACK);
+        oled.drawLine(114, 2, 123, 9, SSD1306_BLACK);
+        oled.drawLine(115, 1, 124, 8, SSD1306_WHITE);
     }
 }
 
@@ -187,23 +196,24 @@ void drawWeatherWidget(OLED& oled, const ClockText& text) {
     oled.drawRect(degX, 35, 2, 2, SSD1306_WHITE);
 }
 
-template <typename OLED>
-void drawFooter(OLED& oled, const char* timeStr) {
-    oled.drawFastHLine(0, 52, 128, SSD1306_WHITE);
+const char* reminderForTime(int hour, int minute) {
+    if ((hour == 9 || hour == 15) && minute >= 30 && minute < 40)
+        return "TAKE A REST, HYDRATE!";
+    const int minutes = hour * 60 + minute;
+    if (minutes < 5 * 60) return "IT'S LATE, SLEEP!";
+    if (minutes < 9 * 60) return "GOOD MORNING!";
+    if (minutes < 11 * 60 + 30) return "HAVE A NICE DAY!";
+    if (minutes < 13 * 60) return "TIME FOR LUNCH!";
+    if (minutes < 14 * 60) return "NAP & RECHARGE!";
+    if (minutes < 18 * 60) return "FANCY A COFFEE?";
+    if (minutes < 20 * 60) return "TIME FOR DINNER!";
+    if (minutes < 22 * 60) return "TIME TO UNWIND!";
+    return "SWEET DREAMS!";
+}
 
-    const char* greeting = "BMO IS READY!";
-    if (strcmp(timeStr, "--:--") != 0 && strlen(timeStr) >= 2) {
-        int hour = (timeStr[0] - '0') * 10 + (timeStr[1] - '0');
-        if (hour >= 5 && hour < 11) {
-            greeting = "GOOD MORNING!";
-        } else if (hour >= 11 && hour < 17) {
-            greeting = "HAVE A NICE DAY!";
-        } else if (hour >= 17 && hour < 21) {
-            greeting = "GOOD EVENING!";
-        } else {
-            greeting = "SWEET DREAMS!";
-        }
-    }
+template <typename OLED>
+void drawFooter(OLED& oled, const char* greeting) {
+    oled.drawFastHLine(0, 52, 128, SSD1306_WHITE);
 
     oled.setTextSize(1);
     oled.setTextColor(SSD1306_WHITE);
@@ -223,6 +233,7 @@ void BMOClockRenderer::format(time_t nowUtc, const WeatherSnapshot* weather, Clo
     memset(&out, 0, sizeof(out));
     strcpy(out.time, "--:--");
     strcpy(out.temperature, "--");
+    strcpy(out.reminder, "BMO IS READY!");
     out.condition = WeatherCondition::UNKNOWN;
     out.isDay = true;
     out.wifiConnected = wifiConnected;
@@ -232,6 +243,8 @@ void BMOClockRenderer::format(time_t nowUtc, const WeatherSnapshot* weather, Clo
     time_t local = nowUtc + 7 * 3600;
     tm calendar{};
     gmtime_r(&local, &calendar);
+    snprintf(out.reminder, sizeof(out.reminder), "%s",
+        reminderForTime(calendar.tm_hour, calendar.tm_min));
     snprintf(out.time, sizeof(out.time), "%02d:%02d", calendar.tm_hour, calendar.tm_min);
 
     const int weekday = calendar.tm_wday == 0 ? 8 : calendar.tm_wday + 1;
@@ -261,7 +274,7 @@ void BMOClockRenderer::renderIfChanged(time_t nowUtc, const WeatherSnapshot* wea
     drawHeader(oled, next);
     drawClock(oled, next);
     drawWeatherWidget(oled, next);
-    drawFooter(oled, next.time);
+    drawFooter(oled, next.reminder);
 
     display.update();
 }

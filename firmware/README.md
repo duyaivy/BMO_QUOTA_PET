@@ -157,6 +157,22 @@ and PEM root CA in `BMO_MQTT_CA_CERT`. Missing CA or unsynchronized time prevent
 connection. The firmware never calls `setInsecure`; missing CA disables TLS MQTT.
 Plaintext (`BMO_MQTT_TLS=0`, port 1883) is for trusted local tests only.
 
+If Button B reports no quota and weather is blank, inspect the serial log before
+changing server data. `[MQTT] TLS CA missing` means the device cannot connect:
+set `BMO_MQTT_CA_CERT` in ignored `config.local.h` to the broker's trusted PEM
+root CA, rebuild, and upload. A successful weather monitor response only proves
+the server job ran; it does not prove the ESP received the retained messages.
+The `[WAKE] Closing` log reports the Wi-Fi, UTC time, config, matching snapshot,
+and weather stages separately. All five should be `1` after a complete session.
+A cold boot tries the second configured NTP server after 3 seconds without UTC;
+this avoids waiting for lwIP's longer default failover. A boot that still fails
+to obtain UTC within the 20-second budget cannot start TLS MQTT. The next boot
+or button wake from light sleep starts another session.
+While awake after a completed session, the radio stays off; monitor updates are
+received on the next boot or wake, rather than every 15 minutes on the device.
+The clock's top-right Wi-Fi icon shows signal arcs while connected and the same
+arcs crossed out while disconnected, including intentional radio shutdown.
+
 Run the host tests under `tests/firmware/native/` for weather parsing, the wake
 session, buttons, power policy, navigation, and clock formatting. Build both
 `esp32cam` and `esp32cam_bench` PlatformIO environments. The preview at
@@ -165,6 +181,28 @@ session, buttons, power policy, navigation, and clock formatting. Build both
 These checks do not prove DNS/TLS completion time, wake pin pull-ups, or battery
 runtime on the ESP32-CAM. Those require the physical bench procedure.
 Arduino IDE compatibility has not been validated; use the PlatformIO project.
+
+## Clock reminders
+
+The clock footer uses Vietnam time (UTC+7) for these daily reminders:
+
+| Local time | Footer |
+|---|---|
+| 00:00–04:59 | IT'S LATE, SLEEP! |
+| 05:00–08:59 | GOOD MORNING! |
+| 09:00–11:29 | HAVE A NICE DAY! |
+| 11:30–12:59 | TIME FOR LUNCH! |
+| 13:00–13:59 | NAP & RECHARGE! |
+| 14:00–17:59 | FANCY A COFFEE? |
+| 18:00–19:59 | TIME FOR DINNER! |
+| 20:00–21:59 | TIME TO UNWIND! |
+| 22:00–23:59 | SWEET DREAMS! |
+
+At 09:30–09:39 and 15:30–15:39, `TAKE A REST, HYDRATE!` overrides the normal
+footer. Messages fit one centered line (at most 21 characters / 126 pixels).
+They appear on the active clock screen; they do not wake the sleeping device,
+interrupt quota/face screens, or send additional MQTT messages. Without a synced
+clock, the footer remains `BMO IS READY!`.
 
 ## Pet animation preview
 

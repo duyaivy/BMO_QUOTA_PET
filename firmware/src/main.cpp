@@ -11,15 +11,28 @@
 namespace {
 class DeviceWakeTransport final : public BMOWakeTransport {
 public:
-    void startWakeConnection() override { connManager.startWakeConnection(); }
+    void startWakeConnection() override {
+        Serial.println("[WAKE] Starting 20-second network session");
+        connManager.startWakeConnection();
+    }
     bool isWifiConnected() const override { return connManager.isWifiConnected(); }
-    void requestTimeSync() override { connManager.requestTimeSync(); }
+    void requestTimeSync(bool useFallback = false) override {
+        Serial.println(useFallback ? "[WAKE] UTC pending; trying fallback NTP server"
+            : "[WAKE] Wi-Fi connected; requesting UTC time");
+        connManager.requestTimeSync(useFallback);
+    }
     bool hasTrustedTime() const override { return connManager.isTimeSynced(); }
-    void startMqttConnection() override { mqttClient.startWakeConnection(); }
+    void startMqttConnection() override {
+        Serial.println("[WAKE] UTC time ready; starting MQTT");
+        mqttClient.startWakeConnection();
+    }
     bool hasConfig() const override { return mqttClient.hasWakeConfig(); }
     bool hasMatchingSnapshot() const override { return mqttClient.hasWakeSnapshot(); }
     bool hasWeatherResponse() const override { return mqttClient.hasWakeWeather(); }
     void stopForSleep() override {
+        Serial.printf("[WAKE] Closing: wifi=%d time=%d config=%d snapshot=%d weather=%d epoch=%lld\n",
+            isWifiConnected(), hasTrustedTime(), hasConfig(), hasMatchingSnapshot(),
+            hasWeatherResponse(), static_cast<long long>(connManager.getCurrentEpoch()));
         mqttClient.stopForSleep();
         connManager.stopForSleep();
     }
