@@ -1,0 +1,107 @@
+{
+  "BMO_MAIN_BODY": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 36880.3497781609
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 36880.3497781609,
+      "relative_volume_error": 0.0005104302320946476
+    }
+  },
+  "BMO_BACK_COVER": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 8559.469542098279
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 8559.469542098279,
+      "relative_volume_error": 6.404636999721745e-06
+    }
+  },
+  "BMO_DPAD_YELLOW": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 394.6521155414683
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 394.6521155414683,
+      "relative_volume_error": 2.9276797759024174e-07
+    }
+  },
+  "BMO_BUTTON_RED": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 200.8149751291286
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 200.8149751291286,
+      "relative_volume_error": 0.0012850486414184234
+    }
+  },
+  "BMO_DECOR_TRIANGLE_CYAN": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 36.75
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 36.75,
+      "relative_volume_error": 1.9334496211159186e-16
+    }
+  },
+  "BMO_DECOR_UPPER_BLUE": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 10.588639792018512
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 10.588639792018512,
+      "relative_volume_error": 0.0013425993959795181
+    }
+  },
+  "BMO_DECOR_SMALL_GREEN": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 7.953248322088257
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 7.953248322088257,
+      "relative_volume_error": 0.0013421821714650701
+    }
+  }
+}

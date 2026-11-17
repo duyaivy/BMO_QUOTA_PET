@@ -1,0 +1,130 @@
+[
+  {
+    "axis_xz": [
+      -20,
+      30
+    ],
+    "pilot_core_obstruction_mm3": 0.0,
+    "receiving_ring_fill_fraction_last_6mm": 1.0,
+    "lid_clearance_core_obstruction_mm3": 0.0,
+    "solid_on_center_axis_mm": 0.0,
+    "receiving_sections": [
+      {
+        "y": 12,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 18,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 24,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 28,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 29.5,
+        "ring_fill_fraction": 1.0
+      }
+    ]
+  },
+  {
+    "axis_xz": [
+      20,
+      30
+    ],
+    "pilot_core_obstruction_mm3": 0.0,
+    "receiving_ring_fill_fraction_last_6mm": 1.0,
+    "lid_clearance_core_obstruction_mm3": 0.0,
+    "solid_on_center_axis_mm": 0.0,
+    "receiving_sections": [
+      {
+        "y": 12,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 18,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 24,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 28,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 29.5,
+        "ring_fill_fraction": 1.0
+      }
+    ]
+  },
+  {
+    "axis_xz": [
+      -21.5,
+      69
+    ],
+    "pilot_core_obstruction_mm3": 0.0,
+    "receiving_ring_fill_fraction_last_6mm": 1.0,
+    "lid_clearance_core_obstruction_mm3": 0.0,
+    "solid_on_center_axis_mm": 4.0,
+    "receiving_sections": [
+      {
+        "y": 12,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 18,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 24,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 28,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 29.5,
+        "ring_fill_fraction": 1.0
+      }
+    ]
+  },
+  {
+    "axis_xz": [
+      21.5,
+      69
+    ],
+    "pilot_core_obstruction_mm3": 0.0,
+    "receiving_ring_fill_fraction_last_6mm": 1.0,
+    "lid_clearance_core_obstruction_mm3": 0.0,
+    "solid_on_center_axis_mm": 4.0,
+    "receiving_sections": [
+      {
+        "y": 12,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 18,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 24,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 28,
+        "ring_fill_fraction": 1.0
+      },
+      {
+        "y": 29.5,
+        "ring_fill_fraction": 1.0
+      }
+    ]
+  }
+]

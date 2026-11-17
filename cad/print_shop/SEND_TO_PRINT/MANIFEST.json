@@ -1,31 +1,23 @@
 {
-  "status": "DESIGN_REVIEW_REQUIRED",
-  "files": [
-    {
-      "name": "BMO_MAIN_BODY.stl",
-      "color": "mint",
-      "sha256": "d0f471762619e0cdd56be9a92de21d70db96d344a8347481f87471ca79433a36",
-      "bytes": 1954384
-    },
-    {
-      "name": "BMO_BACK_COVER.stl",
-      "color": "mint",
-      "sha256": "f30638d25944f3b3cfd9dc970a595663af089e26fe270d97821374945284bac5",
-      "bytes": 247284
-    },
-    {
-      "name": "BMO_DPAD_YELLOW.stl",
-      "color": "yellow",
-      "sha256": "f18b5144a0ba3357a3f51faa030a38094208645c8204563f3d33bf2312e0ad1d",
-      "bytes": 4684
-    },
-    {
-      "name": "BMO_BUTTON_RED.stl",
-      "color": "red",
-      "sha256": "5cadeba997506e316e74d36737ff5f9b41206d573d69bc609142a7bcc8147603",
-      "bytes": 51884
-    }
-  ],
-  "printed_part_count": 4,
-  "nonprinted_additional_hardware": "Two FR4 carriers and four M2 fasteners; actual tactile attachment/footprint must be verified."
+  "BMO_BACK_COVER.stl": "69c0983665396da1a8cdad28a037e5509745216cbc9ccae7def49832ca2f6bf7",
+  "BMO_DECOR_SMALL_GREEN.stl": "7b27f56f52d0a8c3c464c8bcb79e55626181747fabc224096a3ecd96de0c0e30",
+  "PREVIEW.html": "fcef9bdf409491adf9ebe3f626b83ee5525857b3afca814e3c7b64a74cc91216",
+  "MESH_CHECKS.json": "9369576079760ca66e6593f9869daadadff025e6ce0d6d34c96d539ff696042a",
+  "rear-screw-audit.json": "bc6b2f39addedf85fbe89a6b6b8c46c37fb8725b1c550133b24319c640f4f0aa",
+  "README_VI.txt": "830a6d41e666cb9b4a958a739b85988090a0fa41c95ed89bd4f760a9a28cd703",
+  "BMO_BUTTON_RED.stl": "f1b1da082a1f2803be99590c1099ab91b000f1f6d7bab46b13841b0eaa99e94a",
+  "BMO_DECOR_TRIANGLE_CYAN.stl": "3f917b2e4889be7ada19a2d7d435ff54113df57424b88ead5865ff1d101f1d64",
+  "BMO_DPAD_YELLOW.stl": "b255110e9765a1609ce3a5dcb63a37170e3e55d28eac5e73ce3a2cb48f3270ce",
+  "mesh-validation.json": "9369576079760ca66e6593f9869daadadff025e6ce0d6d34c96d539ff696042a",
+  "revision-report.json": "6074711d07e62c6744dbb332d049811c2c392cfd7d9c3deb3f9a1b3f337e10fd",
+  "BMO_MAIN_BODY.stl": "64a21ed79e33eace5ca855a6969bbce0b111843305cfddb1010c0c23175965c7",
+  "BMO_DECOR_UPPER_BLUE.stl": "ae0a2889767f29709e1317f5c61685452327e56b86a7892eb596f14e42a54170",
+  "preview/07-seven-print-parts.png": "f735881918840cd77e547d2ccf7f5c57658bb356ff5a2dd94b2b90d700bd566b",
+  "preview/06-section.png": "d09a4b701a51399515f9f57455d908fe667e3ca8ce3c0aeb191b5d4d7d9c4193",
+  "preview/05-exploded.png": "e3e58f1e15fd04d8c8e4af5129f83122763664ab755b837453ec110a84240f47",
+  "preview/08-inside-back-cover.png": "06e083752089cfbf35ab284353f37d860a04d49e23ad9a92c0d11630128c0eae",
+  "preview/02-front.png": "8e7e755d61daa87c7d2e77def0504c04be8a3d5849dde8796a2550b2bac8f993",
+  "preview/03-side-BMO.png": "b74d809bef4dec693544cf0fa3dcc4f1eb4cd966d710353193e63c060097d18d",
+  "preview/04-back-switch.png": "c9a62d7d691e8a224314721b9cb9169dc97ffef4fdf8491a2182032c8e78d752",
+  "preview/01-assembly.png": "4d06be20054c54a4bde6bc4155eeb5aa63acd9fc10325878b55ffd82790206f7"
 }

@@ -1,36 +1,41 @@
-BMO QUOTA PET — BỘ 4 CHI TIẾT IN THỬ
-Trạng thái: DESIGN_REVIEW_REQUIRED — chưa xác minh fit với toàn bộ linh kiện thật.
+BMO — BẢN NẮP LƯNG ĐƠN GIẢN, BỎ THANH/KHAY GIỮ MẠCH VÀ PIN
 
-GỬI TIỆM IN
-In mỗi STL một chiếc, đơn vị mm, scale 100%:
-1. BMO_MAIN_BODY.stl     — xanh mint: thân, tay, chân, tai rỗng, trang trí, chữ liền thân.
-2. BMO_BACK_COVER.stl    — xanh mint: nắp lưng, khay/giá đỡ, vị trí công tắc sau lưng.
-3. BMO_DPAD_YELLOW.stl   — vàng: nút D-pad thật.
-4. BMO_BUTTON_RED.stl    — đỏ: nút tròn thật.
+Dùng bộ này thay cho bộ reinforced cũ.
+File thiết kế chính: BMO_SIMPLE_BACK.FCStd (FreeCAD, gồm cả linh kiện tham chiếu).
+BMO_PRINT_ASSEMBLY.step và 7 STEP riêng chỉ gồm các chi tiết nhựa cần in.
+7 STL đã kiểm tra kín, mỗi file một khối; đơn vị mm, scale 100%.
 
-Thân danh nghĩa 48 x 48 x 68 mm, chưa tính tay/chân/tai/nút. Hai chân và chữ BMO
-đã phục hồi từ LIVE_STATE_BEFORE; chữ O đồng tâm gốc tay. Không tách tay/chân/tai
-ra để in rời. Các chi tiết giả và chữ cùng màu thân; người dùng tự sơn nếu muốn.
+ĐÃ SỬA
+- Xoá cụm thanh ngang, hai thanh dẫn ESP32, khay và gân giữ pin trong nắp lưng.
+- Giữ nguyên vị trí/hình dáng 14 chi tiết linh kiện so với bản trước.
+- Giữ mặt nắp, lỗ bắt vít, cửa sạc, vị trí giữ công tắc.
+- Giữ tay/khớp chân đã gia cố, bỏ bệ chống ngã dưới thân.
+- Giữ màu ba nút trang trí: tam giác cyan, tròn trên xanh lam, tròn nhỏ xanh lá.
+- D-pad vàng và nút tròn đỏ là nút chức năng.
 
-Profile thử để tiệm đánh giá: nozzle 0.4 mm; layer 0.16–0.20 mm; 3–4 vách.
-STL đã đặt trên Z=0 theo hướng in thử. Tiệm cần xem support trong slicer, đặc biệt
-dưới tay/ngón, đáy thân, gân trong nắp và flange của hai cap. Giữ sạch mặt trượt,
-lỗ tai và hốc OLED; không tự thay scale để sửa fit. Hai cap có hai trụ chặn nhỏ,
-cần gỡ support nhẹ. Chưa có G-code hoặc profile máy in đã thử.
+IN MÀU
+BMO_MAIN_BODY và BMO_BACK_COVER: xanh mint.
+BMO_DPAD_YELLOW: vàng; BMO_BUTTON_RED: đỏ.
+BMO_DECOR_TRIANGLE_CYAN: cyan; BMO_DECOR_UPPER_BLUE: xanh lam;
+BMO_DECOR_SMALL_GREEN: xanh lá.
+STL không lưu màu; tên file và preview là hướng dẫn gán màu.
+Thân và ba vùng màu trang trí dùng chung tọa độ, nhập thành một cụm nhiều phần
+trong slicer để giữ đúng vị trí. Hai nút thật và nắp lưng là chi tiết lắp rời.
+Các STL giữ tọa độ lắp ráp, shop chủ động chọn hướng in và support theo máy.
+Không tự thay scale để sửa độ khít.
 
 LẮP RÁP
-Để chỉ có 4 chi tiết nhựa in, hai tactile dùng 2 miếng FR4/PCB đục lỗ dày 1.6 mm
-và 4 vít M2 làm giá. Đây là vật tư lắp ráp bổ sung, không có STL in riêng.
-Cách giữ switch/footprint/chân hàn phải đối chiếu switch thật; không thêm nút thật.
+Nắp có 4 lỗ thông đường kính 2,3 mm, hốc đầu vít đường kính 4,2 mm sâu 1 mm.
+Thân chính có 4 lỗ mồi danh nghĩa 1,7 mm đồng trục, để vít tạo ren trong nhựa.
+Không có ren kim loại hoặc insert. Thợ cần chọn vít tạo ren cho nhựa tương ứng
+và thử độ khít trên vật liệu in; chưa thử bắt vít thật. rear-screw-audit.json
+ghi kiểm tra 6 mm cuối lỗ nhận vít và độ thông của lỗ nắp.
+Pin và các mạch không còn khay định vị in liền nắp. Cố định bằng đệm/băng dính
+phù hợp hoặc dây giữ tại vị trí tham chiếu trong CAD và ảnh mặt cắt.
+Linh kiện điện tử trong CAD chỉ để tham chiếu, không in chúng.
+Giá FR4 của hai nút thật vẫn là vật tư lắp riêng, không thuộc bộ nhựa in.
+Chưa kiểm chứng lắp linh kiện thật, độ bền hoặc cân bằng khi bỏ bệ dưới.
 
-TRƯỚC KHI IN FULL ĐỂ LẮP
-Cần đo pack 503048 cả bọc/PCM/JST, header ESP, OLED, boost/tụ, charger/công tắc và
-chiều cao/hành trình tactile. Khe ngang cell–khay danh nghĩa 0.3 mm mỗi bên.
-Nên in thử vùng nút/giá switch và thử bằng dummy pin trước; không ép pin thật vào
-vỏ để bù sai số. Mesh kín không chứng minh kích thước thực hoặc độ bền đã đạt.
-
-XEM PREVIEW
-Mở PREVIEW.html bằng trình duyệt để xem ảnh assembly, mặt trước, cạnh BMO,
-công tắc sau lưng, exploded, section và bộ 4 chi tiết in. Bấm ảnh để phóng lớn.
-Muốn xoay 3D: mở BMO_PRINT_SHOP.FCStd bằng FreeCAD; hoặc kéo 4 STL vào slicer.
-File CAD/STEP và bản preview CAD nằm tại cad/print_shop/ trong project gốc.
+PREVIEW.html gồm ảnh lắp hoàn chỉnh, mặt trong nắp lưng và mặt cắt linh kiện.
+Ảnh mặt cắt chỉ minh hoạ bố trí; không phải chi tiết in bị cắt đôi.
+revision-report.json ghi đối chiếu linh kiện; mesh-validation.json ghi kiểm tra STL.

@@ -55,3 +55,5 @@ __pycache__/
 /cad/print_shop/*-trial.stl
 /cad/print_shop/mesh-*-study.json
 /cad/print_shop/BMO_SEND_TO_PRINT.zip
+/cad/print_shop/reinforced/
+/cad/print_shop/simple_back/preview-request.json

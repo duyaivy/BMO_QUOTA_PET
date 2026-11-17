@@ -1,0 +1,130 @@
+{
+  "BMO_SIMPLE_BACK.FCStd": {
+    "bytes": 671977,
+    "sha256": "0589d2e35eade4c23f6027181ac6f2873e01fabeaa69eedc5379ca929a8c1cd7"
+  },
+  "README_VI.txt": {
+    "bytes": 2760,
+    "sha256": "830a6d41e666cb9b4a958a739b85988090a0fa41c95ed89bd4f760a9a28cd703"
+  },
+  "PREVIEW.html": {
+    "bytes": 3008,
+    "sha256": "fcef9bdf409491adf9ebe3f626b83ee5525857b3afca814e3c7b64a74cc91216"
+  },
+  "revision-report.json": {
+    "bytes": 2274,
+    "sha256": "6074711d07e62c6744dbb332d049811c2c392cfd7d9c3deb3f9a1b3f337e10fd"
+  },
+  "mesh-validation.json": {
+    "bytes": 2627,
+    "sha256": "9369576079760ca66e6593f9869daadadff025e6ce0d6d34c96d539ff696042a"
+  },
+  "rear-screw-audit.json": {
+    "bytes": 2404,
+    "sha256": "bc6b2f39addedf85fbe89a6b6b8c46c37fb8725b1c550133b24319c640f4f0aa"
+  },
+  "BMO_BACK_COVER.stl": {
+    "bytes": 275684,
+    "sha256": "69c0983665396da1a8cdad28a037e5509745216cbc9ccae7def49832ca2f6bf7"
+  },
+  "BMO_BUTTON_RED.stl": {
+    "bytes": 29484,
+    "sha256": "f1b1da082a1f2803be99590c1099ab91b000f1f6d7bab46b13841b0eaa99e94a"
+  },
+  "BMO_DECOR_SMALL_GREEN.stl": {
+    "bytes": 13884,
+    "sha256": "7b27f56f52d0a8c3c464c8bcb79e55626181747fabc224096a3ecd96de0c0e30"
+  },
+  "BMO_DECOR_TRIANGLE_CYAN.stl": {
+    "bytes": 484,
+    "sha256": "3f917b2e4889be7ada19a2d7d435ff54113df57424b88ead5865ff1d101f1d64"
+  },
+  "BMO_DECOR_UPPER_BLUE.stl": {
+    "bytes": 13884,
+    "sha256": "ae0a2889767f29709e1317f5c61685452327e56b86a7892eb596f14e42a54170"
+  },
+  "BMO_DPAD_YELLOW.stl": {
+    "bytes": 4684,
+    "sha256": "b255110e9765a1609ce3a5dcb63a37170e3e55d28eac5e73ce3a2cb48f3270ce"
+  },
+  "BMO_MAIN_BODY.stl": {
+    "bytes": 1935884,
+    "sha256": "64a21ed79e33eace5ca855a6969bbce0b111843305cfddb1010c0c23175965c7"
+  },
+  "BMO_BACK_COVER.step": {
+    "bytes": 382931,
+    "sha256": "a90700d72fc19b1627a2c8aef825e23dec79263233861d18441b6aa6fc4a4fe5"
+  },
+  "BMO_BUTTON_RED.step": {
+    "bytes": 15586,
+    "sha256": "6152fe76229bae5c641bfbd32cd14cc9069b1260e3973558fbb410cdab17f75b"
+  },
+  "BMO_DECOR_SMALL_GREEN.step": {
+    "bytes": 3516,
+    "sha256": "404f6fa690553f0ca774f48544d6eae0b83ed66a2acbf487116b9fedad82aaae"
+  },
+  "BMO_DECOR_TRIANGLE_CYAN.step": {
+    "bytes": 5924,
+    "sha256": "343df6153a273dc5539d3d082c15d193d0cc0d34fdb51deb171d3e30db3b593c"
+  },
+  "BMO_DECOR_UPPER_BLUE.step": {
+    "bytes": 3519,
+    "sha256": "cabe3c560700403fcae21c69a43ec07dacf5321f808874d114c16e343bf98d1b"
+  },
+  "BMO_DPAD_YELLOW.step": {
+    "bytes": 32583,
+    "sha256": "1c38e9aef9df276d69e6eee1df9c2ae3577f411c3469b11094c9112069c83276"
+  },
+  "BMO_MAIN_BODY.step": {
+    "bytes": 1526995,
+    "sha256": "2fe69ea097edd6223f8447dc94151b854d8d1296bfca5c1696e4b1c848d907db"
+  },
+  "BMO_PRINT_ASSEMBLY.step": {
+    "bytes": 1986702,
+    "sha256": "124e52b8ab341e9485c4a9d80fcd4863cd90d2869cb9e488d9c1e4bbfb5b8618"
+  },
+  "01-assembly.png": {
+    "bytes": 80404,
+    "sha256": "4d06be20054c54a4bde6bc4155eeb5aa63acd9fc10325878b55ffd82790206f7"
+  },
+  "02-inside-back-cover.png": {
+    "bytes": 20601,
+    "sha256": "06e083752089cfbf35ab284353f37d860a04d49e23ad9a92c0d11630128c0eae"
+  },
+  "03-component-layout.png": {
+    "bytes": 48956,
+    "sha256": "d09a4b701a51399515f9f57455d908fe667e3ca8ce3c0aeb191b5d4d7d9c4193"
+  },
+  "preview/01-assembly.png": {
+    "bytes": 80404,
+    "sha256": "4d06be20054c54a4bde6bc4155eeb5aa63acd9fc10325878b55ffd82790206f7"
+  },
+  "preview/02-front.png": {
+    "bytes": 53368,
+    "sha256": "8e7e755d61daa87c7d2e77def0504c04be8a3d5849dde8796a2550b2bac8f993"
+  },
+  "preview/03-side-BMO.png": {
+    "bytes": 34061,
+    "sha256": "b74d809bef4dec693544cf0fa3dcc4f1eb4cd966d710353193e63c060097d18d"
+  },
+  "preview/04-back-switch.png": {
+    "bytes": 52463,
+    "sha256": "c9a62d7d691e8a224314721b9cb9169dc97ffef4fdf8491a2182032c8e78d752"
+  },
+  "preview/05-exploded.png": {
+    "bytes": 71252,
+    "sha256": "e3e58f1e15fd04d8c8e4af5129f83122763664ab755b837453ec110a84240f47"
+  },
+  "preview/06-section.png": {
+    "bytes": 48956,
+    "sha256": "d09a4b701a51399515f9f57455d908fe667e3ca8ce3c0aeb191b5d4d7d9c4193"
+  },
+  "preview/07-seven-print-parts.png": {
+    "bytes": 65186,
+    "sha256": "f735881918840cd77e547d2ccf7f5c57658bb356ff5a2dd94b2b90d700bd566b"
+  },
+  "preview/08-inside-back-cover.png": {
+    "bytes": 20601,
+    "sha256": "06e083752089cfbf35ab284353f37d860a04d49e23ad9a92c0d11630128c0eae"
+  }
+}

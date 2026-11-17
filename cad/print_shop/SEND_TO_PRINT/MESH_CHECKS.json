@@ -1,91 +1,107 @@
 {
-  "status": "DESIGN_REVIEW_REQUIRED",
-  "freecad": [
-    {
-      "name": "BMO_MAIN_BODY",
-      "solid": true,
-      "nonmanifold": false,
-      "components": 1,
-      "self_intersections": false
+  "BMO_MAIN_BODY": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 36880.3497781609
     },
-    {
-      "name": "BMO_BACK_COVER",
-      "solid": true,
-      "nonmanifold": false,
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
       "components": 1,
-      "self_intersections": false
-    },
-    {
-      "name": "BMO_DPAD_YELLOW",
-      "solid": true,
-      "nonmanifold": false,
-      "components": 1,
-      "self_intersections": false
-    },
-    {
-      "name": "BMO_BUTTON_RED",
-      "solid": true,
-      "nonmanifold": false,
-      "components": 1,
-      "self_intersections": false
+      "volume_mm3": 36880.3497781609,
+      "relative_volume_error": 0.0005104302320946476
     }
-  ],
-  "pymeshlab_and_trimesh": [
-    {
-      "name": "BMO_MAIN_BODY",
-      "checks": {
-        "watertight": true,
-        "winding_consistent": true,
-        "positive_volume": true,
-        "components": 1,
-        "self_intersecting_faces": 0,
-        "faces": 39086,
-        "vertices": 19517,
-        "volume_mm3": 37608.86988426276
-      },
-      "sha256": "d0f471762619e0cdd56be9a92de21d70db96d344a8347481f87471ca79433a36"
+  },
+  "BMO_BACK_COVER": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 8559.469542098279
     },
-    {
-      "name": "BMO_BACK_COVER",
-      "checks": {
-        "watertight": true,
-        "winding_consistent": true,
-        "positive_volume": true,
-        "components": 1,
-        "self_intersecting_faces": 0,
-        "faces": 4944,
-        "vertices": 2458,
-        "volume_mm3": 10341.974227420757
-      },
-      "sha256": "f30638d25944f3b3cfd9dc970a595663af089e26fe270d97821374945284bac5"
-    },
-    {
-      "name": "BMO_DPAD_YELLOW",
-      "checks": {
-        "watertight": true,
-        "winding_consistent": true,
-        "positive_volume": true,
-        "components": 1,
-        "self_intersecting_faces": 0,
-        "faces": 92,
-        "vertices": 48,
-        "volume_mm3": 394.6521155414684
-      },
-      "sha256": "f18b5144a0ba3357a3f51faa030a38094208645c8204563f3d33bf2312e0ad1d"
-    },
-    {
-      "name": "BMO_BUTTON_RED",
-      "checks": {
-        "watertight": true,
-        "winding_consistent": true,
-        "positive_volume": true,
-        "components": 1,
-        "self_intersecting_faces": 0,
-        "faces": 1036,
-        "vertices": 520,
-        "volume_mm3": 200.9936197434587
-      },
-      "sha256": "5cadeba997506e316e74d36737ff5f9b41206d573d69bc609142a7bcc8147603"
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 8559.469542098279,
+      "relative_volume_error": 6.404636999721745e-06
     }
-  ]
+  },
+  "BMO_DPAD_YELLOW": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 394.6521155414683
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 394.6521155414683,
+      "relative_volume_error": 2.9276797759024174e-07
+    }
+  },
+  "BMO_BUTTON_RED": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 200.8149751291286
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 200.8149751291286,
+      "relative_volume_error": 0.0012850486414184234
+    }
+  },
+  "BMO_DECOR_TRIANGLE_CYAN": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 36.75
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 36.75,
+      "relative_volume_error": 1.9334496211159186e-16
+    }
+  },
+  "BMO_DECOR_UPPER_BLUE": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 10.588639792018512
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 10.588639792018512,
+      "relative_volume_error": 0.0013425993959795181
+    }
+  },
+  "BMO_DECOR_SMALL_GREEN": {
+    "before": {
+      "watertight": true,
+      "winding_consistent": true,
+      "volume_mm3": 7.953248322088257
+    },
+    "after": {
+      "watertight": true,
+      "winding_consistent": true,
+      "positive_volume": true,
+      "components": 1,
+      "volume_mm3": 7.953248322088257,
+      "relative_volume_error": 0.0013421821714650701
+    }
+  }
 }

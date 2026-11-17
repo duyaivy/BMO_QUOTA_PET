@@ -30,7 +30,7 @@ Focused Playwright tests cover responsive navigation, keyboard and skip-link beh
 
 ## Commit & Pull Request Guidelines
 
-No Git history is available to establish existing commit conventions. Use concise, imperative commit subjects, such as `Add initial application scaffold`, and keep commits focused.
+Use Conventional Commits: `type(scope): imperative summary`, for example `feat(cad): simplify rear cover and refresh print previews`. Choose a meaningful scope such as `cad`, `firmware`, or `web`. For substantial changes, add a body describing the changes and actual validation performed. Keep commits focused. Apply this structure to all future commits.
 
 Pull requests should describe the change, its purpose, and validation performed. Link related issues when available, include screenshots for visible interface changes, and explain any configuration or dependency changes. State explicitly when tests could not be run.
 

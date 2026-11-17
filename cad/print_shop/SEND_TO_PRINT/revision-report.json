@@ -1,0 +1,92 @@
+{
+  "status": "PROTOTYPE_FIT_NOT_PHYSICALLY_VERIFIED",
+  "parts": {
+    "BMO_MAIN_BODY": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 36899.18423733526
+    },
+    "BMO_BACK_COVER": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 8559.524362744713
+    },
+    "BMO_DPAD_YELLOW": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 394.6520000000004
+    },
+    "BMO_BUTTON_RED": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 201.0733641825969
+    },
+    "BMO_DECOR_TRIANGLE_CYAN": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 36.75000000000001
+    },
+    "BMO_DECOR_UPPER_BLUE": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 10.602875205865553
+    },
+    "BMO_DECOR_SMALL_GREEN": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 7.963937376850129
+    }
+  },
+  "component_checks": {
+    "OLED_096_PCB": {
+      "shape_and_position_unchanged": true
+    },
+    "OLED_096_Glass": {
+      "shape_and_position_unchanged": true
+    },
+    "OLED_096_ActiveArea": {
+      "shape_and_position_unchanged": true
+    },
+    "OLED_096_Header": {
+      "shape_and_position_unchanged": true
+    },
+    "Tactile_Switch_A_DPad": {
+      "shape_and_position_unchanged": true
+    },
+    "Tactile_Switch_B_Red": {
+      "shape_and_position_unchanged": true
+    },
+    "ESP32_CAM_AI_Thinker": {
+      "shape_and_position_unchanged": true
+    },
+    "Battery_LiPo_503048": {
+      "shape_and_position_unchanged": true
+    },
+    "Power_Boost_MT3608": {
+      "shape_and_position_unchanged": true
+    },
+    "Capacitor_2200uF": {
+      "shape_and_position_unchanged": true
+    },
+    "Charger_Module_PLACEHOLDER": {
+      "shape_and_position_unchanged": true
+    },
+    "Power_Switch_PLACEHOLDER": {
+      "shape_and_position_unchanged": true
+    },
+    "FR4_DPAD_CARRIER_NOT_PRINTED": {
+      "shape_and_position_unchanged": true
+    },
+    "FR4_RED_CARRIER_NOT_PRINTED": {
+      "shape_and_position_unchanged": true
+    }
+  },
+  "rear_trays_removed_mm3": 2117.8760172446564,
+  "remaining_internal_tray_volume_mm3": 0.0,
+  "rear_screws": {
+    "lid_clearance_diameter_mm": 2.3,
+    "head_recess_diameter_mm": 4.2,
+    "head_recess_depth_mm": 1,
+    "receiving_pilot_nominal_diameter_mm": 1.7
+  }
+}
