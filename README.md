@@ -206,4 +206,4 @@ node --conditions=react-server --import tsx scripts/check-mqtt.ts
 ## 8. License
 
 Personal project — All rights reserved.
-from duyaivy with love
+from duyaivy with love <3
