@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await login(page.request);
 });
 
-test("provider navigation responds before the server finishes loading", async ({
+test("provider navigation keeps the current content while the server responds", async ({
   page,
 }) => {
   let releaseResponse!: () => void;
@@ -45,7 +45,7 @@ test("provider navigation responds before the server finishes loading", async ({
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Nguồn nhà cung cấp", exact: true }),
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(navigation).toBeVisible();
     releaseResponse();
     await expect(page).toHaveURL("/providers/antigravity");
@@ -56,6 +56,52 @@ test("provider navigation responds before the server finishes loading", async ({
   } finally {
     releaseResponse();
   }
+});
+
+test("prefetched provider and collector pages switch without a navigation request", async ({
+  page,
+}) => {
+  const destinations = [
+    { path: "/providers/antigravity", heading: "Antigravity" },
+    { path: "/providers/codex", heading: "Codex" },
+    { path: "/providers/claude", heading: "Claude Code" },
+    { path: "/collectors", heading: "Bộ thu thập" },
+  ];
+  const prefetched = destinations.map(({ path }) =>
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === path &&
+        response.request().headers().rsc === "1" &&
+        response.request().headers()["next-router-prefetch"] === undefined &&
+        response.ok(),
+    ),
+  );
+  await page.goto("/settings/providers");
+  await Promise.all(prefetched);
+
+  const requests: string[] = [];
+  for (const { path } of destinations) {
+    await page.route(
+      (url) => url.pathname === path,
+      async (route) => {
+        if (route.request().headers()["next-router-prefetch"])
+          return route.continue();
+        requests.push(path);
+        await route.abort();
+      },
+    );
+  }
+  for (const { path, heading } of destinations) {
+    await page
+      .getByRole("navigation", { name: "Điều hướng chính" })
+      .getByRole("link", { name: heading, exact: true })
+      .click();
+    await expect(page).toHaveURL(path);
+    await expect(
+      page.getByRole("heading", { level: 1, name: heading, exact: true }),
+    ).toBeVisible();
+  }
+  expect(requests).toEqual([]);
 });
 
 const routes = [

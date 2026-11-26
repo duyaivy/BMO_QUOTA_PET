@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { PageHeader } from "@/components/shell/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +16,35 @@ export const metadata: Metadata = {
   title: "Trạng thái vận hành | BMO Personal",
   description: "Độ khả dụng của các dịch vụ vận hành BMO.",
 };
-export default async function StatusPage() {
-  const snapshot = await readDashboard();
-  // readDashboard authenticates the owner before initiating a network probe.
+
+async function BrokerStatusCard() {
   const broker = await checkMqttHealth();
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>MQTT broker</CardTitle>
+        <Badge variant={broker.state === "connected" ? "secondary" : "outline"}>
+          {broker.state === "connected"
+            ? "Kết nối thành công"
+            : broker.state === "unconfigured"
+              ? "Chưa cấu hình"
+              : "Kết nối thất bại"}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          {broker.state === "unconfigured"
+            ? "Chưa có MQTT_HOST trong môi trường ứng dụng."
+            : `Kiểm tra lúc ${absoluteTime(new Date(broker.checkedAt).toISOString())} (${broker.durationMs} ms). ${broker.state === "connected" ? "Broker đã chấp nhận bắt tay MQTT bằng cấu hình hiện tại. Chưa xác minh quyền publish hoặc thiết bị nhận dữ liệu." : `Mã lỗi: ${broker.errorCode}. ${broker.errorCode === "CONNACK_REFUSED" ? "Broker từ chối kết nối; kiểm tra thông tin xác thực và quyền CONNECT." : broker.errorCode === "CONFIG_INVALID" ? "Kiểm tra cấu hình MQTT trong môi trường ứng dụng." : "Kiểm tra DNS, mạng, cổng và chứng chỉ TLS của broker."}`}`}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default async function StatusPage() {
+  // Authenticate before rendering the broker probe.
+  const snapshot = await readDashboard();
   const origin = getRuntimeConfig().BMO_APP_ORIGIN;
   const uploads = snapshot.collectors.filter(
     (collector) => collector.lastSeenAt !== null,
@@ -59,20 +85,6 @@ export default async function StatusPage() {
         ),
       detail:
         "Trạng thái xác minh theo cấu hình từng nhà cung cấp. Việc bật nguồn không xác nhận dữ liệu mới.",
-    },
-    {
-      name: "MQTT broker",
-      healthy: broker.state === "connected",
-      status:
-        broker.state === "connected"
-          ? "Kết nối thành công"
-          : broker.state === "unconfigured"
-            ? "Chưa cấu hình"
-            : "Kết nối thất bại",
-      detail:
-        broker.state === "unconfigured"
-          ? "Chưa có MQTT_HOST trong môi trường ứng dụng."
-          : `Kiểm tra lúc ${absoluteTime(new Date(broker.checkedAt).toISOString())} (${broker.durationMs} ms). ${broker.state === "connected" ? "Broker đã chấp nhận bắt tay MQTT bằng cấu hình hiện tại. Chưa xác minh quyền publish hoặc thiết bị nhận dữ liệu." : `Mã lỗi: ${broker.errorCode}. ${broker.errorCode === "CONNACK_REFUSED" ? "Broker từ chối kết nối; kiểm tra thông tin xác thực và quyền CONNECT." : broker.errorCode === "CONFIG_INVALID" ? "Kiểm tra cấu hình MQTT trong môi trường ứng dụng." : "Kiểm tra DNS, mạng, cổng và chứng chỉ TLS của broker."}`}`,
     },
     {
       name: "Môi trường ứng dụng",
@@ -243,6 +255,20 @@ export default async function StatusPage() {
             </CardContent>
           </Card>
         ))}
+        <Suspense
+          fallback={
+            <Card aria-busy="true">
+              <CardHeader>
+                <CardTitle>MQTT broker</CardTitle>
+                <p role="status" className="text-sm text-muted-foreground">
+                  Đang kiểm tra kết nối…
+                </p>
+              </CardHeader>
+            </Card>
+          }
+        >
+          <BrokerStatusCard />
+        </Suspense>
       </section>
     </>
   );

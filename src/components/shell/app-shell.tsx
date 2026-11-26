@@ -26,7 +26,6 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LoadingState } from "@/components/states/loading-state";
 
 const providers = [
   { id: "antigravity", name: "Antigravity" },
@@ -120,7 +119,7 @@ export function AppShell({
     return (
       <Link
         href={href}
-        onClick={() => setDrawerOpen(false)}
+        prefetch={authenticated && href !== "/status" ? true : undefined}
         onNavigate={(event) => navigate(href, event)}
         aria-current={active ? "page" : undefined}
         className={cn(
@@ -248,7 +247,7 @@ export function AppShell({
                         <li key={provider.id}>
                           <Link
                             href={`/providers/${provider.id}`}
-                            onClick={() => setDrawerOpen(false)}
+                            prefetch={authenticated ? true : undefined}
                             onNavigate={(event) =>
                               navigate(`/providers/${provider.id}`, event)
                             }
@@ -316,7 +315,17 @@ export function AppShell({
             )}
           </div>
         </aside>
-        <div inert={drawerOpen} className="flex min-w-0 flex-1 flex-col">
+        <div
+          inert={drawerOpen}
+          className="relative flex min-w-0 flex-1 flex-col"
+        >
+          {navigating && (
+            <div
+              role="status"
+              aria-label="Đang tải nội dung"
+              className="absolute inset-x-0 top-0 h-0.5 bg-primary motion-safe:animate-pulse"
+            />
+          )}
           <main
             id="main-content"
             tabIndex={-1}
@@ -324,7 +333,7 @@ export function AppShell({
             className="w-full flex-1 px-4 py-6 outline-none sm:px-6 lg:px-7 lg:py-6 xl:px-8"
           >
             <div className="mx-auto w-full max-w-[1440px] space-y-5">
-              {navigating ? <LoadingState /> : children}
+              {children}
             </div>
           </main>
           <footer className="px-6 py-5 text-center text-[11px] leading-5 text-muted-foreground">
