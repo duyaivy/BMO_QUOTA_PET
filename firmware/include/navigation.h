@@ -5,9 +5,12 @@
 #include "faces.h"
 #include "quota_renderer.h"
 #include "clock_renderer.h"
+#include "calendar_renderer.h"
 
 enum class UIMode {
     CLOCK,
+    PAYMENT_QR,
+    CALENDAR,
     PET_FACE,
     QUOTA_VIEW,
     END_OF_LIST
@@ -32,6 +35,8 @@ private:
     uint8_t _quotaIndex;
     unsigned long _endOfListEnteredAt;
     bool _forceClock;
+    bool _forceQr;
+    bool _forceCalendar;
 };
 
 extern BMONavigationController navigation;

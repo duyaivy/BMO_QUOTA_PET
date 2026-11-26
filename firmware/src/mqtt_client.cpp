@@ -23,6 +23,7 @@ BMOMqttClient::BMOMqttClient()
       _acceptedConfig(false),
       _acceptedSnapshot(false),
       _connected(false),
+      _connectedThisWake(false),
       _stopRequested(true),
       _workerBusy(false),
       _workerTask(nullptr),
@@ -109,11 +110,16 @@ bool BMOMqttClient::isConnected() {
     return _connected;
 }
 
-void BMOMqttClient::startWakeConnection() {
-    if (!_workerTask || _workerBusy.load() || !WiFi.isConnected()) return;
+void BMOMqttClient::resetWakeConnectionState() {
     _receivedConfigThisWake = false;
     _receivedSnapshotThisWake = false;
     _receivedWeatherThisWake = false;
+    _connectedThisWake = false;
+}
+
+void BMOMqttClient::startWakeConnection() {
+    if (!_workerTask || _workerBusy.load() || !WiFi.isConnected()) return;
+    resetWakeConnectionState();
     _stopRequested = false;
     xTaskNotifyGive(_workerTask);
 }
@@ -186,6 +192,7 @@ bool BMOMqttClient::connectOnce() {
     _mqtt.subscribe(_snapshotTopic, 1);
     _mqtt.subscribe(_weatherTopic, 1);
     _connected = true;
+    _connectedThisWake = true;
     Serial.println("[MQTT] Connected; subscribed to retained config/snapshot/weather");
     return true;
 }

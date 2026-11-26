@@ -1,5 +1,6 @@
 #include "quota_renderer.h"
 #include "mqtt_client.h"
+#include "oled_icons.h"
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
@@ -180,21 +181,9 @@ void BMOQuotaRenderer::renderQuotaScreen(uint8_t pageIndex, bool wifiConnected, 
     oled.setCursor(15, 2);
     oled.print(providerDisplayName);
 
-    // Status indicators (WiFi & MQTT)
-    if (wifiConnected) {
-        oled.drawPixel(114, 4, SSD1306_WHITE);
-        oled.drawFastHLine(113, 2, 3, SSD1306_WHITE);
-        oled.drawFastHLine(112, 0, 5, SSD1306_WHITE);
-    } else {
-        oled.setCursor(112, 0);
-        oled.print("xW");
-    }
-
-    if (mqttConnected) {
-        oled.fillCircle(124, 2, 2, SSD1306_WHITE);
-    } else {
-        oled.drawCircle(124, 2, 2, SSD1306_WHITE);
-    }
+    // Top-right status icon: Wi-Fi when connected, decorative battery when offline.
+    (void)mqttConnected;
+    drawWifiStatusIcon(oled, 114, 1, wifiConnected);
 
     oled.drawFastHLine(0, 10, 128, SSD1306_WHITE);
 

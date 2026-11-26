@@ -72,11 +72,19 @@ extern Display display;
 ''')
         (p / 'test.cpp').write_text('''#include "clock_renderer.h"
 #include "display.h"
+#include <cassert>
 #include <cstdio>
 Display display;
 bool weatherIsFresh(const WeatherSnapshot& w,time_t now){return w.valid&&w.hasObservation&&w.dataAt<=now+300&&now<w.validUntil;}
 void frame(time_t epoch, const WeatherSnapshot* weather, bool wifi = true) {
  clockRenderer.renderIfChanged(epoch,weather,true,wifi);
+ if (wifi) {
+  assert(display.oled.getPixel(120, 8) == 1);
+  assert(display.oled.getPixel(126, 4) == 0);
+ } else {
+  assert(display.oled.getPixel(126, 4) == 1);
+  assert(display.oled.getPixel(120, 8) == 0);
+ }
  for(int y=0;y<64;y++)for(int x=0;x<128;x++)putchar(display.oled.getPixel(x,y)?'1':'0');
  putchar('\\n');
 }

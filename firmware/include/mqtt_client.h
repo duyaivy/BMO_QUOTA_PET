@@ -18,6 +18,7 @@ public:
     void begin();
     void loop();
     void startWakeConnection();
+    void resetWakeConnectionState();
     void stopForSleep();
     bool workerIdle() const { return !_workerBusy.load(); }
 
@@ -31,6 +32,7 @@ public:
     bool hasWakeConfig() const { return _receivedConfigThisWake && _config.valid; }
     bool hasWakeSnapshot() const { return _receivedSnapshotThisWake && _snapshot.valid && _config.valid && _snapshot.configRevision == _config.revision; }
     bool hasWakeWeather() const { return _receivedWeatherThisWake; }
+    bool hasWakeConnected() const { return _connectedThisWake.load(); }
 
     uint8_t getQuotaScreenCount() const;
     const ConfigScreen* getQuotaScreenAt(uint8_t index) const;
@@ -69,6 +71,7 @@ private:
     bool _acceptedConfig;
     bool _acceptedSnapshot;
     std::atomic<bool> _connected;
+    std::atomic<bool> _connectedThisWake;
     std::atomic<bool> _stopRequested;
     std::atomic<bool> _workerBusy;
     TaskHandle_t _workerTask;
