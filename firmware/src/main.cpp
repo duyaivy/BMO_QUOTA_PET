@@ -9,10 +9,13 @@
 #include "wake_session.h"
 
 namespace {
+bool portalOfferedThisWake = false;
+
 class DeviceWakeTransport final : public BMOWakeTransport {
 public:
     void startWakeConnection() override {
         Serial.println("[WAKE] Starting 20-second network session");
+        mqttClient.resetWakeConnectionState();
         connManager.startWakeConnection();
     }
     bool isWifiConnected() const override { return connManager.isWifiConnected(); }
@@ -91,10 +94,12 @@ void setup() {
     connManager.begin();
     if (resetTriggered) connManager.resetWifiSettings();
     if (resetTriggered || connManager.needsProvisioning()) {
-        connManager.openConfigPortal();
+        connManager.openConfigPortal("WI-FI SETUP (AP)");
+        powerManager.resetActivityTimer();
         navigation.showClock();
     }
     mqttClient.begin();
+    portalOfferedThisWake = false;
     wakeSession.begin(millis());
 #endif
 
@@ -108,7 +113,26 @@ void loop() {
 #if !defined(BMO_BENCH_OFFLINE) || !BMO_BENCH_OFFLINE
     connManager.loop();
     mqttClient.loop();
+    const bool wasFinished = wakeSession.isFinished();
     wakeSession.update(now);
+    if (!wasFinished && wakeSession.isFinished()) {
+        if (shouldOpenPortalForNoInternet(
+                connManager.wifiConnectedThisWake(),
+                connManager.wifiConnectedDurationMs(now),
+                connManager.hadSyncThisWake(),
+                mqttClient.hasWakeConnected(),
+                portalOfferedThisWake)) {
+            portalOfferedThisWake = true;
+            Serial.println("[WIFI] Connected to Wi-Fi without internet; opening config portal.");
+            const bool reconfigured = connManager.openConfigPortal("NO INTERNET - AP");
+            powerManager.resetActivityTimer();
+            navigation.showClock();
+            if (reconfigured) {
+                wakeSession.begin(millis());
+            }
+            now = millis();
+        }
+    }
 #endif
 
     // 2. Poll Physical Buttons and Update Navigation State
@@ -133,6 +157,7 @@ void loop() {
             buttonManager.consumeWakePress();
             navigation.showClock();
 #if !defined(BMO_BENCH_OFFLINE) || !BMO_BENCH_OFFLINE
+            portalOfferedThisWake = false;
             wakeSession.begin(millis());
 #endif
         }

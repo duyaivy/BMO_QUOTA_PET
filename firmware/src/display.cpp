@@ -1,4 +1,6 @@
 #include "display.h"
+#include "oled_icons.h"
+#include "payment_qr.h"
 
 BMODisplay display;
 
@@ -94,22 +96,9 @@ void BMODisplay::drawHeader(const char* title, bool wifiConnected, bool mqttConn
     _oled.setCursor(0, 0);
     _oled.print(title ? title : "BMO");
 
-    // Wi-Fi Status Glyph / text in top-right
-    if (wifiConnected) {
-        _oled.drawPixel(114, 4, SSD1306_WHITE);
-        _oled.drawFastHLine(113, 2, 3, SSD1306_WHITE);
-        _oled.drawFastHLine(112, 0, 5, SSD1306_WHITE);
-    } else {
-        _oled.setCursor(112, 0);
-        _oled.print("xW");
-    }
-
-    // MQTT Status Glyph / dot
-    if (mqttConnected) {
-        _oled.fillCircle(124, 2, 2, SSD1306_WHITE);
-    } else {
-        _oled.drawCircle(124, 2, 2, SSD1306_WHITE);
-    }
+    // Top-right status icon: Wi-Fi when connected, decorative battery when offline.
+    (void)mqttConnected;
+    drawWifiStatusIcon(_oled, 114, 1, wifiConnected);
 
     // Header divider line
     _oled.drawFastHLine(0, 9, OLED_SCREEN_WIDTH, SSD1306_WHITE);
@@ -223,31 +212,41 @@ void BMODisplay::showConnectingScreen(const char* stepName) {
     _oled.display();
 }
 
-void BMODisplay::showWifiSetupScreen(const char* apSsid, const char* apPass, const char* ip) {
+void BMODisplay::showWifiSetupScreen(const char* apSsid, const char* apPass, const char* ip,
+                                     const char* title) {
     if (!_initialized) return;
     _oled.clearDisplay();
 
-    // Top banner
+    // Top banner (full-width inverted bar with crisp black text)
+    const char* banner = (title && title[0] != '\0') ? title : "WI-FI SETUP (AP)";
     _oled.fillRect(0, 0, OLED_SCREEN_WIDTH, 12, SSD1306_WHITE);
-    _oled.setTextColor(SSD1306_BLACK);
     _oled.setTextSize(1);
-    drawCenteredText("WI-FI SETUP (AP)", 2, 1, false);
+    _oled.setTextColor(SSD1306_BLACK);
+    int16_t bx1, by1;
+    uint16_t bw, bh;
+    _oled.getTextBounds(banner, 0, 2, &bx1, &by1, &bw, &bh);
+    int16_t bx = (OLED_SCREEN_WIDTH - static_cast<int16_t>(bw)) / 2;
+    _oled.setCursor(bx < 0 ? 0 : bx, 2);
+    _oled.print(banner);
     _oled.setTextColor(SSD1306_WHITE);
 
     // AP SSID
-    _oled.setCursor(4, 18);
+    _oled.setCursor(4, 16);
     _oled.print("AP: ");
     _oled.print(apSsid ? apSsid : "duyaivy's pet");
 
     // Pass
-    _oled.setCursor(4, 32);
+    _oled.setCursor(4, 28);
     _oled.print("Pass: ");
     _oled.print(apPass ? apPass : "12345678");
 
     // IP URL
-    _oled.setCursor(4, 46);
+    _oled.setCursor(4, 40);
     _oled.print("Web: ");
     _oled.print(ip ? ip : "192.168.4.1");
+
+    _oled.drawFastHLine(0, 51, OLED_SCREEN_WIDTH, SSD1306_WHITE);
+    drawCenteredText("[A/B] Skip setup", 54, 1, false);
 
     _oled.display();
 }
@@ -285,6 +284,12 @@ void BMODisplay::showEmptyQuotaScreen() {
     drawCenteredText("Configure in Dashboard", 30, 1);
     drawCenteredText("Returning to face...", 48, 1);
 
+    _oled.display();
+}
+
+void BMODisplay::showPaymentQrScreen() {
+    if (!_initialized) return;
+    renderPaymentQr(_oled);
     _oled.display();
 }
 

@@ -1,5 +1,6 @@
 #include "clock_renderer.h"
 #include "display.h"
+#include "oled_icons.h"
 #include <cmath>
 #include <cstring>
 
@@ -40,30 +41,7 @@ void drawHeader(OLED& oled, const ClockText& text) {
         oled.print("BMO CLOCK");
     }
 
-    // Three nested signal arcs and a dot, readable at the OLED's native size.
-    // Keep the same Wi-Fi silhouette when offline instead of a lone diagonal.
-    constexpr uint16_t wifiRows[] = {
-        0b00111111100,
-        0b01000000010,
-        0b10011111001,
-        0b00100000100,
-        0b00001110000,
-        0b00010001000,
-        0b00000000000,
-        0b00000100000,
-    };
-    for (int y = 0; y < 8; ++y) {
-        for (int x = 0; x < 11; ++x) {
-            if (wifiRows[y] & (1u << (10 - x)))
-                oled.drawPixel(115 + x, 1 + y, SSD1306_WHITE);
-        }
-    }
-    if (!text.wifiConnected) {
-        // Clear a one-pixel border so the slash stays distinct from the arcs.
-        oled.drawLine(116, 0, 125, 7, SSD1306_BLACK);
-        oled.drawLine(114, 2, 123, 9, SSD1306_BLACK);
-        oled.drawLine(115, 1, 124, 8, SSD1306_WHITE);
-    }
+    drawWifiStatusIcon(oled, 114, 1, text.wifiConnected);
 }
 
 template <typename OLED>

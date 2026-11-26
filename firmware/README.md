@@ -22,9 +22,9 @@ Firmware for the **BMO Personal Desk Pet** running on the **AI-Thinker ESP32-CAM
   13. `STARRY`: Pulsing five-pointed star eyes and an excited mouth.
 - **Clock and weather:** Boots into a 24-hour Vietnam clock (UTC+7) with weekday/date and a static weather icon. The clock reads a retained `weather` MQTT topic during a single wake session, keeps it in RAM, and hides expired or future observations. No periodic weather wake is scheduled.
 - **Interactive 2-Button Navigation:**
-  - **Button A (Face Mode):**
+  - **Button A (Payment QR, Calendar & Face Mode):**
     - Switches from Quota view back to Clock.
-    - From Clock, opens the Happy face. In Face mode, cycles through all 13 scenes and then returns to Clock; the scene IDs are preserved.
+    - From Clock, opens the personal TP Bank VietQR payment screen (`90979783396`), then the current-month Calendar screen (UTC+7 with today highlighted), then cycles through all 13 BMO scenes and returns to Clock; the scene IDs are preserved.
   - **Button B (Quota Provider Mode):**
     - Switches from Face mode to Quota mode (showing Quota screen #1).
     - While in Quota mode, pressing Button B cycles through configured provider quotas (Claude, Codex, Antigravity).
@@ -134,11 +134,13 @@ Edit `include/config.local.h` and update:
 
 | Button | Current Screen | Action | Result |
 |---|---|---|---|
-| **Button A** | Clock | Press | Opens Happy face |
+| **Button A** | Clock | Press | Opens TP Bank VietQR payment screen |
+| **Button A** | Payment QR | Press | Opens current-month Calendar screen (today highlighted) |
+| **Button A** | Calendar | Press | Opens Happy face |
 | **Button A** | Face Mode | Press | Cycles to next BMO Face (Happy -> Blink -> Wink -> Worried -> Sleep -> Surprised -> Love -> Dance -> SIUUU -> MU -> SIUUU Face -> Cool -> Starry -> Clock) |
 | **Button A** | Quota View | Press | Immediately returns to Clock |
 | **Button A** | End of List | Press | Returns to Clock |
-| **Button B** | Clock or Face Mode | Press | Enters Quota Mode at first provider screen |
+| **Button B** | Clock, QR, Calendar, or Face | Press | Enters Quota Mode at first provider screen |
 | **Button B** | Quota View | Press | Advances to next Quota screen |
 | **Button B** | Last Quota Screen | Press | Displays **"ALL PROVIDERS VIEWED / End of Quota List"** screen |
 | **Button B** | End of List | Press | Wraps back to first Quota screen |
@@ -165,16 +167,15 @@ the server job ran; it does not prove the ESP received the retained messages.
 The `[WAKE] Closing` log reports the Wi-Fi, UTC time, config, matching snapshot,
 and weather stages separately. All five should be `1` after a complete session.
 A cold boot tries the second configured NTP server after 3 seconds without UTC;
-this avoids waiting for lwIP's longer default failover. A boot that still fails
-to obtain UTC within the 20-second budget cannot start TLS MQTT. The next boot
-or button wake from light sleep starts another session.
+this avoids waiting for lwIP's longer default failover. A boot that still fails to obtain UTC within the 20-second budget cannot start TLS MQTT. If Wi-Fi associates for at least 4 seconds during a wake session but receives neither an NTP sync nor an MQTT connection (indicating a connected Wi-Fi network without internet access), the device automatically opens the setup AP portal once so you can switch to another Wi-Fi network (press Button A or B to dismiss). Portal-saved credentials persist in NVS across reboots unless `BMO_WIFI_SSID` in `config.local.h` changes. The next boot or button wake from light sleep starts another session.
 While awake after a completed session, the radio stays off; monitor updates are
 received on the next boot or wake, rather than every 15 minutes on the device.
-The clock's top-right Wi-Fi icon shows signal arcs while connected and the same
-arcs crossed out while disconnected, including intentional radio shutdown.
+The top-right status icon on the Clock, Calendar, and Quota screens shows Wi-Fi
+signal arcs while connected and a decorative battery icon while disconnected,
+including intentional radio shutdown.
 
 Run the host tests under `tests/firmware/native/` for weather parsing, the wake
-session, buttons, power policy, navigation, and clock formatting. Build both
+session, buttons, power policy, navigation, calendar formatting, Wi-Fi policy, and clock formatting. Build both
 `esp32cam` and `esp32cam_bench` PlatformIO environments. The preview at
 `/tmp/bmo-clock-preview/index.html` can be regenerated with
 `python3 tests/firmware/native/render_clock.py --preview /tmp/bmo-clock-preview/index.html`.
