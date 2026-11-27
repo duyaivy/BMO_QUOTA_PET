@@ -1,0 +1,14 @@
+{
+  "scope": "Nominal CAD with a simulated 1.0 mm stump; the photographed fracture is not measured.",
+  "size_mm": [
+    10.0,
+    5.2,
+    4.9
+  ],
+  "stump_relief_diameter_mm": 4.6,
+  "fastener": "M2 x 5 mm, countersunk",
+  "hole_center_spacing_to_existing_lower_post_mm": 18,
+  "boss_surface_contact_test_mm3": 0.6441,
+  "cap_and_hardware_overlap_mm3": 0,
+  "mesh_faces": 3304
+}

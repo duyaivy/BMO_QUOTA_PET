@@ -1,0 +1,143 @@
+{
+  "status": "CAD_CHECKED_PHYSICAL_FIT_UNVERIFIED",
+  "source": "cad/print_shop/simple_back/BMO_SIMPLE_BACK.FCStd",
+  "switch_reference": {
+    "body_diameter_mm": 6.2,
+    "height_without_pins_mm": 5.0,
+    "body_depth_mm": 3.6,
+    "pin_pitch_mm": 5.0,
+    "nominal_travel_mm": 0.25,
+    "modeled_pin_length_mm": 2.3
+  },
+  "buttons": {
+    "DPAD": {
+      "screw_spacing_mm": 18,
+      "screw_clearance_diameter_mm": 2.4,
+      "plunger_gap_at_rest_mm": 0.1,
+      "cap_travel_to_stop_mm": 0.37,
+      "plunger_compression_at_stop_mm": 0.27,
+      "nominal_reach_of_switch_at_click_mm": 0.35,
+      "estimated_mechanical_stop_contact_area_mm2": 32.53,
+      "cap_reinforcement_depth_mm": 0.75,
+      "holder_nominal_wall_mm": 1.5,
+      "holder_base_thickness_mm": 1.8,
+      "fixed_part_and_travel_intersections_mm3": 0,
+      "intentional_rib_contact_mm3": 0.1125,
+      "files": {
+        "BMO_ROUND_DPAD_CAP.stl": {
+          "triangles": 1074,
+          "closed": true,
+          "components": 1,
+          "size_mm": [
+            13.0,
+            13.0,
+            5.45
+          ]
+        },
+        "BMO_ROUND_DPAD_HOLDER.stl": {
+          "triangles": 5764,
+          "closed": true,
+          "components": 1,
+          "size_mm": [
+            10.8,
+            23.5,
+            5.43
+          ]
+        }
+      },
+      "removal_path_from_installed_xyz_mm": {
+        "cap": [
+          [
+            0,
+            6,
+            0
+          ],
+          [
+            4,
+            0,
+            -2
+          ],
+          [
+            0,
+            50,
+            0
+          ]
+        ],
+        "holder": [
+          [
+            0,
+            2.5,
+            0
+          ],
+          [
+            0,
+            0,
+            1.5
+          ],
+          [
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            50,
+            0
+          ]
+        ]
+      }
+    },
+    "RED": {
+      "screw_spacing_mm": 15.0,
+      "screw_clearance_diameter_mm": 2.4,
+      "plunger_gap_at_rest_mm": 0.1,
+      "cap_travel_to_stop_mm": 0.37,
+      "plunger_compression_at_stop_mm": 0.27,
+      "nominal_reach_of_switch_at_click_mm": 0.35,
+      "estimated_mechanical_stop_contact_area_mm2": 18.08,
+      "cap_reinforcement_depth_mm": 0.75,
+      "holder_nominal_wall_mm": 1.5,
+      "holder_base_thickness_mm": 1.8,
+      "fixed_part_and_travel_intersections_mm3": 0,
+      "intentional_rib_contact_mm3": 0.1125,
+      "files": {
+        "BMO_ROUND_RED_CAP.stl": {
+          "triangles": 2012,
+          "closed": true,
+          "components": 1,
+          "size_mm": [
+            9.0,
+            9.0,
+            5.45
+          ]
+        },
+        "BMO_ROUND_RED_HOLDER.stl": {
+          "triangles": 5764,
+          "closed": true,
+          "components": 1,
+          "size_mm": [
+            10.8,
+            20.5,
+            5.43
+          ]
+        }
+      },
+      "removal_path_from_installed_xyz_mm": {
+        "cap": [
+          [
+            0,
+            56,
+            0
+          ]
+        ],
+        "holder": [
+          [
+            0,
+            50,
+            0
+          ]
+        ]
+      }
+    }
+  }
+}
